@@ -1,0 +1,35 @@
+﻿<html>
+<head>
+    <title>$self $index $first $last parent() outerParent()</title>
+    <script src="jquery-1.7.2.min.js"></script>
+    <script src="groot.js"></script>
+</head>
+<body>
+<div gt-view="myview">
+    <ul gt-each="list">
+        <li gt-attr="$index(id,value +1)"><span gt-text="$index(value+1)"></span><span>姓名:</span><span
+                gt-text="name"></span>---<span>性别:</span><span
+                gt-text="sex"></span><input
+                type="text" gt-value-change="name"/><input type="button" value="按钮" gt-click="click"></li>
+    </ul>
+</div>
+</body>
+</html>
+<script>
+    groot.view("myview", function (vm, ve) {
+        vm.list = [
+            {"name": "张三", "sex": "男"}
+            ,{"name": "李四", "sex": "男"}
+            ,{"name": "王五", "sex": "男"}
+        ];
+        ve.click = function ($self) {
+            groot.log($self);//$self为点击事件所在的vm
+            groot.log($self.$index);//$index为 对象在数组中的索引
+            groot.log($self.$first);//$first 该对象是否为数组中的第一个对象 是 true 否 false
+            groot.log($self.$last);//$first 该对象是否为数组中的最后一个对象 是 true 否 false
+            groot.log($self.parent());//返回整个数组 当时对象时 返回此对象所在的对象
+            groot.log($self.outerParent());//返回数组所在vm
+        }
+    })
+    groot.sweep();
+</script>

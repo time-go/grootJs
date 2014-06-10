@@ -1,0 +1,19 @@
+<html>
+<head>
+    <title>hello word</title>
+    <script src="jquery-1.7.2.min.js"></script>
+    <script src="groot.js"></script>
+</head>
+<body>
+<div gt-view="myview">
+    <input type="text" gt-value-blur="say"><span gt-text="say"></span>
+
+</div>
+</body>
+</html>
+<script>
+    groot.view("myview", function (vm, ve) {
+        vm.say = "hello word!";
+    })
+    groot.sweep();
+</script>

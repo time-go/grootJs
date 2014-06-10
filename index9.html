@@ -1,0 +1,20 @@
+﻿<html>
+<head>
+    <title>模块加载器</title>
+    <script src="jquery-1.7.2.min.js"></script>
+    <script src="groot.js"></script>
+</head>
+<body>
+<div gt-view="myview">
+    <span gt-text="name"></span>
+</div>
+</body>
+</html>
+<script>
+    var view = groot.view("myview", function (vm, ve) {
+        vm.name = "";
+    })
+    var m = require("./moudle");
+    view.name = m.txt + m.name;
+    groot.sweep();
+</script>

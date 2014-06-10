@@ -1,0 +1,32 @@
+﻿<html>
+<head>
+    <title>变量监控指令 gt-wach</title>
+    <script src="jquery-1.7.2.min.js"></script>
+    <script src="groot.js"></script>
+</head>
+<body>
+<div gt-view="myview">
+    <ul gt-each="list">
+        <li gt-class="$index(back0:value % 2 ==0,back1:value % 2==1)"><span
+                gt-text="$index(value+1)"></span><span>姓名:</span><span
+                gt-text="name"></span>---<span>性别:</span><span
+                gt-text="sex"></span> <input type="text" gt-wach="mychange" gt-value-change="name"></li>
+    </ul>
+</div>
+</body>
+</html>
+<script>
+    groot.view("myview", function (vm, ve) {
+        vm.list = [
+            {"name": "张三", "sex": "男"}
+            ,
+            {"name": "李四", "sex": "男"}
+            ,
+            {"name": "王五", "sex": "男"}
+        ];
+        ve.mychange = function ($self, value) {
+            groot.log("第" + $self.$index + "项在变化,新值为\"" + value + "\"");
+        }
+    })
+    groot.sweep();
+</script>

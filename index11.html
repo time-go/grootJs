@@ -1,0 +1,40 @@
+﻿<html>
+<head>
+    <title>checkbox radio select绑定</title>
+    <script src="jquery-1.7.2.min.js"></script>
+    <script src="groot.js"></script>
+</head>
+<body>
+<div gt-view="myview">
+    <span gt-text="name"></span><select gt-select="name">
+    <option value="李四">李四</option>
+    <option value="张三">张三</option>
+</select>
+
+    <br>
+    <br>
+    <div>
+        <div gt-text="s"></div>
+        <input gt-radio="s" type="radio" value="清华" name="school">清华
+        <input gt-radio="s" type="radio" value="北大" name="school">北大
+        <input gt-radio="s" type="radio" value="复旦" name="school">复旦
+    </div>
+    <br>
+    <br>
+    <div gt-each="c">
+        <span gt-text="name" gt-show="s"></span><br>
+    </div>
+    <div gt-each="c">
+        <input type="checkbox" gt-check="s"><span gt-text="name"></span>
+      </div>
+</div>
+</body>
+</html>
+<script>
+    var view = groot.view("myview", function (vm, ve) {
+        vm.name = "张三"
+        vm.s = "北大";
+        vm.c=[{"name":"张三",s:false},{"name":"李四",s:true},{"name":"王五",s:false}];
+    });
+    groot.sweep();
+</script>
