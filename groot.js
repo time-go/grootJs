@@ -1,10 +1,15 @@
-﻿var groot = (function ($) {
- //---------------作者:大盗乔三---------------//
+var groot = (function ($) {
+    //---------------作者:大盗乔三---------------//
     //---------------qq:289880020---------------//
     //---------------系统常量----------------//
     var PREFIX = "gt";
     var RENDEAR = "Render";
     //---------------初始化对象----------------//
+    function isNum(value) {
+        if (value == "")return false;
+        return !isNaN(value);
+    }
+
     var groot = {};
     groot.ui = {};//ui控件开发接口
     groot.bindingHandler = [];
@@ -321,17 +326,18 @@
 
             _classList.push({"element": $(this), "express": _expression});
             var _express;
-            if (isNaN(vm[pro])) {
-                _express = _expression.replace(/value/g, "\"" + vm[pro] + "\"");
-            } else {
+            if (isNum(vm[pro])) {
+
                 _express = _expression.replace(/value/g, vm[pro]);
+            } else {
+
+                _express = _expression.replace(/value/g, "\"" + vm[pro] + "\"");
             }
             var _classArr = _express.split(",");
             $(this).removeAttr(PREFIX + "-class");
             for (var i = 0; i < _classArr.length; i++) {
                 var _cname = _classArr[i].split(":")[0];
                 var _cexpress = _classArr[i].split(":")[1];
-
                 window["eval"]("var myValue = " + _cexpress);
                 if (myValue) {
                     $(this).addClass(_cname);
@@ -352,10 +358,12 @@
 
             _textList.push({"element": $(this), "express": _expression});
             var _express;
-            if (isNaN(vm[pro])) {
-                _express = _expression.replace(/value/g, "\"" + vm[pro] + "\"").replace("filter:", "groot.filter.");
+            if (isNum(vm[pro])) {
+
+                _express = _expression.replace(/value/g, vm[pro]);
             } else {
-                _express = _expression.replace(/value/g, vm[pro]).replace("filter:", "groot.filter.");
+
+                _express = _expression.replace(/value/g, "\"" + vm[pro] + "\"");
             }
             window["eval"]("var myValue = " + _express);
             $(this).removeAttr(PREFIX + "-text").html(myValue);
@@ -367,10 +375,12 @@
             var _expression = _sx.substring(_sx.indexOf(",") + 1, _sx.lastIndexOf(")"));
             _attrList.push({"attr": _attr, "element": $(this), "express": _expression});
             var _express;
-            if (isNaN(vm[pro])) {
-                _express = _expression.replace(/value/g, "\"" + vm[pro] + "\"");
-            } else {
+            if (isNum(vm[pro])) {
+
                 _express = _expression.replace(/value/g, vm[pro]);
+            } else {
+
+                _express = _expression.replace(/value/g, "\"" + vm[pro] + "\"");
             }
             window["eval"]("var myValue = " + _express);
             $(this).removeAttr(PREFIX + "-attr").attr(_attr, myValue)
@@ -382,10 +392,12 @@
             var _expression = _sx.substring(_sx.indexOf(",") + 1, _sx.lastIndexOf(")"));
             _cssList.push({"css": _css, "element": $(this), "express": _expression});
             var _express;
-            if (isNaN(vm[pro])) {
-                _express = _expression.replace(/value/g, "\"" + vm[pro] + "\"");
-            } else {
+            if (isNum(vm[pro])) {
+
                 _express = _expression.replace(/value/g, vm[pro]);
+            } else {
+
+                _express = _expression.replace(/value/g, "\"" + vm[pro] + "\"");
             }
             window["eval"]("var myValue = " + _express);
             $(this).removeAttr(PREFIX + "-css").css(_css, myValue)
@@ -430,10 +442,10 @@
             });
             for (var i = 0; i < _classList.length; i++) {
                 var _express;
-                if (isNaN(value)) {
-                    _express = _classList[i].express.replace(/value/g, "\"" + value + "\"");
-                } else {
+                if (isNum(value)) {
                     _express = _classList[i].express.replace(/value/g, value);
+                } else {
+                    _express = _classList[i].express.replace(/value/g, "\"" + value + "\"");
                 }
                 var _classIntem = _express.split(",")
                 for (var j = 0; j < _classIntem.length; j++) {
@@ -449,10 +461,10 @@
             }
             for (var i = 0; i < _textList.length; i++) {
                 var _express;
-                if (isNaN(value)) {
-                    _express = _textList[i].express.replace(/value/g, "\"" + value + "\"");
-                } else {
+                if (isNum(value)) {
                     _express = _textList[i].express.replace(/value/g, value);
+                } else {
+                    _express = _textList[i].express.replace(/value/g, "\"" + value + "\"");
                 }
                 window["eval"]("var myValue = " + _express);
                 _textList[i].element.html(myValue);
@@ -466,20 +478,20 @@
             })
             for (var i = 0; i < _attrList.length; i++) {
                 var _express;
-                if (isNaN(value)) {
-                    _express = _attrList[i].express.replace(/value/g, "\"" + value + "\"");
-                } else {
+                if (isNum(value)) {
                     _express = _attrList[i].express.replace(/value/g, value);
+                } else {
+                    _express = _attrList[i].express.replace(/value/g, "\"" + value + "\"");
                 }
                 window["eval"]("var myValue = " + _express);
                 _attrList[i].element.attr(_attrList[i].attr, myValue);
             }
             for (var i = 0; i < _cssList.length; i++) {
                 var _express;
-                if (isNaN(value)) {
-                    _express = _cssList[i].express.replace(/value/g, "\"" + value + "\"");
-                } else {
+                if (isNum(value)) {
                     _express = _cssList[i].express.replace(/value/g, value);
+                } else {
+                    _express = _cssList[i].express.replace(/value/g, "\"" + value + "\"");
                 }
                 window["eval"]("var myValue = " + _express);
                 _cssList[i].element.css(_cssList[i].css, myValue);
@@ -812,6 +824,7 @@
                 }
             }
         }
+
         _getModel(_o);
         return _o;
     }
