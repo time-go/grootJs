@@ -25,6 +25,7 @@ var groot = (function ($) {
         }
     }
     groot.vms = {};//储存vm所有对象
+    groot.uiInit={};//存放控件初始化数据
     groot.view = function (name, factory) {
         groot.vms[name] = {};
         groot.vms[name].$$ve = {};
@@ -206,7 +207,14 @@ var groot = (function ($) {
             $(this).removeAttr(PREFIX + "-ui");
             var _data = null;
             if (typeof $(this).attr(PREFIX + "-ui-data") != "undefined") {
-                _data = eval("(" + $(this).attr(PREFIX + "ui-data") + ")");
+                var _default = $(this).attr(PREFIX + "-ui-data");
+                if (_default.indexOf("uiInit") > -1) {
+                    _default = _default.substring(_default.indexOf("[") + 1, _default.lastIndexOf("]"));
+                    _data = groot.uiInit[_default];
+                } else {
+                    _data = eval("(" + _default + ")");
+                }
+
                 $(this).removeAttr(PREFIX + "-ui-data");
             }
             groot.ui[_uiname]($(this), _id, _data, vm[pro], function () {
