@@ -24,6 +24,7 @@ grootJs不同于其他mvvm的三大亮点：
 
 简明教程地址http://www.cnblogs.com/blowfish/p/3778539.html
 
+进阶教程地址http://www.cnblogs.com/blowfish/p/3783937.html
 
 近期将基于grootJs 开发一批常用的前端组件
 
