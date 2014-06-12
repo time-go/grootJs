@@ -107,7 +107,7 @@ var groot = (function ($) {
         function findObj(p, a) {
             var _eltObjcts = element.find("[" + PREFIX + "-object='" + pro + "']:eq(0)").removeAttr(PREFIX + "-object");
             if (_eltObjcts.length > 0) {
-                vm["$$obj" + pro].push({"element": _eltArrs, "templ": _eltArrs.html()});
+                vm["$$obj" + pro].push({"element": _eltObjcts, "templ": _eltObjcts.html()});
                 _eltObjcts.html("");
                 a.push(_eltObjcts[0]);
                 findObj(p, a);
