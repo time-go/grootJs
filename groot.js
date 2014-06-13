@@ -429,8 +429,8 @@ var groot = (function ($) {
             var value = vm[pro];
             //_uiList
             for (var i = 0; i < _uiList.length; i++) {
-                groot.vms[_uiList].uivalue = value;
-                groot.vms[_uiList].uivalueRender();
+                groot.vms[_uiList[i]].uivalue = value;
+                groot.vms[_uiList[i]].uivalueRender();
             }
             if ($.isFunction(vm[pro + "wach"])) {
                 vm[pro + "wach"](vm, value);//调用监控函数
