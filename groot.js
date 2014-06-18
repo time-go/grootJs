@@ -6,7 +6,7 @@ var groot = (function ($) {
     var RENDEAR = "Render";
     //---------------初始化对象----------------//
     function isNum(value) {
-        if (value == "")return false;
+        if (value === "")return false;
         return !isNaN(value);
     }
 
