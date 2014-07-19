@@ -6,8 +6,7 @@ var groot = (function ($) {
     var RENDEAR = "Render";
     //---------------初始化对象----------------//
     function isNum(value) {
-        if ($.trim(value) === "")return false;
-        return !isNaN(value);
+        return $.isNumeric(value);
     }
 
     var groot = {};
@@ -15,7 +14,7 @@ var groot = (function ($) {
     groot.bindingHandler = [];
     groot.bindExtend = function () {
         for (var i = 0; i < arguments.length; i++) {
-            groot.bindingHandler.push(arguments[i])
+            groot.bindingHandler.push(arguments[i]);
         }
     }
     groot.filter = {};
@@ -25,7 +24,7 @@ var groot = (function ($) {
         }
     }
     groot.vms = {};//储存vm所有对象
-    groot.uiInit={};//存放控件初始化数据
+    groot.uiInit = {};//存放控件初始化数据
     groot.view = function (name, factory) {
         groot.vms[name] = {};
         groot.vms[name].$$ve = {};
@@ -80,7 +79,7 @@ var groot = (function ($) {
         }
     }
 
-    function _triggerEvents(ve, args, e) {
+    function _triggerEvents(ve, args) {
         return function () {
             ve(args);
         }
@@ -97,7 +96,7 @@ var groot = (function ($) {
         function findArr(p, a) {
             var _eltArrs = element.find("[" + PREFIX + "-each='" + pro + "']:eq(0)").removeAttr(PREFIX + "-each");
             if (_eltArrs.length > 0) {
-                vm["$$arr" + pro].push({"element": _eltArrs, "templ": _eltArrs.html()});
+                vm["$$arr" + pro].push({"element": _eltArrs, "tmpl": _eltArrs.html()});
                 _eltArrs.html("");
                 a.push(_eltArrs[0]);
                 findArr(p, a);
@@ -107,7 +106,7 @@ var groot = (function ($) {
         function findObj(p, a) {
             var _eltObjcts = element.find("[" + PREFIX + "-object='" + pro + "']:eq(0)").removeAttr(PREFIX + "-object");
             if (_eltObjcts.length > 0) {
-                vm["$$obj" + pro].push({"element": _eltObjcts, "templ": _eltObjcts.html()});
+                vm["$$obj" + pro].push({"element": _eltObjcts, "tmpl": _eltObjcts.html()});
                 _eltObjcts.html("");
                 a.push(_eltObjcts[0]);
                 findObj(p, a);
@@ -161,7 +160,7 @@ var groot = (function ($) {
         var _arr = vm["$$obj" + pro];
         for (var i = 0; i < _arr.length; i++) {
             var _temp = _arr[i];
-            _temp.element.html(_temp.templ);
+            _temp.element.html(_temp.tmpl);
         }
         vm[pro].parent = function () {
             return vm;
@@ -171,7 +170,7 @@ var groot = (function ($) {
             var _arr = vm["$$obj" + pro];
             for (var i = 0; i < _arr.length; i++) {
                 var _temp = _arr[i];
-                _temp.element.html(_temp.templ);
+                _temp.element.html(_temp.tmpl);
             }
             vm[pro].parent = function () {
                 return vm;
@@ -197,6 +196,31 @@ var groot = (function ($) {
         var _elSelect = element.find("[" + PREFIX + "-select='" + pro + "']").removeAttr(PREFIX + "-select");
         var _elCheck = element.find("[" + PREFIX + "-check='" + pro + "']").removeAttr(PREFIX + "-check");
         var _elUi = element.find("[" + PREFIX + "-ui^='" + pro + "']");
+        var _objElements = {
+            "_eltText": _eltText,
+            "_eltValue": _eltValue,
+            "_eltChange": _eltChange,
+            "_eltBlur": _eltBlur,
+            "_eltAttr": _eltAttr,
+            "_eltCss": _eltCss,
+            "_eltClass": _eltClass,
+            "_eltRadio": _eltRadio,
+            "_elSelect": _elSelect,
+            "_elCheck": _elCheck,
+            "_elUi": _elUi
+        };
+        /*********************** wach  *******************************/
+        for (var e in _objElements) {
+            var _elmt = _objElements[e];
+            if (typeof _elmt.attr(PREFIX + "-wach") != "undefined") {
+                var _fun = _elmt.attr(PREFIX + "-wach");
+                if ($.isFunction(ve[_fun])) {
+                    vm[pro + "wach"] = ve[_fun];
+                }
+                _elmt.removeAttr(PREFIX + "-wach");
+            }
+        }
+        /*********************** ui控件开发扫描  *******************************/
         var _uiList = [];
         _elUi.each(function () {
             var _id = new Date() - 1;
@@ -223,78 +247,7 @@ var groot = (function ($) {
             });
             groot.sweep(groot.vms[_id], $(this));
         });
-
-        if (typeof _eltText.attr(PREFIX + "-wach") != "undefined") {
-            var _fun = _eltText.attr(PREFIX + "-wach");
-            if ($.isFunction(ve[_fun])) {
-                vm[pro + "wach"] = ve[_fun]
-            }
-            _eltText.removeAttr(PREFIX + "-wach");
-        }
-        if (typeof _eltValue.attr(PREFIX + "-wach") != "undefined") {
-            var _fun = _eltValue.attr(PREFIX + "-wach");
-            if ($.isFunction(ve[_fun])) {
-                vm[pro + "wach"] = ve[_fun]
-            }
-            _eltValue.removeAttr(PREFIX + "-wach");
-        }
-        if (typeof _eltChange.attr(PREFIX + "-wach") != "undefined") {
-            var _fun = _eltChange.attr(PREFIX + "-wach");
-            if ($.isFunction(ve[_fun])) {
-                vm[pro + "wach"] = ve[_fun]
-            }
-            _eltChange.removeAttr(PREFIX + "-wach");
-        }
-        if (typeof _eltBlur.attr(PREFIX + "-wach") != "undefined") {
-            var _fun = _eltBlur.attr(PREFIX + "-wach");
-            if ($.isFunction(ve[_fun])) {
-                vm[pro + "wach"] = ve[_fun]
-            }
-            _eltBlur.removeAttr(PREFIX + "-wach");
-        }
-        if (typeof _eltAttr.attr(PREFIX + "-wach") != "undefined") {
-            var _fun = _eltAttr.attr(PREFIX + "-wach");
-            if ($.isFunction(ve[_fun])) {
-                vm[pro + "wach"] = ve[_fun]
-            }
-            _eltAttr.removeAttr(PREFIX + "-wach");
-        }
-        if (typeof _eltCss.attr(PREFIX + "-wach") != "undefined") {
-            var _fun = _eltCss.attr(PREFIX + "-wach");
-            if ($.isFunction(ve[_fun])) {
-                vm[pro + "wach"] = ve[_fun]
-            }
-            _eltCss.removeAttr(PREFIX + "-wach");
-        }
-        if (typeof _eltClass.attr(PREFIX + "-wach") != "undefined") {
-            var _fun = _eltClass.attr(PREFIX + "-wach");
-            if ($.isFunction(ve[_fun])) {
-                vm[pro + "wach"] = ve[_fun]
-            }
-            _eltClass.removeAttr(PREFIX + "-wach");
-        }
-        if (typeof _eltRadio.attr(PREFIX + "-wach") != "undefined") {
-            var _fun = _eltRadio.attr(PREFIX + "-wach");
-            if ($.isFunction(ve[_fun])) {
-                vm[pro + "wach"] = ve[_fun]
-            }
-            _eltRadio.removeAttr(PREFIX + "-wach");
-        }
-        if (typeof _elSelect.attr(PREFIX + "-wach") != "undefined") {
-            var _fun = _elSelect.attr(PREFIX + "-wach");
-            if ($.isFunction(ve[_fun])) {
-                vm[pro + "wach"] = ve[_fun]
-            }
-            _elSelect.removeAttr(PREFIX + "-wach");
-        }
-        if (typeof _elCheck.attr(PREFIX + "-wach") != "undefined") {
-            var _fun = _elCheck.attr(PREFIX + "-wach");
-            if ($.isFunction(ve[_fun])) {
-                vm[pro + "wach"] = ve[_fun]
-            }
-            _elCheck.removeAttr(PREFIX + "-wach");
-        }
-        //////
+        /*********************** checkbox  *******************************/
         if (vm[pro]) {
             _elCheck.attr("checked", "checked");//.is(":checked")
         } else {
@@ -309,11 +262,13 @@ var groot = (function ($) {
                 vm[pro + RENDEAR]();
             }
         });
+        /*********************** selectBox  *******************************/
         _elSelect.find("option[value='" + vm[pro] + "']").attr("selected", "selected");
         _elSelect.change(function () {
             vm[pro] = $(this).val();
             vm[pro + RENDEAR]();
         });
+        /*********************** Radio  *******************************/
         _eltRadio.each(function () {
             if ($(this).val() == vm[pro]) {
                 $(this).attr("checked", "checked");
@@ -326,7 +281,8 @@ var groot = (function ($) {
                 vm[pro] = $(this).val();
                 vm[pro + RENDEAR]();
             }
-        })
+        });
+        /*********************** class 样式 *******************************/
         var _classList = [];
         _eltClass.each(function () {
             var _sx = $(this).attr(PREFIX + "-class");
@@ -354,6 +310,7 @@ var groot = (function ($) {
                 }
             }
         });
+        /*********************** text 文本  *******************************/
         var _textList = [];
         _eltText.each(function () {
             var _sx = $(this).attr(PREFIX + "-text");
@@ -373,9 +330,11 @@ var groot = (function ($) {
 
                 _express = _expression.replace(/value/g, "\"" + vm[pro] + "\"");
             }
+            _express = _express.replace("filter:", "groot.filter.");
             window["eval"]("var myValue = " + _express);
             $(this).removeAttr(PREFIX + "-text").html(myValue);
         });
+        /*********************** text 属性  *******************************/
         var _attrList = [];
         _eltAttr.each(function () {
             var _sx = $(this).attr(PREFIX + "-attr");
@@ -393,6 +352,7 @@ var groot = (function ($) {
             window["eval"]("var myValue = " + _express);
             $(this).removeAttr(PREFIX + "-attr").attr(_attr, myValue)
         });
+        /*********************** css style样式  *******************************/
         var _cssList = [];
         _eltCss.each(function () {
             var _sx = $(this).attr(PREFIX + "-css");
@@ -410,6 +370,7 @@ var groot = (function ($) {
             window["eval"]("var myValue = " + _express);
             $(this).removeAttr(PREFIX + "-css").css(_css, myValue)
         });
+        /*********************** 绑定扩展属性  *******************************/
         var _eblist = [];
         for (var i = 0; i < groot.bindingHandler.length; i++) {
             var _temp = groot.bindingHandler[i];
@@ -417,30 +378,36 @@ var groot = (function ($) {
             _temp.Handler(_elts, vm[pro]);
             _eblist.push(_elts);
         }
+        /*********************** 绑定输入框值变化  *******************************/
         _eltChange.bind("input propertychange keyup", function () {
             vm[pro] = $(this).val();
             vm[pro + RENDEAR]();
         });
+        /*********************** 绑定输入失去焦点 *******************************/
         _eltBlur.change(function () {
             vm[pro] = $(this).val();
             vm[pro + RENDEAR]();
         });
         vm[pro + RENDEAR] = function () {
             var value = vm[pro];
-            //_uiList
+            /*********************** 渲染控件  *******************************/
             for (var i = 0; i < _uiList.length; i++) {
                 groot.vms[_uiList[i]].uivalue = value;
                 groot.vms[_uiList[i]].uivalueRender();
             }
+            /*********************** 触发监控  *******************************/
             if ($.isFunction(vm[pro + "wach"])) {
                 vm[pro + "wach"](vm, value);//调用监控函数
             }
+            /*********************** checkBox  *******************************/
             if (vm[pro]) {
                 _elCheck.attr("checked", "checked");//.is(":checked")
             } else {
                 _elCheck.removeAttr("checked");
             }
+            /*********************** selectBox  *******************************/
             _elSelect.find("option[value='" + vm[pro] + "']").attr("selected", "selected");
+            /*********************** Radio  *******************************/
             _eltRadio.each(function () {
                 if ($(this).val() == value) {
                     $(this).attr("checked", "checked");
@@ -448,6 +415,7 @@ var groot = (function ($) {
                     $(this).removeAttr("checked");
                 }
             });
+            /*********************** class样式  *******************************/
             for (var i = 0; i < _classList.length; i++) {
                 var _express;
                 if (isNum(value)) {
@@ -467,6 +435,7 @@ var groot = (function ($) {
                     }
                 }
             }
+            /*********************** text 标签值  *******************************/
             for (var i = 0; i < _textList.length; i++) {
                 var _express;
                 if (isNum(value)) {
@@ -474,6 +443,7 @@ var groot = (function ($) {
                 } else {
                     _express = _textList[i].express.replace(/value/g, "\"" + value + "\"");
                 }
+                _express = _express.replace("filter:", "groot.filter.");
                 window["eval"]("var myValue = " + _express);
                 _textList[i].element.html(myValue);
             }
@@ -484,6 +454,7 @@ var groot = (function ($) {
             _eltBlur.each(function () {
                 if (value != $(this).val())$(this).val(value);
             })
+            /*********************** attract 属性值  *******************************/
             for (var i = 0; i < _attrList.length; i++) {
                 var _express;
                 if (isNum(value)) {
@@ -494,6 +465,7 @@ var groot = (function ($) {
                 window["eval"]("var myValue = " + _express);
                 _attrList[i].element.attr(_attrList[i].attr, myValue);
             }
+            /*********************** style 式 属性值  *******************************/
             for (var i = 0; i < _cssList.length; i++) {
                 var _express;
                 if (isNum(value)) {
@@ -504,6 +476,7 @@ var groot = (function ($) {
                 window["eval"]("var myValue = " + _express);
                 _cssList[i].element.css(_cssList[i].css, myValue);
             }
+            /*********************** style 式 刷新扩展属性  *******************************/
             for (var i = 0; i < groot.bindingHandler.length; i++) {
                 var _temp = groot.bindingHandler[i];
                 _temp.Handler(_eblist[i], value);
@@ -523,7 +496,7 @@ var groot = (function ($) {
                 var element = vm["$$child" + pro][arguments[0]];
                 for (var i = 0; i < element.length; i++) {
                     var _child = element[i];
-                    var _temp = $(_child.templ).insertBefore(_child.element);
+                    var _temp = $(_child.tmpl).insertBefore(_child.element);
                     _child.element.remove();
                     _child.element = _temp;
                 }
@@ -556,24 +529,25 @@ var groot = (function ($) {
     }
 
     function _initArry(vm, pro, ve) {
+        _IndexInit(vm[pro]);
         vm["$$child" + pro] = [];
         var _arr = vm["$$arr" + pro];
         for (var i = 0; i < _arr.length; i++) {
             _arr[i].element.html("");
         }
-        _IndexInit(vm[pro]);
         for (var i = 0; i < vm[pro].length; i++) {
             if (!$.isFunction(vm[pro]) && pro.indexOf("$$") < 0) {
                 var _childs = [];
+                var _ts = [];
                 for (var j = 0; j < _arr.length; j++) {
                     var _temp = _arr[j];
-                    var _child = $(_temp.templ);
-                    _childs.push({"element": _child, "templ": _temp.templ});
-                    var _element = _temp.element.append(_child);
+                    var _child = $(_temp.tmpl);
+                    _childs.push({"element": _child, "tmpl": _temp.tmpl});
+                    _temp.element.append(_child);
+                    _ts.push(_ts);
                 }
                 _creatArrProperty(vm, vm[pro], vm[pro][i])
                 _bindData(vm[pro][i], vm["$$arrSelector" + pro], ve);
-                ;
                 vm["$$child" + pro].push(_childs);
             }
         }
@@ -584,9 +558,9 @@ var groot = (function ($) {
             var _childs = [];
             for (var j = 0; j < _arr.length; j++) {
                 var _temp = _arr[j];
-                var _child = $(_temp.templ);
-                _childs.push({"element": _child, "templ": _temp.templ});
-                var _element = _temp.element.append(_child);
+                var _child = $(_temp.tmpl);
+                _childs.push({"element": _child, "tmpl": _temp.tmpl});
+                _temp.element.append(_child);
             }
             _creatArrProperty(vm, vm[pro], value);
             _bindData(value, vm["$$arrSelector" + pro], ve);
@@ -619,8 +593,8 @@ var groot = (function ($) {
             var _childs = [];
             for (var j = 0; j < _arr.length; j++) {
                 var _temp = _arr[j];
-                var _child = $(_temp.templ);
-                _childs.push({"element": _child, "templ": _temp.templ});
+                var _child = $(_temp.tmpl);
+                _childs.push({"element": _child, "tmpl": _temp.tmpl});
                 var _element = _temp.element.prepend(_child);
             }
             _creatArrProperty(vm, vm[pro], value);
@@ -656,8 +630,8 @@ var groot = (function ($) {
                         for (var j = 0; j < _arr.length; j++) {
                             var _eleAffter;
                             var _temp = _arr[j];
-                            var _child = $(_temp.templ);
-                            _childs.push({"element": _child, "templ": _temp.templ});
+                            var _child = $(_temp.tmpl);
+                            _childs.push({"element": _child, "tmpl": _temp.tmpl});
                             if (_eleAffter[j] == 0) {
                                 if (args[0] == 0) {
                                     var _element = _temp.element.prepend(_child);///
@@ -844,12 +818,11 @@ var groot = (function ($) {
         setTimeout(foo, 10);
     }
     groot.createElement = function (html, id) {
-        return $(html).append("<input type='hidden' id=\"" + id + "\">")
+        return $(html).append("<input type='hidden' id=\"" + id + "\">");
     }
     groot.absUrl = _absUrl;//根绝相对路径获取绝对路径
     return groot;
-})
-    (jQuery);
+})(jQuery);
 ///bindExtend,自定义属性,自定义属性 gt-width="w"
 (function ($, groot) {
     groot.bindExtend(
