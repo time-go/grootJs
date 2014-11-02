@@ -683,7 +683,7 @@ var groot = (function ($) {
         }
     }
 
-//---------------commonjs规范----------------//
+  //---------------commonjs规范----------------//
     var _cssCache = {};
     var _absUrl = function (path) {
         if (path.indexOf("http://") > -1) {
@@ -717,7 +717,12 @@ var groot = (function ($) {
             path = path.substr(2);
             path = parent + path;
         } else {
-            var _host = window.location.href;
+            var _host;
+            if (parent == "") {
+                _host = window.location.href;
+            } else {
+                _host = parent;
+            }
             if (_host.indexOf("/") > -1) {
                 _host = _host.substr(0, _host.lastIndexOf("/") + 1);
             } else {
@@ -740,7 +745,7 @@ var groot = (function ($) {
             "cache": true,
             "dataType": "text",
             "error": function () {
-                groot.log(_absUrl(path) + "加载失败");
+                console && console.log(_absUrl(path) + "加载失败");
             },
             "async": false,
             "success": function (data) {
@@ -771,8 +776,8 @@ var groot = (function ($) {
         var _exports = {};
         var _module = {};
         _module.exports = {};
-        var retExpots = factory(_exports, _module);
-        return $.extend(true, {}, _exports, _module.exports, retExpots);
+        factory(_exports, _module);
+        return $.extend(true, {}, _exports, _module.exports);
     }
 //获取model对象
     groot.model = function (o) {
