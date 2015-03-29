@@ -17,10 +17,10 @@ var groot = (function ($) {
             groot.bindingHandler.push(arguments[i]);
         }
     }
-    groot.filter = {};
+    var _ = {};
     groot.filter = function () {
         for (var i = 0; i < arguments.length; i++) {
-            groot.filter = $.extend(groot.filter, arguments[i]);
+            groot.filter = $.extend(_, arguments[i]);
         }
     }
     groot.vms = {};//储存vm所有对象
@@ -29,7 +29,9 @@ var groot = (function ($) {
         groot.vms[name] = {};
         groot.vms[name].$$ve = {};
         factory(groot.vms[name], groot.vms[name].$$ve);//vm对象
-        return  groot.vms[name];
+        var htmlElment = $("[" + PREFIX + "-view='" + name + "']").removeAttr(PREFIX + "-view");
+        groot.sweep(groot.vms[name], htmlElment);
+        return groot.vms[name];
     }
     //绑定事件
     var _bindEvents = [
@@ -71,7 +73,7 @@ var groot = (function ($) {
     function _sweepEvents(vm, element, ve) {
         for (var e in ve) {//绑定事件
             for (var i = 0; i < _bindEvents.length; i++) {
-                element.find("[" + PREFIX + "-" + _bindEvents[i] + "='" + e + "']")
+                $("[" + PREFIX + "-" + _bindEvents[i] + "='" + e + "']", element)
                     .unbind(_bindEvents[i])
                     .bind(_bindEvents[i], _triggerEvents(ve[e], vm))
                     .removeAttr(PREFIX + "-" + _bindEvents[i]);
@@ -87,47 +89,46 @@ var groot = (function ($) {
 
     //---------------私有函数-----------------//
     function _bindData(vm, element, ve) {
-        var _include = element.find("[" + PREFIX + "-include]");
+        var _include = $("[" + PREFIX + "-include]", element);
         _include.each(function () {
             var _text = require($(this).attr(PREFIX + "-include") + "!text");
             $(this).html(_text);
             $(this).removeAttr(PREFIX + "-include");
         });
-        function findArr(p, a) {
-            var _eltArrs = element.find("[" + PREFIX + "-each='" + pro + "']:eq(0)").removeAttr(PREFIX + "-each");
+        function findArr(p) {
+            var _eltArrs = $("[" + PREFIX + "-each='" + p + "']", element).first().removeAttr(PREFIX + "-each");
             if (_eltArrs.length > 0) {
-                vm["$$arr" + pro].push({"element": _eltArrs, "tmpl": _eltArrs.html()});
+                vm["$$arr" + pro] = {"element": _eltArrs, "tmpl": _eltArrs.html()};
                 _eltArrs.html("");
-                a.push(_eltArrs[0]);
-                findArr(p, a);
             }
         }
 
-        function findObj(p, a) {
-            var _eltObjcts = element.find("[" + PREFIX + "-object='" + pro + "']:eq(0)").removeAttr(PREFIX + "-object");
+        function findObj(p) {
+            var _eltObjcts = $("[" + PREFIX + "-object='" + p + "']", element).first().removeAttr(PREFIX + "-object");
             if (_eltObjcts.length > 0) {
-                vm["$$obj" + pro].push({"element": _eltObjcts, "tmpl": _eltObjcts.html()});
+                vm["$$obj" + pro] = {"element": _eltObjcts, "tmpl": _eltObjcts.html()};
                 _eltObjcts.html("");
-                a.push(_eltObjcts[0]);
-                findObj(p, a);
             }
         }
 
         for (var pro in  vm) {//保存数组对象模板
             if (!$.isFunction(vm[pro]) && pro.indexOf("$$") < 0) {
                 if ($.isArray(vm[pro])) {//数组
-                    vm["$$arr" + pro] = [];
-                    var _eltArrs = [];
-                    findArr(pro, _eltArrs);
-                    vm["$$arrSelector" + pro] = $(_eltArrs);
+                    findArr(pro);
                 } else if (typeof vm[pro] == "object") {//对象
-                    vm["$$obj" + pro] = [];
-                    var _eltObjcts = [];
-                    findObj(pro, _eltObjcts);
-                    vm["$$objSelector" + pro] = $(_eltObjcts);
+                    findObj(pro);
                 }
             }
         }
+        var textlsit = [];
+        for (var pro in  vm) {
+            if (!$.isFunction(vm[pro]) && pro.indexOf("$$") < 0) {
+                if (!$.isArray(vm[pro]) && typeof vm[pro] !== "object") {
+                    textlsit.push(pro);
+                }
+            }
+        }
+        _bindText(element, vm, textlsit);//绑定text
         for (var pro in  vm) {//初始化对象
             if (!$.isFunction(vm[pro]) && pro.indexOf("$$") < 0) {
                 if ($.isArray(vm[pro])) {//绑定数组
@@ -141,6 +142,63 @@ var groot = (function ($) {
         }
         _sweepEvents(vm, element, ve);//绑定事件
         _collection();//回收垃圾
+    }
+
+    /*
+     @vm 绑定的数据模型
+     @textlsit 要绑定的属性数组
+     * */
+    function _bindText(element, vm, textlsit) {
+        function _selecs(selector) {
+            var _ls = [];
+            if (element.attr(selector) != undefined) {
+                _ls.push(element[0]);
+            }
+            var _ele = $("[" + selector + "]", element);
+            if (_ele.length > 0) {
+                _ele.each(function () {
+                    _ls.push(this)
+                })
+            }
+            return $(_ls);
+        }
+
+        var _eltText = _selecs(PREFIX + "-text");
+        var _expressions = [];
+        _eltText.each(function () {
+            var _expression = $(this).attr(PREFIX + "-text");
+            _expressions.push({ele: this, expr: _expression});
+        });
+        _eltText.removeAttr(PREFIX + "-text");
+        function replaceAll(str, ostr, nstr) {
+            if (str.indexOf(ostr) > -1) {
+                str = str.replace(ostr, nstr);
+                return replaceAll(str, ostr, nstr);
+            } else {
+                return str;
+            }
+        }
+
+        function renderText() {
+            for (var i = 0; i < _expressions.length; i++) {
+                var _o = _expressions[i];
+                var _expshow = _o.expr;
+                for (var k = 0; k < textlsit.length; k++) {
+                    if (isNum(vm[textlsit[k]])) {
+                        _expshow = replaceAll(_expshow, "{" + textlsit[k] + "}", vm[textlsit[k]]);
+                        _expshow = _expshow.replace(new RegExp("{" + textlsit[k].replace("$", "\\$") + "}", "g"), vm[textlsit[k]]);
+                    } else {
+                        _expshow = replaceAll(_expshow, "{" + textlsit[k] + "}", "\"" + vm[textlsit[k]] + "\"");
+                    }
+                }
+                eval("var _v=" + _expshow)
+                $(_o.ele).html(_v);
+            }
+        }
+
+        renderText();
+        vm.$$renderText = renderText;
+
     }
 
     function _creatArrProperty(opvm, pvm, vm) {//创建数组的层次关系
@@ -157,25 +215,19 @@ var groot = (function ($) {
      @pro 要绑定的属性
      * */
     function _bindingObject(vm, pro, ve) {
-        var _arr = vm["$$obj" + pro];
-        for (var i = 0; i < _arr.length; i++) {
-            var _temp = _arr[i];
-            _temp.element.html(_temp.tmpl);
-        }
+        var _obj = vm["$$obj" + pro];
+        _obj.element.html(_obj.tmpl);
         vm[pro].parent = function () {
             return vm;
         }
-        _bindData(vm[pro], vm["$$objSelector" + pro], ve);
+        _bindData(vm[pro], _obj.element, ve);
         vm[pro + RENDEAR] = function () {
-            var _arr = vm["$$obj" + pro];
-            for (var i = 0; i < _arr.length; i++) {
-                var _temp = _arr[i];
-                _temp.element.html(_temp.tmpl);
-            }
+            var _obj = vm["$$obj" + pro];
+            _obj.element.html(_obj.tmpl);
             vm[pro].parent = function () {
                 return vm;
             }
-            _bindData(vm[pro], vm["$$objSelector" + pro], ve);
+            _bindData(vm[pro], _obj.element, ve);
         };
     }
 
@@ -185,19 +237,34 @@ var groot = (function ($) {
      @pro 要绑定的属性
      * */
     function _bindingProperty(element, vm, pro, ve) {
-        var _eltText = element.find("[" + PREFIX + "-text^='" + pro + "']").html(vm[pro]);
-        var _eltValue = element.find("[" + PREFIX + "-value='" + pro + "']").val(vm[pro]).removeAttr(PREFIX + "-value");
-        var _eltChange = element.find("[" + PREFIX + "-value-change='" + pro + "']").val(vm[pro]).removeAttr(PREFIX + "-value-change");
-        var _eltBlur = element.find("[" + PREFIX + "-value-blur='" + pro + "']").val(vm[pro]).removeAttr(PREFIX + "-value-blur");
-        var _eltAttr = element.find("[" + PREFIX + "-attr^='" + pro + "(']");//"pro(id,value+""")"
-        var _eltCss = element.find("[" + PREFIX + "-css^='" + pro + "(']");//"pro(id,value+""")"
-        var _eltClass = element.find("[" + PREFIX + "-class^='" + pro + "(']");
-        var _eltRadio = element.find("[" + PREFIX + "-radio='" + pro + "']").removeAttr(PREFIX + "-radio");
-        var _elSelect = element.find("[" + PREFIX + "-select='" + pro + "']").removeAttr(PREFIX + "-select");
-        var _elCheck = element.find("[" + PREFIX + "-check='" + pro + "']").removeAttr(PREFIX + "-check");
-        var _elUi = element.find("[" + PREFIX + "-ui^='" + pro + "']");
+
+        function _selecs(selector) {
+            var _ls = [];
+            if (element.attr(selector) != undefined && element.attr(selector).indexOf(pro) == 0) {
+                _ls.push(element[0]);
+            }
+            var _ele0 = $("[" + selector + "^='" + pro + "(']", element);
+            var _ele1 = $("[" + selector + "='" + pro + "']", element);
+            _ele0.each(function () {
+                _ls.push(this)
+            })
+            _ele1.each(function () {
+                _ls.push(this)
+            })
+            return $(_ls);
+        }
+
+        var _eltValue = _selecs(PREFIX + "-value");
+        var _eltChange = _selecs(PREFIX + "-value-change");
+        var _eltBlur = _selecs(PREFIX + "-value-blur");
+        var _eltAttr = _selecs(PREFIX + "-attr");
+        var _eltCss = _selecs(PREFIX + "-css");//"pro(id,value+""")"
+        var _eltClass = _selecs(PREFIX + "-class");
+        var _eltRadio = _selecs(PREFIX + "-radio");
+        var _elSelect = _selecs(PREFIX + "-select");
+        var _elCheck = _selecs(PREFIX + "-check");
+        var _elUi = _selecs(PREFIX + "-ui");
         var _objElements = {
-            "_eltText": _eltText,
             "_eltValue": _eltValue,
             "_eltChange": _eltChange,
             "_eltBlur": _eltBlur,
@@ -245,9 +312,9 @@ var groot = (function ($) {
                 vm[pro] = groot.vms[_id].uivalue;
                 vm[pro + "Render"]();
             });
-            groot.sweep(groot.vms[_id], $(this));
         });
         /*********************** checkbox  *******************************/
+        _elCheck.removeAttr(PREFIX + "-check");
         if (vm[pro]) {
             _elCheck.attr("checked", "checked");//.is(":checked")
         } else {
@@ -263,12 +330,14 @@ var groot = (function ($) {
             }
         });
         /*********************** selectBox  *******************************/
+        _elSelect.removeAttr(PREFIX + "-select");
         _elSelect.find("option[value='" + vm[pro] + "']").attr("selected", "selected");
         _elSelect.change(function () {
             vm[pro] = $(this).val();
             vm[pro + RENDEAR]();
         });
         /*********************** Radio  *******************************/
+        _eltRadio.removeAttr(PREFIX + "-radio");
         _eltRadio.each(function () {
             if ($(this).val() == vm[pro]) {
                 $(this).attr("checked", "checked");
@@ -310,30 +379,10 @@ var groot = (function ($) {
                 }
             }
         });
+        _eltClass.removeAttr(PREFIX + "-value-class");
         /*********************** text 文本  *******************************/
-        var _textList = [];
-        _eltText.each(function () {
-            var _sx = $(this).attr(PREFIX + "-text");
-            var _expression;
-            if (_sx.indexOf("(") > -1) {
-                _expression = _sx.substring(_sx.indexOf("(") + 1, _sx.lastIndexOf(")"));
-            } else {
-                _expression = "value";
-            }
-
-            _textList.push({"element": $(this), "express": _expression});
-            var _express;
-            if (isNum(vm[pro])) {
-
-                _express = _expression.replace(/value/g, vm[pro]);
-            } else {
-
-                _express = _expression.replace(/value/g, "\"" + vm[pro] + "\"");
-            }
-            _express = _express.replace("filter:", "groot.filter.");
-            window["eval"]("var myValue = " + _express);
-            $(this).removeAttr(PREFIX + "-text").html(myValue);
-        });
+        /*********************** value 文本  *******************************/
+        _eltValue.removeAttr(PREFIX + "-value").val(vm[pro]);
         /*********************** text 属性  *******************************/
         var _attrList = [];
         _eltAttr.each(function () {
@@ -374,16 +423,18 @@ var groot = (function ($) {
         var _eblist = [];
         for (var i = 0; i < groot.bindingHandler.length; i++) {
             var _temp = groot.bindingHandler[i];
-            var _elts = element.find("[" + PREFIX + "-" + _temp.Name + "='" + pro + "']").removeAttr(PREFIX + "-" + _temp.Name);
+            var _elts = $("[" + PREFIX + "-" + _temp.Name + "='" + pro + "']", element).removeAttr(PREFIX + "-" + _temp.Name);
             _temp.Handler(_elts, vm[pro]);
             _eblist.push(_elts);
         }
         /*********************** 绑定输入框值变化  *******************************/
+        _eltChange.removeAttr(PREFIX + "-value-change").val(vm[pro]);
         _eltChange.bind("input propertychange keyup", function () {
             vm[pro] = $(this).val();
             vm[pro + RENDEAR]();
         });
         /*********************** 绑定输入失去焦点 *******************************/
+        _eltBlur.removeAttr(PREFIX + "-value-blur").val(vm[pro]);
         _eltBlur.change(function () {
             vm[pro] = $(this).val();
             vm[pro + RENDEAR]();
@@ -436,24 +487,11 @@ var groot = (function ($) {
                 }
             }
             /*********************** text 标签值  *******************************/
-            for (var i = 0; i < _textList.length; i++) {
-                var _express;
-                if (isNum(value)) {
-                    _express = _textList[i].express.replace(/value/g, value);
-                } else {
-                    _express = _textList[i].express.replace(/value/g, "\"" + value + "\"");
-                }
-                _express = _express.replace("filter:", "groot.filter.");
-                window["eval"]("var myValue = " + _express);
-                _textList[i].element.html(myValue);
-            }
-            _eltValue.val(value);
-            _eltChange.each(function () {
-                if (value != $(this).val())$(this).val(value);
-            })
-            _eltBlur.each(function () {
-                if (value != $(this).val())$(this).val(value);
-            })
+            vm.$$renderText();
+            /*********************** value 文本  *******************************/
+            _eltValue.val(vm[pro]);
+            _eltChange.val(vm[pro]);
+            _eltBlur.val(vm[pro]);
             /*********************** attract 属性值  *******************************/
             for (var i = 0; i < _attrList.length; i++) {
                 var _express;
@@ -493,16 +531,13 @@ var groot = (function ($) {
         _initArry(vm, pro, ve);
         vm[pro + RENDEAR] = function () {
             if (arguments.length > 0) {
-                var element = vm["$$child" + pro][arguments[0]];
-                for (var i = 0; i < element.length; i++) {
-                    var _child = element[i];
-                    var _temp = $(_child.tmpl).insertBefore(_child.element);
-                    _child.element.remove();
-                    _child.element = _temp;
-                }
+                var _child = vm["$$child" + pro][arguments[0]];
+                var _temp = $(vm["$$arr" + pro].tmpl).insertBefore(_child);
+                _child.remove();
+                _child = _temp;
                 _IndexInit(vm[pro])
                 _creatArrProperty(vm, vm[pro], vm[pro][arguments[0]]);
-                _bindData(vm[pro][arguments[0]], vm["$$arrSelector" + pro], ve);
+                _bindData(vm[pro][arguments[0]], _child, ve);
                 _IndexRender(vm[pro])
             } else {
                 _initArry(vm, pro);
@@ -532,56 +567,38 @@ var groot = (function ($) {
         _IndexInit(vm[pro]);
         vm["$$child" + pro] = [];
         var _arr = vm["$$arr" + pro];
-        for (var i = 0; i < _arr.length; i++) {
-            _arr[i].element.html("");
-        }
+        _arr.element.html("");
         for (var i = 0; i < vm[pro].length; i++) {
             if (!$.isFunction(vm[pro]) && pro.indexOf("$$") < 0) {
-                var _childs = [];
-                var _ts = [];
-                for (var j = 0; j < _arr.length; j++) {
-                    var _temp = _arr[j];
-                    var _child = $(_temp.tmpl);
-                    _childs.push({"element": _child, "tmpl": _temp.tmpl});
-                    _temp.element.append(_child);
-                    _ts.push(_ts);
-                }
+                var _child = $(_arr.tmpl);
+                _arr.element.append(_child);
                 _creatArrProperty(vm, vm[pro], vm[pro][i])
-                _bindData(vm[pro][i], vm["$$arrSelector" + pro], ve);
-                vm["$$child" + pro].push(_childs);
+                _bindData(vm[pro][i], _child, ve);
+                vm["$$child" + pro].push(_child);
             }
         }
         _IndexRender(vm[pro]);
         vm[pro + "push"] = function (value) {
             vm[pro].push(value);
             _IndexInit(vm[pro]);
-            var _childs = [];
-            for (var j = 0; j < _arr.length; j++) {
-                var _temp = _arr[j];
-                var _child = $(_temp.tmpl);
-                _childs.push({"element": _child, "tmpl": _temp.tmpl});
-                _temp.element.append(_child);
-            }
+            var _child = $(_arr.tmpl);
+            _arr.element.append(_child);
             _creatArrProperty(vm, vm[pro], value);
-            _bindData(value, vm["$$arrSelector" + pro], ve);
+            _bindData(value, _child, ve);
             _IndexRender(vm[pro]);
-            vm["$$child" + pro].push(_childs);
+            vm["$$child" + pro].push(_child);
         }
         vm[pro + "pop"] = function () {
-            var _arrchids = vm["$$child" + pro].pop();
-            for (var i = 0; i < _arrchids.length; i++) {
-                _arrchids[i].element.remove();
-            }
+            var _arrchid = vm["$$child" + pro].pop();
+            _arrchid.remove();
             var ret = vm[pro].pop();
             _IndexInit(vm[pro]);
             _IndexRender(vm[pro]);
             return ret;
         }
         vm[pro + "shift"] = function () {
-            var _arrchids = vm["$$child" + pro].shift();
-            for (var i = 0; i < _arrchids.length; i++) {
-                _arrchids[i].element.remove();
-            }
+            var _arrchid = vm["$$child" + pro].shift();
+            _arrchid.remove();
             var ret = vm[pro].shift();
             _IndexInit(vm[pro]);
             _IndexRender(vm[pro]);
@@ -590,17 +607,12 @@ var groot = (function ($) {
         vm[pro + "unshift"] = function (value) {
             vm[pro].unshift(value);
             _IndexInit(vm[pro]);
-            var _childs = [];
-            for (var j = 0; j < _arr.length; j++) {
-                var _temp = _arr[j];
-                var _child = $(_temp.tmpl);
-                _childs.push({"element": _child, "tmpl": _temp.tmpl});
-                var _element = _temp.element.prepend(_child);
-            }
+            var _child = $(_arr.tmpl);
+            _arr.element.prepend(_child);
             _creatArrProperty(vm, vm[pro], value);
-            _bindData(value, vm["$$arrSelector" + pro], ve);
+            _bindData(value, _child, ve);
             _IndexRender(vm[pro]);
-            vm["$$child" + pro].unshift(_childs);
+            vm["$$child" + pro].unshift(_child);
         };
         vm[pro + "splice"] = function () {
             var args = arguments;
@@ -612,55 +624,48 @@ var groot = (function ($) {
                 if (args[0] < 0 || args[1] < 0)return;
             }
             if (args.length > 2) {
-                var _removeChild = vm["$$child" + pro].splice(args[0], args[1]);
-                vm[pro].splice(args[0], args[1]);
-                for (var i = 0; i < _removeChild.length; i++) {
-                    for (var j = 0; j < _removeChild[i].length; j++) {
-                        _removeChild[i][j].element.remove();
-                    }
-                }//删除多余 插入新元素
-                var _eleAffter = [];
-                for (var j = 0; j < _arr.length; j++) {
-                    _eleAffter.push(0);
-                }
+                var _data = [];
+                var _start = args[0];
+                var _end = -1;
                 for (var i = 0; i < args.length; i++) {
                     if (i > 1) {
-                        vm[pro].splice(args[0], 0, args[i]);
-                        var _childs = [];
-                        for (var j = 0; j < _arr.length; j++) {
-                            var _eleAffter;
-                            var _temp = _arr[j];
-                            var _child = $(_temp.tmpl);
-                            _childs.push({"element": _child, "tmpl": _temp.tmpl});
-                            if (_eleAffter[j] == 0) {
-                                if (args[0] == 0) {
-                                    var _element = _temp.element.prepend(_child);///
-                                    _eleAffter[j] = _element;
-                                } else {
-                                    _eleAffter[j] = vm["$$child" + pro][args[0]][j].element;
-                                    var _element = _child.insertBefore(_eleAffter[j]);///
-                                    _eleAffter[j] = _element;
-                                }
-                            } else {
-                                var _element = _child.insertAfter(_eleAffter);///
-                                _eleAffter = _element;
-                            }
-                        }
-                        _IndexInit(vm[pro]);
-                        _creatArrProperty(vm, vm[pro], args[i]);
-                        _bindData(args[i], vm["$$arrSelector" + pro], ve);
-                        _IndexRender(vm[pro]);
-                        vm["$$child" + pro].splice(args[0], 0, _childs);
+                        _end++;
+                        var _child = $(_arr.tmpl);
+                        _data.push(args[i]);
                     }
                 }
-
+                _end = _start + _end;
+                var _removeChild = vm["$$child" + pro].splice(args[0], args[1]);
+                vm[pro].splice.apply(vm[pro], args);
+                for (var i = 0; i < _removeChild.length; i++) {
+                    _removeChild.remove();
+                }//删除多余 插入新元素
+                var _eleAffter = null;
+                if (args[0] != 0) {
+                    _eleAffter = vm["$$child" + pro][args[0] - 1];
+                }
+                _IndexInit(vm[pro]);
+                for (var d = 0; d < vm[pro].length; d++) {
+                    if (d >= _start && d <= _end) {
+                        var _child = $(_arr.tmpl);
+                        var _d = vm[pro][d];
+                        if (_eleAffter == null) {
+                            _arr.element.prepend(_child);
+                        } else {
+                            _child.insertAfter(_eleAffter);
+                        }
+                        vm["$$child" + pro].splice(args[0] + _start - d, 0, _child);
+                        _eleAffter = _child;
+                        _bindData(_d, _child, ve);
+                        _creatArrProperty(vm, vm[pro], _d);
+                    }
+                }
+                _IndexRender(vm[pro])
             } else if (args.length <= 2 && args.length > 0) {
                 var _removeChild = vm["$$child" + pro].splice.apply(vm["$$child" + pro], arguments);
                 vm[pro].splice.apply(vm[pro], arguments);
                 for (var i = 0; i < _removeChild.length; i++) {
-                    for (var j = 0; j < _removeChild[i].length; j++) {
-                        _removeChild[i][j].element.remove();
-                    }
+                    _removeChild[i].remove();
                 }
                 _IndexInit(vm[pro]);
                 _IndexRender(vm[pro]);
@@ -683,7 +688,7 @@ var groot = (function ($) {
         }
     }
 
-  //---------------commonjs规范----------------//
+    //---------------commonjs规范----------------//
     var _cssCache = {};
     var _absUrl = function (path) {
         if (path.indexOf("http://") > -1) {
@@ -822,8 +827,10 @@ var groot = (function ($) {
     groot.asyn = function (foo) {//异步函数
         setTimeout(foo, 10);
     }
-    groot.createElement = function (html, id) {
-        return $(html).append("<input type='hidden' id=\"" + id + "\">");
+    groot.createElement = function (html, id, element) {
+        var _temp = $(html).append("<input type='hidden' id=\"" + id + "\">");
+        element.html(_temp);
+        element.attr(PREFIX + "-view", id);
     }
     groot.absUrl = _absUrl;//根绝相对路径获取绝对路径
     return groot;
@@ -858,7 +865,7 @@ var groot = (function ($) {
     );
     groot.filter(
         {
-            "formatDate": function (value, format) {
+            "d": function (value, format) {
                 if (!value) return;
                 if (!format) format = "yyyy-MM-dd";
                 switch (typeof value) {
