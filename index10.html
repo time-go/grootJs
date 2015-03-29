@@ -1,12 +1,12 @@
-﻿<html>
+<html>
 <head>
     <title>属性过滤器</title>
-    <script src="jquery-1.7.2.min.js"></script>
+    <script src="jquery-1.11.2.min.js"></script>
     <script src="groot.js"></script>
 </head>
 <body>
 <div gt-view="myview">
-    <span gt-text="time(filter:formatDate(value,'yyyy-MM-dd'))"></span>
+    <span gt-text="_.d({time},'yyyy-MM-dd')"></span>
 </div>
 </body>
 </html>
@@ -14,5 +14,4 @@
     var view = groot.view("myview", function (vm, ve) {
         vm.time = "2013/10/20";
     });
-    groot.sweep();
 </script>
