@@ -1,7 +1,7 @@
-﻿<html>
+<html>
 <head>
     <title>绑定数组</title>
-    <script src="jquery-1.7.2.min.js"></script>
+    <script src="jquery-1.11.2.min.js"></script>
     <script src="groot.js"></script>
 </head>
 <body>
@@ -13,9 +13,9 @@
     <input type="button" gt-click="insert" value="插入"/>
     <input type="button" gt-click="chList" value="给整个数组重新赋值"/>
     <ul gt-each="list">
-        <li gt-attr="$index(id,value +1)"><span gt-text="$index(value+1)"></span><span>姓名:</span><span
-                gt-text="name"></span>---<span>性别:</span><span
-                gt-text="sex"></span><input
+        <li gt-attr="$index(id,value +1)"><span gt-text="{$index}+1"></span><span>姓名:</span><span
+                gt-text="{name}"></span>---<span>性别:</span><span
+                gt-text="{sex}"></span><input
                 type="text" gt-value-change="name"/></li>
     </ul>
 </div>
@@ -36,7 +36,7 @@
             vm.listsplice(1, 1);
         }
         ve.insert = function () {
-            vm.listsplice(2, 0, {"name": "李四", "sex": "男"});
+            vm.listsplice(1, 0, {"name": "李四", "sex": "男"});
         }
         ve.chObject = function () {
             vm.list[1] = {"name": "王五", "sex": "男"};
@@ -50,5 +50,4 @@
             vm.listRender();
         }
     })
-    groot.sweep();
 </script>
