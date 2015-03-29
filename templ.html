@@ -1,5 +1,5 @@
-﻿<ul gt-each="list">
-    <li gt-class="$index(back0:value % 2 ==0,back1:value % 2==1)"><span gt-text="$index(value+1)"></span><span>姓名:</span><span
-            gt-text="name"></span>---<span>性别:</span><span
-            gt-text="sex"></span></li>
+<ul gt-each="list">
+    <li gt-class="$index(back0:value % 2 ==0,back1:value % 2==1)"><span gt-text="{$index}+1"></span><span>姓名:</span><span
+            gt-text="{name}"></span>---<span>性别:</span><span
+            gt-text="{sex}"></span></li>
 </ul>
