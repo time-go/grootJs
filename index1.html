@@ -1,19 +1,30 @@
 <html>
 <head>
     <title>hello word</title>
-    <script src="jquery-1.7.2.min.js"></script>
+    <script src="jquery-1.11.2.min.js"></script>
     <script src="groot.js"></script>
 </head>
 <body>
 <div gt-view="myview">
-    <input type="text" gt-value-change="say"><span gt-text="say"></span>
-
+    <div gt-object="data">
+        <input type="text" gt-value-change="say">+<input type="text" gt-value-change="say2"><span
+            gt-text="{say}+{say2}"></span>
+    </div>
+    <input type="button" value="点击" gt-click="fuzhi">
 </div>
 </body>
 </html>
 <script>
     groot.view("myview", function (vm, ve) {
-        vm.say = "hello word!";
+        vm.data = {
+            say: 1,
+            say2: 2
+        }
+        /*vm.say = 1;
+         vm.say2 = 20;*/
+        ve.fuzhi = function () {
+            vm.data = {say: 10, say2: 50}
+            vm.dataRender();
+        }
     })
-    groot.sweep();
 </script>
