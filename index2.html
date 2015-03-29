@@ -1,12 +1,12 @@
-﻿<html>
+<html>
 <head>
     <title>绑定事件</title>
-    <script src="jquery-1.7.2.min.js"></script>
+    <script src="jquery-1.11.2.min.js"></script>
     <script src="groot.js"></script>
 </head>
 <body>
 <div gt-view="myview">
-    <input type="text" gt-value-change="say"><span gt-text="say"></span><input gt-click="hello" type="button" value="恢复">
+    <input type="text" gt-value-change="say"><span gt-text="{say}"></span><input gt-click="hello" type="button" value="恢复">
 
 </div>
 </body>
@@ -19,5 +19,4 @@
             vm.sayRender();
         }
     })
-    groot.sweep();
 </script>
