@@ -1,13 +1,13 @@
-﻿<html>
+<html>
 <head>
     <title>绑定对象</title>
-    <script src="jquery-1.7.2.min.js"></script>
+    <script src="jquery-1.11.2.min.js"></script>
     <script src="groot.js"></script>
 </head>
 <body>
 <div gt-view="myview">
     <div gt-object="data">
-        姓名:<span gt-text="name"></span>--性别:<span gt-text="sex"></span><input gt-click="hello" type="button"
+        姓名:<span gt-text="{name}"></span>--性别:<span gt-text="{sex}"></span><input gt-click="hello" type="button"
                                                                             value="变名称">
     </div>
 </div>
@@ -27,5 +27,4 @@
             vm.data.nameRender();
         }
     })
-    groot.sweep();
 </script>
