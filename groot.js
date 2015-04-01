@@ -276,15 +276,15 @@ var groot = (function ($) {
             "_elCheck": _elCheck,
             "_elUi": _elUi
         };
-        /*********************** wach  *******************************/
+        /*********************** watch  *******************************/
         for (var e in _objElements) {
             var _elmt = _objElements[e];
-            if (typeof _elmt.attr(PREFIX + "-wach") != "undefined") {
-                var _fun = _elmt.attr(PREFIX + "-wach");
+            if (typeof _elmt.attr(PREFIX + "-watch") != "undefined") {
+                var _fun = _elmt.attr(PREFIX + "-watch");
                 if ($.isFunction(ve[_fun])) {
-                    vm[pro + "wach"] = ve[_fun];
+                    vm[pro + "watch"] = ve[_fun];
                 }
-                _elmt.removeAttr(PREFIX + "-wach");
+                _elmt.removeAttr(PREFIX + "-watch");
             }
         }
         /*********************** ui控件开发扫描  *******************************/
@@ -447,8 +447,8 @@ var groot = (function ($) {
                 groot.vms[_uiList[i]].uivalueRender();
             }
             /*********************** 触发监控  *******************************/
-            if ($.isFunction(vm[pro + "wach"])) {
-                vm[pro + "wach"](vm, value);//调用监控函数
+            if ($.isFunction(vm[pro + "watch"])) {
+                vm[pro + "watch"](vm, value);//调用监控函数
             }
             /*********************** checkBox  *******************************/
             if (vm[pro]) {
@@ -534,10 +534,10 @@ var groot = (function ($) {
                 var _child = vm["$$child" + pro][arguments[0]];
                 var _temp = $(vm["$$arr" + pro].tmpl).insertBefore(_child);
                 _child.remove();
-                _child = _temp;
+                vm["$$child" + pro][arguments[0]] = _temp;
                 _IndexInit(vm[pro])
                 _creatArrProperty(vm, vm[pro], vm[pro][arguments[0]]);
-                _bindData(vm[pro][arguments[0]], _child, ve);
+                _bindData(vm[pro][arguments[0]], _temp, ve);
                 _IndexRender(vm[pro])
             } else {
                 _initArry(vm, pro);
