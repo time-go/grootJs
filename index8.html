@@ -1,6 +1,6 @@
 <html>
 <head>
-    <title>变量监控指令 gt-wach</title>
+    <title>变量监控指令 gt-watch</title>
     <script src="jquery-1.11.2.min.js"></script>
     <script src="groot.js"></script>
 </head>
@@ -10,7 +10,7 @@
         <li gt-class="$index(back0:value % 2 ==0,back1:value % 2==1)"><span
                 gt-text="{$index}+1"></span><span>姓名:</span><span
                 gt-text="{name}"></span>---<span>性别:</span><span
-                gt-text="{sex}"></span> <input type="text" gt-wach="mychange" gt-value-change="name"></li>
+                gt-text="{sex}"></span> <input type="text" gt-watch="mychange" gt-value-change="name"></li>
     </ul>
 </div>
 </body>
