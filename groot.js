@@ -340,12 +340,11 @@ var groot = (function ($) {
         _eltRadio.removeAttr(PREFIX + "-radio");
         _eltRadio.each(function () {
             if ($(this).val() == vm[pro]) {
-                $(this).attr("checked", "checked");
-            } else {
-                $(this).removeAttr("checked");
+                //$(this).attr("checked", "checked");元写法在火狐下有bug
+                $(this).click();
             }
         });
-        _eltRadio.click(function () {
+        _eltRadio.change(function () {
             if ($(this).is(':checked')) {
                 vm[pro] = $(this).val();
                 vm[pro + RENDEAR]();
