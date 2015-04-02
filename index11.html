@@ -27,7 +27,7 @@
         <span gt-text="{name}"></span>
     </div>
     <div gt-each="c">
-        <span><input type="checkbox" gt-check="s" gt-click="click"><span gt-text="{name}"></span></span>
+        <span><input type="checkbox" gt-check="s" gt-watch="watch"><span gt-text="{name}"></span></span>
     </div>
 </div>
 </body>
@@ -38,7 +38,7 @@
         vm.s = "北大";
         vm.l=[];
         vm.c = [{"name": "张三", s: false}, {"name": "李四", s: false}, {"name": "王五", s: false}];
-        ve.click=function(){
+        ve.watch=function(){
             var arr=[];
             for(var i=0;i<vm.c.length;i++){
                 if(vm.c[i].s){
