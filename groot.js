@@ -539,7 +539,7 @@ var groot = (function ($) {
                 _bindData(vm[pro][arguments[0]], _temp, ve);
                 _IndexRender(vm[pro])
             } else {
-                _initArry(vm, pro);
+                _initArry(vm, pro, ve);
             }
         }
     }
