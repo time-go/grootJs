@@ -688,21 +688,29 @@ var groot = (function ($) {
     }
 
     //---------------commonjs规范----------------//
+    var tmpTag = document.location.protocol + "//";
     var _cssCache = {};
     var _absUrl = function (path) {
-        if (path.indexOf("http://") > -1) {
-            path = path.replace("http://", "").replace(/\/+/g, "/");
-            return "http://" + path;
-        }
-        var _host = window.location.href;
-        if (_host.indexOf("/") > -1) {
-            _host = _host.substr(0, _host.lastIndexOf("/") + 1);
+        var url;
+        if (path.indexOf(tmpTag) > -1) {
+            path = path.replace(tmpTag, "").replace(/\/+/g, "/");
+            url = path;
         } else {
-            _host = _host + "/";
+            path = path.replace(/\/+/g, "/");
+            if (path.substr(0, 1) == "/") {
+                url = window.location.host + path;
+            } else {
+                var _host = window.location.href;
+                if (_host.indexOf("/") > -1) {
+                    _host = _host.substr(0, _host.lastIndexOf("/") + 1);
+                } else {
+                    _host = _host + "/";
+                }
+                url = _host.replace(tmpTag, "") + path;
+            }
         }
-        _host = _host.replace("http://", "") + path;
-        _host = _host.replace(/\/+/g, "/")
-        var _arr = _host.split("/");
+
+        var _arr = url.split("/");
         var _urlArr = [];
         for (var i = 0; i < _arr.length; i++) {
             if (_arr[i] != "..") {
@@ -711,45 +719,51 @@ var groot = (function ($) {
                 _urlArr.pop();
             }
         }
-        return "http://" + _urlArr.join("/");
+        return tmpTag + _urlArr.join("/");
     }
     _require = function (parent, path) {
         var _moudle;
         var _type = "js";
         var _basePath;
-        if (path.substr(0, 2) == "./") {
-            path = path.substr(2);
-            path = parent + path;
-        } else {
-            var _host;
-            if (parent == "") {
-                _host = window.location.href;
+        if (path.indexOf(tmpTag) < 0) {
+            if (path.substr(0, 2) == "./") {
+                path = path.substr(2);
+                _basePath = parent + path;
+            } else if (path.substr(0, 1) == "/") {
+                _basePath = tmpTag + window.location.host + path;
             } else {
-                _host = parent;
-            }
-            if (_host.indexOf("/") > -1) {
-                _host = _host.substr(0, _host.lastIndexOf("/") + 1);
-            } else {
-                _host = _host + "/";
-            }
-            path = _host + path;
-        }
-        _basePath = path.substr(0, path.lastIndexOf("/") + 1);
-        if (path.lastIndexOf("!") > -1) {
-            _type = path.substr(path.lastIndexOf("!") + 1);
-            path = path.substr(0, path.lastIndexOf("!"));
-        } else {
-            if (path.lastIndexOf(".js") < 0) {
-                path = path + ".js";
+                var _host;
+                if (parent == "") {
+                    _host = window.location.href;
+                } else {
+                    _host = parent;
+                }
+                if (_host.indexOf("/") > -1) {
+                    _host = _host.substr(0, _host.lastIndexOf("/") + 1);
+                } else {
+                    _host = _host + "/";
+                }
+                _basePath = _host + path;
             }
         }
+        var _path = _basePath;
+        _basePath = _basePath.substr(0, _basePath.lastIndexOf("/") + 1);
+        if (_path.lastIndexOf("!") > -1) {
+            _type = _path.substr(_path.lastIndexOf("!") + 1);
+            _path = _path.substr(0, _path.lastIndexOf("!"));
+        } else {
+            if (_path.lastIndexOf(".js") < 0) {
+                _path = _path + ".js";
+            }
+        }
+        var _myUrl = _absUrl(_path);
         $.ajax({
             type: 'get',
-            "url": path,
+            "url": _myUrl,
             "cache": true,
             "dataType": "text",
             "error": function () {
-                console && console.log(_absUrl(path) + "加载失败");
+                console && console.log(_myUrl + "加载失败");
             },
             "async": false,
             "success": function (data) {
@@ -757,13 +771,13 @@ var groot = (function ($) {
                     var _script = "_define(function(exports,module){\n";
                     _script += "var $parent = \"" + _basePath + "\";\n";
                     _script += data.replace(/require\(/g, "_require($parent,");
-                    _script += ";\n});" + "//@ sourceURL=" + _absUrl(path);
+                    _script += ";\n});" + "//@ sourceURL=" + _myUrl;
                     _moudle = window["eval"](_script);
                 } else if (_type == "text") {
                     _moudle = data;
                 }
                 else if (_type == "css") {
-                    var _key = _absUrl(path);
+                    var _key = _myUrl;
                     if (!_cssCache.hasOwnProperty(_key)) {
                         $("<style></style>").html(data).appendTo("head")
                         _cssCache[_key] = "load";
