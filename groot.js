@@ -745,6 +745,8 @@ var groot = (function ($) {
                 }
                 _basePath = _host + path;
             }
+        } else {
+            _basePath = path;
         }
         var _path = _basePath;
         _basePath = _basePath.substr(0, _basePath.lastIndexOf("/") + 1);
