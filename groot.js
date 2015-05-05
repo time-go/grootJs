@@ -25,7 +25,14 @@ var groot = (function ($) {
     }
     groot.vms = {};//储存vm所有对象
     groot.uiInit = {};//存放控件初始化数据
-    groot.view = function (name, factory) {
+    groot.control = function () {//初始化view
+        groot.vms[name] = {};
+        groot.vms[name].$$ve = {};
+        factory(groot.vms[name], groot.vms[name].$$ve);//vm对象
+        var htmlElment = $("[" + PREFIX + "-view='" + name + "']").removeAttr(PREFIX + "-view");
+        return groot.vms[name];
+    }
+    groot.view = function (name, factory) {//初始化view并扫描
         groot.vms[name] = {};
         groot.vms[name].$$ve = {};
         factory(groot.vms[name], groot.vms[name].$$ve);//vm对象
@@ -40,15 +47,16 @@ var groot = (function ($) {
     ]
     //垃圾回收算法
     var _collect = true;
+    var _dynVMS = {};
 
     function _collection() {//垃圾回收
         if (_collect) {
             _collect = false;
             groot.asyn(function () {
-                for (var vm in groot.vms) {
-                    if (groot.vms[vm].hasOwnProperty("uivalue")) {
-                        if ($("#" + vm).length <= 0)
-                            delete  groot.vms[vm];
+                for (var vm in _dynVMS) {
+                    if ($("#" + vm).length <= 0) {
+                        delete  groot.vms[vm];
+                        delete  _dynVMS[vm];
                     }
                 }
                 _collect = true;
@@ -70,6 +78,7 @@ var groot = (function ($) {
             _bindData(vm, element, vm.$$ve);
         }
     }
+    groot.collection = _collection;
     function _sweepEvents(vm, element, ve) {
         for (var e in ve) {//绑定事件
             for (var i = 0; i < _bindEvents.length; i++) {
@@ -686,7 +695,6 @@ var groot = (function ($) {
 
         }
     }
-
     //---------------commonjs规范----------------//
     var tmpTag = document.location.protocol + "//";
     var _cssCache = {};
@@ -843,11 +851,13 @@ var groot = (function ($) {
         setTimeout(foo, 10);
     }
     groot.createElement = function (html, id, element) {
-        var _temp = $(html).append("<input type='hidden' id=\"" + id + "\">");
+        var _temp = $(html + "<input type='hidden' id=\"" + id + "\">");
         element.html(_temp);
         element.attr(PREFIX + "-view", id);
+        _dynVMS[id] = id;
+        return element;
     }
-    groot.absUrl = _absUrl;//根绝相对路径获取绝对路径
+    //groot.absUrl = _absUrl;//根绝相对路径获取绝对路径
     return groot;
 })(jQuery);
 ///bindExtend,自定义属性,自定义属性 gt-width="w"
