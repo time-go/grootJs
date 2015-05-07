@@ -437,9 +437,14 @@ var groot = (function ($) {
         }
         /*********************** 绑定输入框值变化  *******************************/
         _eltChange.removeAttr(PREFIX + "-value-change").val(vm[pro]);
+        _eltChange.bind("keydown", function () {
+            $(this).attr("lock", "change");
+        });
         _eltChange.bind("input propertychange keyup", function () {
             vm[pro] = $(this).val();
             vm[pro + RENDEAR]();
+            $(this).removeAttr("lock");
+
         });
         /*********************** 绑定输入失去焦点 *******************************/
         _eltBlur.removeAttr(PREFIX + "-value-blur").val(vm[pro]);
@@ -498,7 +503,11 @@ var groot = (function ($) {
             vm.$$renderText();
             /*********************** value 文本  *******************************/
             _eltValue.val(vm[pro]);
-            _eltChange.val(vm[pro]);
+             _eltChange.each(function () {
+                if ($(this).attr("loack") != "change") {
+                    $(this).val(vm[pro])
+                }
+            });
             _eltBlur.val(vm[pro]);
             /*********************** attract 属性值  *******************************/
             for (var i = 0; i < _attrList.length; i++) {
