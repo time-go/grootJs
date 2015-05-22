@@ -120,7 +120,7 @@ var groot = (function ($) {
     var RENDEAR = "Render";
     //---------------初始化对象----------------//
     function isNum(value) {
-        return $.isNumeric(value);
+        return typeof value =="number";
     }
 
     var groot = {};
