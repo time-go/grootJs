@@ -1,3 +1,117 @@
+(function (w, $) {
+    //---------------commonjs规范----------------//
+    var tmpTag = document.location.protocol + "//";
+    var _cssCache = {};
+    var _absUrl = function (path) {
+        var url;
+        if (path.indexOf(tmpTag) > -1) {
+            path = path.replace(tmpTag, "").replace(/\/+/g, "/");
+            url = path;
+        } else {
+            path = path.replace(/\/+/g, "/");
+            if (path.substr(0, 1) == "/") {
+                url = window.location.host + path;
+            } else {
+                var _host = window.location.href;
+                if (_host.indexOf("/") > -1) {
+                    _host = _host.substr(0, _host.lastIndexOf("/") + 1);
+                } else {
+                    _host = _host + "/";
+                }
+                url = _host.replace(tmpTag, "") + path;
+            }
+        }
+
+        var _arr = url.split("/");
+        var _urlArr = [];
+        for (var i = 0; i < _arr.length; i++) {
+            if (_arr[i] != "..") {
+                _urlArr.push(_arr[i]);
+            } else {
+                _urlArr.pop();
+            }
+        }
+        return tmpTag + _urlArr.join("/");
+    }
+    var _define = function (factory) {
+        var _exports = {};
+        var _module = {};
+        _module.exports = {};
+        factory(_exports, _module);
+        return $.extend(true, {}, _exports, _module.exports);
+    }
+    var _require = function (parent, path) {
+        var _moudle;
+        var _type = "js";
+        var _basePath;
+        if (path.indexOf(tmpTag) < 0) {
+            if (path.substr(0, 2) == "./") {
+                path = path.substr(2);
+                _basePath = parent + path;
+            } else if (path.substr(0, 1) == "/") {
+                _basePath = tmpTag + window.location.host + path;
+            } else {
+                var _host;
+                if (parent == "") {
+                    _host = window.location.href;
+                } else {
+                    _host = parent;
+                }
+                if (_host.indexOf("/") > -1) {
+                    _host = _host.substr(0, _host.lastIndexOf("/") + 1);
+                } else {
+                    _host = _host + "/";
+                }
+                _basePath = _host + path;
+            }
+        } else {
+            _basePath = path;
+        }
+        var _path = _basePath;
+        _basePath = _basePath.substr(0, _basePath.lastIndexOf("/") + 1);
+        if (_path.lastIndexOf("!") > -1) {
+            _type = _path.substr(_path.lastIndexOf("!") + 1);
+            _path = _path.substr(0, _path.lastIndexOf("!"));
+        } else {
+            if (_path.lastIndexOf(".js") < 0) {
+                _path = _path + ".js";
+            }
+        }
+        var _myUrl = _absUrl(_path);
+        $.ajax({
+            type: 'get',
+            "url": _myUrl + "?r=" + (new Date() - 1),
+            "cache": true,
+            "dataType": "text",
+            "error": function () {
+                console && console.log(_myUrl + "加载失败");
+            },
+            "async": false,
+            "success": function (data) {
+                _moudle = data
+                setStorage(_absUrl(path), data, _version);
+            }
+        });
+
+        if (_type == "js") { //js预编译
+            var _script = "_define(function(exports,module){\n";
+            _script += "var $parent = \"" + _basePath + "\";\n";
+            _script += _moudle.replace(/require\(/g, "_require($parent,");
+            _script += ";\n});" + "//@ sourceURL=" + _absUrl(path);
+            _moudle = eval(_script);
+        } else if (_type == "css") {
+            var _key = _absUrl(path);
+            if (!_cssCache.hasOwnProperty(_key)) {
+                $("<style></style>").html(_moudle).appendTo("head");
+                _cssCache[_key] = "load";
+            }
+        }
+        return _moudle;
+    }
+    window.require = function (path) {
+        return _require("", path);
+    };
+})(window, jQuery);
 var groot = (function ($) {
     //---------------作者:大盗乔三---------------//
     //---------------qq:289880020---------------//
@@ -193,7 +307,7 @@ var groot = (function ($) {
                 var _o = _expressions[i];
                 var _expshow = _o.expr;
                 for (var k = 0; k < textlsit.length; k++) {
-                    if (isNum(vm[textlsit[k]])) {
+                    if (isNum(vm[textlsit[k]]) || typeof vm[textlsit[k]] == "boolean") {
                         _expshow = replaceAll(_expshow, "{" + textlsit[k] + "}", vm[textlsit[k]]);
                         _expshow = _expshow.replace(new RegExp("{" + textlsit[k].replace("$", "\\$") + "}", "g"), vm[textlsit[k]]);
                     } else {
@@ -367,7 +481,7 @@ var groot = (function ($) {
 
             _classList.push({"element": $(this), "express": _expression});
             var _express;
-            if (isNum(vm[pro])) {
+            if (isNum(vm[pro]) || typeof vm[pro] == "boolean") {
 
                 _express = _expression.replace(/value/g, vm[pro]);
             } else {
@@ -379,7 +493,7 @@ var groot = (function ($) {
             for (var i = 0; i < _classArr.length; i++) {
                 var _cname = _classArr[i].split(":")[0];
                 var _cexpress = _classArr[i].split(":")[1];
-                window["eval"]("var myValue = " + _cexpress);
+                eval("var myValue = " + _cexpress);
                 if (myValue) {
                     $(this).addClass(_cname);
                 } else {
@@ -399,14 +513,14 @@ var groot = (function ($) {
             var _expression = _sx.substring(_sx.indexOf(",") + 1, _sx.lastIndexOf(")"));
             _attrList.push({"attr": _attr, "element": $(this), "express": _expression});
             var _express;
-            if (isNum(vm[pro])) {
+            if (isNum(vm[pro]) || typeof vm[pro] == "boolean") {
 
                 _express = _expression.replace(/value/g, vm[pro]);
             } else {
 
                 _express = _expression.replace(/value/g, "\"" + vm[pro] + "\"");
             }
-            window["eval"]("var myValue = " + _express);
+            eval("var myValue = " + _express);
             $(this).removeAttr(PREFIX + "-attr").attr(_attr, myValue)
         });
         /*********************** css style样式  *******************************/
@@ -417,14 +531,14 @@ var groot = (function ($) {
             var _expression = _sx.substring(_sx.indexOf(",") + 1, _sx.lastIndexOf(")"));
             _cssList.push({"css": _css, "element": $(this), "express": _expression});
             var _express;
-            if (isNum(vm[pro])) {
+            if (isNum(vm[pro]) || typeof vm[pro] == "boolean") {
 
                 _express = _expression.replace(/value/g, vm[pro]);
             } else {
 
                 _express = _expression.replace(/value/g, "\"" + vm[pro] + "\"");
             }
-            window["eval"]("var myValue = " + _express);
+            eval("var myValue = " + _express);
             $(this).removeAttr(PREFIX + "-css").css(_css, myValue)
         });
         /*********************** 绑定扩展属性  *******************************/
@@ -482,7 +596,7 @@ var groot = (function ($) {
             /*********************** class样式  *******************************/
             for (var i = 0; i < _classList.length; i++) {
                 var _express;
-                if (isNum(value)) {
+                if (isNum(value) || typeof value == "boolean") {
                     _express = _classList[i].express.replace(/value/g, value);
                 } else {
                     _express = _classList[i].express.replace(/value/g, "\"" + value + "\"");
@@ -491,7 +605,7 @@ var groot = (function ($) {
                 for (var j = 0; j < _classIntem.length; j++) {
                     var _cname = _classIntem[j].split(":")[0];
                     var _cexpress = _classIntem[j].split(":")[1];
-                    window["eval"]("var myValue = " + _cexpress);
+                    eval("var myValue = " + _cexpress);
                     if (myValue) {
                         _classList[i].element.addClass(_cname);
                     } else {
@@ -503,7 +617,7 @@ var groot = (function ($) {
             vm.$$renderText();
             /*********************** value 文本  *******************************/
             _eltValue.val(vm[pro]);
-             _eltChange.each(function () {
+            _eltChange.each(function () {
                 if ($(this).attr("loack") != "change") {
                     $(this).val(vm[pro])
                 }
@@ -512,23 +626,23 @@ var groot = (function ($) {
             /*********************** attract 属性值  *******************************/
             for (var i = 0; i < _attrList.length; i++) {
                 var _express;
-                if (isNum(value)) {
+                if (isNum(value) || typeof value == "boolean") {
                     _express = _attrList[i].express.replace(/value/g, value);
                 } else {
                     _express = _attrList[i].express.replace(/value/g, "\"" + value + "\"");
                 }
-                window["eval"]("var myValue = " + _express);
+                eval("var myValue = " + _express);
                 _attrList[i].element.attr(_attrList[i].attr, myValue);
             }
             /*********************** style 式 属性值  *******************************/
             for (var i = 0; i < _cssList.length; i++) {
                 var _express;
-                if (isNum(value)) {
+                if (isNum(value) || typeof value == "boolean") {
                     _express = _cssList[i].express.replace(/value/g, value);
                 } else {
                     _express = _cssList[i].express.replace(/value/g, "\"" + value + "\"");
                 }
-                window["eval"]("var myValue = " + _express);
+                eval("var myValue = " + _express);
                 _cssList[i].element.css(_cssList[i].css, myValue);
             }
             /*********************** style 式 刷新扩展属性  *******************************/
@@ -704,118 +818,7 @@ var groot = (function ($) {
 
         }
     }
-    //---------------commonjs规范----------------//
-    var tmpTag = document.location.protocol + "//";
-    var _cssCache = {};
-    var _absUrl = function (path) {
-        var url;
-        if (path.indexOf(tmpTag) > -1) {
-            path = path.replace(tmpTag, "").replace(/\/+/g, "/");
-            url = path;
-        } else {
-            path = path.replace(/\/+/g, "/");
-            if (path.substr(0, 1) == "/") {
-                url = window.location.host + path;
-            } else {
-                var _host = window.location.href;
-                if (_host.indexOf("/") > -1) {
-                    _host = _host.substr(0, _host.lastIndexOf("/") + 1);
-                } else {
-                    _host = _host + "/";
-                }
-                url = _host.replace(tmpTag, "") + path;
-            }
-        }
 
-        var _arr = url.split("/");
-        var _urlArr = [];
-        for (var i = 0; i < _arr.length; i++) {
-            if (_arr[i] != "..") {
-                _urlArr.push(_arr[i]);
-            } else {
-                _urlArr.pop();
-            }
-        }
-        return tmpTag + _urlArr.join("/");
-    }
-    _require = function (parent, path) {
-        var _moudle;
-        var _type = "js";
-        var _basePath;
-        if (path.indexOf(tmpTag) < 0) {
-            if (path.substr(0, 2) == "./") {
-                path = path.substr(2);
-                _basePath = parent + path;
-            } else if (path.substr(0, 1) == "/") {
-                _basePath = tmpTag + window.location.host + path;
-            } else {
-                var _host;
-                if (parent == "") {
-                    _host = window.location.href;
-                } else {
-                    _host = parent;
-                }
-                if (_host.indexOf("/") > -1) {
-                    _host = _host.substr(0, _host.lastIndexOf("/") + 1);
-                } else {
-                    _host = _host + "/";
-                }
-                _basePath = _host + path;
-            }
-        } else {
-            _basePath = path;
-        }
-        var _path = _basePath;
-        _basePath = _basePath.substr(0, _basePath.lastIndexOf("/") + 1);
-        if (_path.lastIndexOf("!") > -1) {
-            _type = _path.substr(_path.lastIndexOf("!") + 1);
-            _path = _path.substr(0, _path.lastIndexOf("!"));
-        } else {
-            if (_path.lastIndexOf(".js") < 0) {
-                _path = _path + ".js";
-            }
-        }
-        var _myUrl = _absUrl(_path);
-        $.ajax({
-            type: 'get',
-            "url": _myUrl,
-            "cache": true,
-            "dataType": "text",
-            "error": function () {
-                console && console.log(_myUrl + "加载失败");
-            },
-            "async": false,
-            "success": function (data) {
-                if (_type == "js") {//js预编译
-                    var _script = "_define(function(exports,module){\n";
-                    _script += "var $parent = \"" + _basePath + "\";\n";
-                    _script += data.replace(/require\(/g, "_require($parent,");
-                    _script += ";\n});" + "//@ sourceURL=" + _myUrl;
-                    _moudle = window["eval"](_script);
-                } else if (_type == "text") {
-                    _moudle = data;
-                }
-                else if (_type == "css") {
-                    var _key = _myUrl;
-                    if (!_cssCache.hasOwnProperty(_key)) {
-                        $("<style></style>").html(data).appendTo("head")
-                        _cssCache[_key] = "load";
-                    }
-                }
-            }
-        });
-        return _moudle;
-    }
-    window.require = function (path) {
-        return _require("", path);
-    };
-    _define = function (factory) {
-        var _exports = {};
-        var _module = {};
-        _module.exports = {};
-        factory(_exports, _module);
-        return $.extend(true, {}, _exports, _module.exports);
-    }
 //获取model对象
     groot.model = function (o) {
         var _o;
@@ -868,7 +871,8 @@ var groot = (function ($) {
     }
     //groot.absUrl = _absUrl;//根绝相对路径获取绝对路径
     return groot;
-})(jQuery);
+})
+(jQuery);
 ///bindExtend,自定义属性,自定义属性 gt-width="w"
 (function ($, groot) {
     groot.bindExtend(
