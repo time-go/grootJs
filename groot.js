@@ -120,7 +120,7 @@ var groot = (function ($) {
     var RENDEAR = "Render";
     //---------------初始化对象----------------//
     function isNum(value) {
-        return typeof value =="number";
+        return typeof value == "number";
     }
 
     var groot = {};
@@ -139,7 +139,7 @@ var groot = (function ($) {
     }
     groot.vms = {};//储存vm所有对象
     groot.uiInit = {};//存放控件初始化数据
-    groot.control = function () {//初始化view
+    groot.control = function (name, factory) {//初始化view
         groot.vms[name] = {};
         groot.vms[name].$$ve = {};
         factory(groot.vms[name], groot.vms[name].$$ve);//vm对象
@@ -551,13 +551,9 @@ var groot = (function ($) {
         }
         /*********************** 绑定输入框值变化  *******************************/
         _eltChange.removeAttr(PREFIX + "-value-change").val(vm[pro]);
-        _eltChange.bind("keydown", function () {
-            $(this).attr("lock", "change");
-        });
         _eltChange.bind("input propertychange keyup", function () {
             vm[pro] = $(this).val();
             vm[pro + RENDEAR]();
-            $(this).removeAttr("lock");
 
         });
         /*********************** 绑定输入失去焦点 *******************************/
@@ -596,7 +592,7 @@ var groot = (function ($) {
             /*********************** class样式  *******************************/
             for (var i = 0; i < _classList.length; i++) {
                 var _express;
-                if (isNum(value) || typeof value == "boolean") {
+                if (isNum(value) || typeof value == "boolean" || value == null) {
                     _express = _classList[i].express.replace(/value/g, value);
                 } else {
                     _express = _classList[i].express.replace(/value/g, "\"" + value + "\"");
@@ -618,15 +614,16 @@ var groot = (function ($) {
             /*********************** value 文本  *******************************/
             _eltValue.val(vm[pro]);
             _eltChange.each(function () {
-                if ($(this).attr("loack") != "change") {
+                if (!$(this).is(':focus')) {
                     $(this).val(vm[pro])
                 }
+
             });
             _eltBlur.val(vm[pro]);
             /*********************** attract 属性值  *******************************/
             for (var i = 0; i < _attrList.length; i++) {
                 var _express;
-                if (isNum(value) || typeof value == "boolean") {
+                if (isNum(value) || typeof value == "boolean" || value == null) {
                     _express = _attrList[i].express.replace(/value/g, value);
                 } else {
                     _express = _attrList[i].express.replace(/value/g, "\"" + value + "\"");
@@ -637,7 +634,7 @@ var groot = (function ($) {
             /*********************** style 式 属性值  *******************************/
             for (var i = 0; i < _cssList.length; i++) {
                 var _express;
-                if (isNum(value) || typeof value == "boolean") {
+                if (isNum(value) || typeof value == "boolean" || value == null) {
                     _express = _cssList[i].express.replace(/value/g, value);
                 } else {
                     _express = _cssList[i].express.replace(/value/g, "\"" + value + "\"");
@@ -935,3 +932,4 @@ var groot = (function ($) {
         }
     )
 })(jQuery, groot)
+
