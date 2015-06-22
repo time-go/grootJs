@@ -88,8 +88,7 @@
             },
             "async": false,
             "success": function (data) {
-                _moudle = data
-                setStorage(_absUrl(path), data, _version);
+                _moudle = data;
             }
         });
 
@@ -491,8 +490,9 @@ var groot = (function ($) {
             var _classArr = _express.split(",");
             $(this).removeAttr(PREFIX + "-class");
             for (var i = 0; i < _classArr.length; i++) {
-                var _cname = _classArr[i].split(":")[0];
-                var _cexpress = _express.replace(_cname + ":", "");
+                var index = _classArr[i].indexOf(":");
+                var _cname = _classArr[i].substr(0, index);
+                var _cexpress = _classArr[i].substr(index + 1)
                 eval("var myValue = " + _cexpress);
                 if (myValue) {
                     $(this).addClass(_cname);
@@ -598,10 +598,11 @@ var groot = (function ($) {
                 } else {
                     _express = _classList[i].express.replace(/value/g, "\"" + value + "\"");
                 }
-                var _classIntem = _express.split(",")
+                var _classIntem = _express.split(",");
                 for (var j = 0; j < _classIntem.length; j++) {
-                    var _cname = _classIntem[j].split(":")[0];
-                    var _cexpress = _express.replace(_cname + ":", "");
+                    var index = _classIntem[j].indexOf(":");
+                    var _cname = _classIntem[j].substr(0, index);
+                    var _cexpress = _classIntem[j].substr(index + 1);
                     eval("var myValue = " + _cexpress);
                     if (myValue) {
                         _classList[i].element.addClass(_cname);
