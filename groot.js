@@ -492,7 +492,7 @@ var groot = (function ($) {
             $(this).removeAttr(PREFIX + "-class");
             for (var i = 0; i < _classArr.length; i++) {
                 var _cname = _classArr[i].split(":")[0];
-                var _cexpress = _classArr[i].split(":")[1];
+                var _cexpress = _express.replace(_cname + ":", "");
                 eval("var myValue = " + _cexpress);
                 if (myValue) {
                     $(this).addClass(_cname);
@@ -504,7 +504,8 @@ var groot = (function ($) {
         _eltClass.removeAttr(PREFIX + "-value-class");
         /*********************** text 文本  *******************************/
         /*********************** value 文本  *******************************/
-        _eltValue.removeAttr(PREFIX + "-value").val(vm[pro]);
+        var temp = $("<div>" + vm[pro] + "</div>");
+        _eltValue.removeAttr(PREFIX + "-value").val(temp.text());
         /*********************** text 属性  *******************************/
         var _attrList = [];
         _eltAttr.each(function () {
@@ -551,7 +552,7 @@ var groot = (function ($) {
         }
         /*********************** 绑定输入框值变化  *******************************/
         _eltChange.removeAttr(PREFIX + "-value-change").val(vm[pro]);
-        _eltChange.bind("input propertychange keyup", function () {
+        _eltChange.bind("input propertychange", function () {
             vm[pro] = $(this).val();
             vm[pro + RENDEAR]();
 
@@ -600,7 +601,7 @@ var groot = (function ($) {
                 var _classIntem = _express.split(",")
                 for (var j = 0; j < _classIntem.length; j++) {
                     var _cname = _classIntem[j].split(":")[0];
-                    var _cexpress = _classIntem[j].split(":")[1];
+                    var _cexpress = _express.replace(_cname + ":", "");
                     eval("var myValue = " + _cexpress);
                     if (myValue) {
                         _classList[i].element.addClass(_cname);
@@ -932,4 +933,3 @@ var groot = (function ($) {
         }
     )
 })(jQuery, groot)
-
