@@ -310,10 +310,11 @@ var groot = (function ($) {
                         _expshow = replaceAll(_expshow, "{" + textlsit[k] + "}", vm[textlsit[k]]);
                         _expshow = _expshow.replace(new RegExp("{" + textlsit[k].replace("$", "\\$") + "}", "g"), vm[textlsit[k]]);
                     } else {
-                        _expshow = replaceAll(_expshow, "{" + textlsit[k] + "}", "\"" + vm[textlsit[k]] + "\"");
+                        _expshow = replaceAll(_expshow, "{" + textlsit[k] + "}", "\"" + vm[textlsit[k]] .replace(/\"/g,"\\\"")+ "\"");
                     }
                 }
-                eval("var _v=" + _expshow)
+                _expshow=_expshow.replace(/(\n)+|(\r\n)+/g, "\\\r\\\n");
+                eval("var _v=" + _expshow);
                 $(_o.ele).html(_v);
             }
         }
@@ -551,14 +552,16 @@ var groot = (function ($) {
             _eblist.push(_elts);
         }
         /*********************** 绑定输入框值变化  *******************************/
-        _eltChange.removeAttr(PREFIX + "-value-change").val(vm[pro]);
+        var temp = $("<div>" + vm[pro] + "</div>");
+        _eltChange.removeAttr(PREFIX + "-value-change").val(temp.text());
         _eltChange.bind("input propertychange", function () {
             vm[pro] = $(this).val();
             vm[pro + RENDEAR]();
 
         });
         /*********************** 绑定输入失去焦点 *******************************/
-        _eltBlur.removeAttr(PREFIX + "-value-blur").val(vm[pro]);
+        var temp = $("<div>" + vm[pro] + "</div>");
+        _eltBlur.removeAttr(PREFIX + "-value-blur").val(temp.text());
         _eltBlur.change(function () {
             vm[pro] = $(this).val();
             vm[pro + RENDEAR]();
