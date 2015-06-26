@@ -310,7 +310,7 @@ var groot = (function ($) {
                         _expshow = replaceAll(_expshow, "{" + textlsit[k] + "}", vm[textlsit[k]]);
                         _expshow = _expshow.replace(new RegExp("{" + textlsit[k].replace("$", "\\$") + "}", "g"), vm[textlsit[k]]);
                     } else {
-                        _expshow = replaceAll(_expshow, "{" + textlsit[k] + "}", "\"" + vm[textlsit[k]] .replace(/\"/g,"\\\"")+ "\"");
+                        _expshow = replaceAll(_expshow, "{" + textlsit[k] + "}", "\"" + vm[textlsit[k]].replace(/\"/g,"\\\"")+ "\"");
                     }
                 }
                 _expshow=_expshow.replace(/(\n)|(\r\n)/g, "\\\r\\\n");
