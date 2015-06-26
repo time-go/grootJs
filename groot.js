@@ -313,7 +313,7 @@ var groot = (function ($) {
                         _expshow = replaceAll(_expshow, "{" + textlsit[k] + "}", "\"" + vm[textlsit[k]] .replace(/\"/g,"\\\"")+ "\"");
                     }
                 }
-                _expshow=_expshow.replace(/(\n)+|(\r\n)+/g, "\\\r\\\n");
+                _expshow=_expshow.replace(/(\n)|(\r\n)/g, "\\\r\\\n");
                 eval("var _v=" + _expshow);
                 $(_o.ele).html(_v);
             }
