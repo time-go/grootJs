@@ -306,14 +306,18 @@ var groot = (function ($) {
                 var _o = _expressions[i];
                 var _expshow = _o.expr;
                 for (var k = 0; k < textlsit.length; k++) {
-                    if (isNum(vm[textlsit[k]]) || typeof vm[textlsit[k]] == "boolean") {
-                        _expshow = replaceAll(_expshow, "{" + textlsit[k] + "}", vm[textlsit[k]]);
-                        _expshow = _expshow.replace(new RegExp("{" + textlsit[k].replace("$", "\\$") + "}", "g"), vm[textlsit[k]]);
-                    } else {
-                        _expshow = replaceAll(_expshow, "{" + textlsit[k] + "}", "\"" + vm[textlsit[k]].replace(/\"/g,"\\\"")+ "\"");
+                    try {
+                        if (isNum(vm[textlsit[k]]) || typeof vm[textlsit[k]] == "boolean") {
+                            _expshow = replaceAll(_expshow, "{" + textlsit[k] + "}", vm[textlsit[k]]);
+                            _expshow = _expshow.replace(new RegExp("{" + textlsit[k].replace("$", "\\$") + "}", "g"), vm[textlsit[k]]);
+                        } else {
+                            _expshow = replaceAll(_expshow, "{" + textlsit[k] + "}", "\"" + vm[textlsit[k]].replace(/\"/g, "\\\"") + "\"");
+                        }
+                    } catch (e) {
+                        console.log(textlsit[k]);
                     }
                 }
-                _expshow=_expshow.replace(/(\n)|(\r\n)/g, "\\\r\\\n");
+                _expshow = _expshow.replace(/(\n)|(\r\n)/g, "\\\r\\\n");
                 eval("var _v=" + _expshow);
                 $(_o.ele).html(_v);
             }
@@ -368,10 +372,14 @@ var groot = (function ($) {
             }
             var _ele0 = $("[" + selector + "^='" + pro + "(']", element);
             var _ele1 = $("[" + selector + "='" + pro + "']", element);
+            var _ele2 = $("[" + selector + "-" + pro + "]", element);
             _ele0.each(function () {
                 _ls.push(this)
             })
             _ele1.each(function () {
+                _ls.push(this)
+            })
+            _ele2.each(function () {
                 _ls.push(this)
             })
             return $(_ls);
@@ -477,7 +485,13 @@ var groot = (function ($) {
         var _classList = [];
         _eltClass.each(function () {
             var _sx = $(this).attr(PREFIX + "-class");
-            var _expression = _sx.substring(_sx.indexOf("(") + 1, _sx.lastIndexOf(")"));
+            var _sx0 = $(this).attr(PREFIX + "-class-" + pro);
+            var _expression;
+            if (typeof _sx == "undefined") {
+                _expression = _sx0;
+            } else {
+                _expression = _sx.substring(_sx.indexOf("(") + 1, _sx.lastIndexOf(")"));
+            }
 
             _classList.push({"element": $(this), "express": _expression});
             var _express;
@@ -490,6 +504,7 @@ var groot = (function ($) {
             }
             var _classArr = _express.split(",");
             $(this).removeAttr(PREFIX + "-class");
+            $(this).removeAttr(PREFIX + "-class-" + pro);
             for (var i = 0; i < _classArr.length; i++) {
                 var index = _classArr[i].indexOf(":");
                 var _cname = _classArr[i].substr(0, index);
@@ -502,8 +517,6 @@ var groot = (function ($) {
                 }
             }
         });
-        _eltClass.removeAttr(PREFIX + "-value-class");
-        /*********************** text 文本  *******************************/
         /*********************** value 文本  *******************************/
         var temp = $("<div>" + vm[pro] + "</div>");
         _eltValue.removeAttr(PREFIX + "-value").val(temp.text());
@@ -681,10 +694,10 @@ var groot = (function ($) {
     function _IndexInit(vm) {
         for (var i = 0; i < vm.length; i++) {
             vm[i]["$index"] = i;
-            vm[i]["$first"] = "false";
-            vm[i]["$last"] = "false";
-            if (i == 0)vm[i]["$first"] = "true";
-            if (i == vm.length - 1)vm[i]["$last"] = "true";
+            vm[i]["$first"] = false;
+            vm[i]["$last"] = false;
+            if (i == 0)vm[i]["$first"] = true;
+            if (i == vm.length - 1)vm[i]["$last"] = true;
         }
     }
 
@@ -900,6 +913,28 @@ var groot = (function ($) {
             "Name": "width",
             "Handler": function (elment, value) {
                 elment.width(value);
+            }
+        }
+        ,
+        {
+            "Name": "readonly",
+            "Handler": function (elment, value) {
+                if (value) {
+                    elment.attr("readonly", "readonly");
+                } else {
+                    elment.removeAttr("readonly");
+                }
+            }
+        }
+        ,
+        {
+            "Name": "disabled",
+            "Handler": function (elment, value) {
+                if (value) {
+                    elment.attr("disabled", "disabled");
+                } else {
+                    elment.removeAttr("disabled");
+                }
             }
         }
     );
