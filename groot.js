@@ -372,8 +372,9 @@ var groot = (function ($) {
             }
             var _ele0 = $("[" + selector + "^='" + pro + "(']", element);
             var _ele1 = $("[" + selector + "='" + pro + "']", element);
+            var _ele2;
             if (selector == (PREFIX + "-class")) {
-                var _ele2 = $("[" + selector + "-" + pro + "]", element);
+                _ele2 = $("[" + selector + "-" + pro.replace(/\$/g, "") + "]", element);
             }
             _ele0.each(function () {
                 _ls.push(this)
@@ -386,512 +387,511 @@ var groot = (function ($) {
                     _ls.push(this)
                 })
             }
+
+            return $(_ls);
         }
 
-        return $(_ls);
-    }
-
-    var _eltValue = _selecs(PREFIX + "-value");
-    var _eltChange = _selecs(PREFIX + "-value-change");
-    var _eltBlur = _selecs(PREFIX + "-value-blur");
-    var _eltAttr = _selecs(PREFIX + "-attr");
-    var _eltCss = _selecs(PREFIX + "-css");//"pro(id,value+""")"
-    var _eltClass = _selecs(PREFIX + "-class");
-    var _eltRadio = _selecs(PREFIX + "-radio");
-    var _elSelect = _selecs(PREFIX + "-select");
-    var _elCheck = _selecs(PREFIX + "-check");
-    var _elUi = _selecs(PREFIX + "-ui");
-    var _objElements = {
-        "_eltValue": _eltValue,
-        "_eltChange": _eltChange,
-        "_eltBlur": _eltBlur,
-        "_eltAttr": _eltAttr,
-        "_eltCss": _eltCss,
-        "_eltClass": _eltClass,
-        "_eltRadio": _eltRadio,
-        "_elSelect": _elSelect,
-        "_elCheck": _elCheck,
-        "_elUi": _elUi
-    };
-    /*********************** watch  *******************************/
-    for (var e in _objElements) {
-        var _elmt = _objElements[e];
-        if (typeof _elmt.attr(PREFIX + "-watch") != "undefined") {
-            var _fun = _elmt.attr(PREFIX + "-watch");
-            if ($.isFunction(ve[_fun])) {
-                vm[pro + "watch"] = ve[_fun];
+        var _eltValue = _selecs(PREFIX + "-value");
+        var _eltChange = _selecs(PREFIX + "-value-change");
+        var _eltBlur = _selecs(PREFIX + "-value-blur");
+        var _eltAttr = _selecs(PREFIX + "-attr");
+        var _eltCss = _selecs(PREFIX + "-css");//"pro(id,value+""")"
+        var _eltClass = _selecs(PREFIX + "-class");
+        var _eltRadio = _selecs(PREFIX + "-radio");
+        var _elSelect = _selecs(PREFIX + "-select");
+        var _elCheck = _selecs(PREFIX + "-check");
+        var _elUi = _selecs(PREFIX + "-ui");
+        var _objElements = {
+            "_eltValue": _eltValue,
+            "_eltChange": _eltChange,
+            "_eltBlur": _eltBlur,
+            "_eltAttr": _eltAttr,
+            "_eltCss": _eltCss,
+            "_eltClass": _eltClass,
+            "_eltRadio": _eltRadio,
+            "_elSelect": _elSelect,
+            "_elCheck": _elCheck,
+            "_elUi": _elUi
+        };
+        /*********************** watch  *******************************/
+        for (var e in _objElements) {
+            var _elmt = _objElements[e];
+            if (typeof _elmt.attr(PREFIX + "-watch") != "undefined") {
+                var _fun = _elmt.attr(PREFIX + "-watch");
+                if ($.isFunction(ve[_fun])) {
+                    vm[pro + "watch"] = ve[_fun];
+                }
+                _elmt.removeAttr(PREFIX + "-watch");
             }
-            _elmt.removeAttr(PREFIX + "-watch");
         }
-    }
-    /*********************** ui控件开发扫描  *******************************/
-    var _uiList = [];
-    _elUi.each(function () {
-        var _id = new Date() - 1;
-        _id = "ui" + _id;
-        _uiList.push(_id);
-        var _uiname = $(this).attr(PREFIX + "-ui");
-        _uiname = _uiname.substring(_uiname.indexOf("(") + 1, _uiname.lastIndexOf(")"));
-        $(this).removeAttr(PREFIX + "-ui");
-        var _data = null;
-        if (typeof $(this).attr(PREFIX + "-ui-data") != "undefined") {
-            var _default = $(this).attr(PREFIX + "-ui-data");
-            if (_default.indexOf("uiInit") > -1) {
-                _default = _default.substring(_default.indexOf("[") + 1, _default.lastIndexOf("]"));
-                _data = groot.uiInit[_default];
-            } else {
-                _data = eval("(" + _default + ")");
-            }
+        /*********************** ui控件开发扫描  *******************************/
+        var _uiList = [];
+        _elUi.each(function () {
+            var _id = new Date() - 1;
+            _id = "ui" + _id;
+            _uiList.push(_id);
+            var _uiname = $(this).attr(PREFIX + "-ui");
+            _uiname = _uiname.substring(_uiname.indexOf("(") + 1, _uiname.lastIndexOf(")"));
+            $(this).removeAttr(PREFIX + "-ui");
+            var _data = null;
+            if (typeof $(this).attr(PREFIX + "-ui-data") != "undefined") {
+                var _default = $(this).attr(PREFIX + "-ui-data");
+                if (_default.indexOf("uiInit") > -1) {
+                    _default = _default.substring(_default.indexOf("[") + 1, _default.lastIndexOf("]"));
+                    _data = groot.uiInit[_default];
+                } else {
+                    _data = eval("(" + _default + ")");
+                }
 
-            $(this).removeAttr(PREFIX + "-ui-data");
-        }
-        groot.ui[_uiname]($(this), _id, _data, vm[pro], function () {
-            vm[pro] = groot.vms[_id].uivalue;
-            vm[pro + "Render"]();
+                $(this).removeAttr(PREFIX + "-ui-data");
+            }
+            groot.ui[_uiname]($(this), _id, _data, vm[pro], function () {
+                vm[pro] = groot.vms[_id].uivalue;
+                vm[pro + "Render"]();
+            });
         });
-    });
-    /*********************** checkbox  *******************************/
-    _elCheck.removeAttr(PREFIX + "-check");
-    if (vm[pro]) {
-        _elCheck.attr("checked", "checked");//.is(":checked")
-    } else {
-        _elCheck.removeAttr("checked");
-    }
-    _elCheck.change(function () {
-        if ($(this).is(":checked")) {
-            vm[pro] = true;
-            vm[pro + RENDEAR]();
-        } else {
-            vm[pro] = false;
-            vm[pro + RENDEAR]();
-        }
-    });
-    /*********************** selectBox  *******************************/
-    _elSelect.removeAttr(PREFIX + "-select");
-    _elSelect.find("option[value='" + vm[pro] + "']").attr("selected", "selected");
-    _elSelect.change(function () {
-        vm[pro] = $(this).val();
-        vm[pro + RENDEAR]();
-    });
-    /*********************** Radio  *******************************/
-    _eltRadio.removeAttr(PREFIX + "-radio");
-    _eltRadio.each(function () {
-        if ($(this).val() == vm[pro]) {
-            //$(this).attr("checked", "checked");元写法在火狐下有bug
-            $(this).click();
-        }
-    });
-    _eltRadio.change(function () {
-        if ($(this).is(':checked')) {
-            vm[pro] = $(this).val();
-            vm[pro + RENDEAR]();
-        }
-    });
-    /*********************** class 样式 *******************************/
-    var _classList = [];
-    _eltClass.each(function () {
-        var _sx = $(this).attr(PREFIX + "-class");
-        var _sx0 = $(this).attr(PREFIX + "-class-" + pro);
-        var _expression;
-        if (typeof _sx == "undefined") {
-            _expression = _sx0;
-        } else {
-            _expression = _sx.substring(_sx.indexOf("(") + 1, _sx.lastIndexOf(")"));
-        }
-
-        _classList.push({"element": $(this), "express": _expression});
-        var _express;
-        if (isNum(vm[pro]) || typeof vm[pro] == "boolean") {
-
-            _express = _expression.replace(/value/g, vm[pro]);
-        } else {
-
-            _express = _expression.replace(/value/g, "\"" + vm[pro] + "\"");
-        }
-        var _classArr = _express.split(",");
-        $(this).removeAttr(PREFIX + "-class");
-        $(this).removeAttr(PREFIX + "-class-" + pro);
-        for (var i = 0; i < _classArr.length; i++) {
-            var index = _classArr[i].indexOf(":");
-            var _cname = _classArr[i].substr(0, index);
-            var _cexpress = _classArr[i].substr(index + 1)
-            eval("var myValue = " + _cexpress);
-            if (myValue) {
-                $(this).addClass(_cname);
-            } else {
-                $(this).removeClass(_cname);
-            }
-        }
-    });
-    /*********************** value 文本  *******************************/
-    var temp = $("<div>" + vm[pro] + "</div>");
-    _eltValue.removeAttr(PREFIX + "-value").val(temp.text());
-    /*********************** text 属性  *******************************/
-    var _attrList = [];
-    _eltAttr.each(function () {
-        var _sx = $(this).attr(PREFIX + "-attr");
-        var _attr = _sx.substring(_sx.indexOf("(") + 1, _sx.indexOf(","));
-        var _expression = _sx.substring(_sx.indexOf(",") + 1, _sx.lastIndexOf(")"));
-        _attrList.push({"attr": _attr, "element": $(this), "express": _expression});
-        var _express;
-        if (isNum(vm[pro]) || typeof vm[pro] == "boolean") {
-
-            _express = _expression.replace(/value/g, vm[pro]);
-        } else {
-
-            _express = _expression.replace(/value/g, "\"" + vm[pro] + "\"");
-        }
-        eval("var myValue = " + _express);
-        $(this).removeAttr(PREFIX + "-attr").attr(_attr, myValue)
-    });
-    /*********************** css style样式  *******************************/
-    var _cssList = [];
-    _eltCss.each(function () {
-        var _sx = $(this).attr(PREFIX + "-css");
-        var _css = _sx.substring(_sx.indexOf("(") + 1, _sx.indexOf(","));
-        var _expression = _sx.substring(_sx.indexOf(",") + 1, _sx.lastIndexOf(")"));
-        _cssList.push({"css": _css, "element": $(this), "express": _expression});
-        var _express;
-        if (isNum(vm[pro]) || typeof vm[pro] == "boolean") {
-
-            _express = _expression.replace(/value/g, vm[pro]);
-        } else {
-
-            _express = _expression.replace(/value/g, "\"" + vm[pro] + "\"");
-        }
-        eval("var myValue = " + _express);
-        $(this).removeAttr(PREFIX + "-css").css(_css, myValue)
-    });
-    /*********************** 绑定扩展属性  *******************************/
-    var _eblist = [];
-    for (var i = 0; i < groot.bindingHandler.length; i++) {
-        var _temp = groot.bindingHandler[i];
-        var _elts = $("[" + PREFIX + "-" + _temp.Name + "='" + pro + "']", element).removeAttr(PREFIX + "-" + _temp.Name);
-        _temp.Handler(_elts, vm[pro]);
-        _eblist.push(_elts);
-    }
-    /*********************** 绑定输入框值变化  *******************************/
-    var temp = $("<div>" + vm[pro] + "</div>");
-    _eltChange.removeAttr(PREFIX + "-value-change").val(temp.text());
-    _eltChange.bind("input propertychange", function () {
-        vm[pro] = $(this).val();
-        vm[pro + RENDEAR]();
-
-    });
-    /*********************** 绑定输入失去焦点 *******************************/
-    var temp = $("<div>" + vm[pro] + "</div>");
-    _eltBlur.removeAttr(PREFIX + "-value-blur").val(temp.text());
-    _eltBlur.change(function () {
-        vm[pro] = $(this).val();
-        vm[pro + RENDEAR]();
-    });
-    vm[pro + RENDEAR] = function () {
-        var value = vm[pro];
-        /*********************** 渲染控件  *******************************/
-        for (var i = 0; i < _uiList.length; i++) {
-            groot.vms[_uiList[i]].uivalue = value;
-            groot.vms[_uiList[i]].uivalueRender();
-        }
-        /*********************** 触发监控  *******************************/
-        if ($.isFunction(vm[pro + "watch"])) {
-            vm[pro + "watch"](vm, value);//调用监控函数
-        }
-        /*********************** checkBox  *******************************/
+        /*********************** checkbox  *******************************/
+        _elCheck.removeAttr(PREFIX + "-check");
         if (vm[pro]) {
             _elCheck.attr("checked", "checked");//.is(":checked")
         } else {
             _elCheck.removeAttr("checked");
         }
-        /*********************** selectBox  *******************************/
-        _elSelect.find("option[value='" + vm[pro] + "']").attr("selected", "selected");
-        /*********************** Radio  *******************************/
-        _eltRadio.each(function () {
-            if ($(this).val() == value) {
-                $(this).attr("checked", "checked");
+        _elCheck.change(function () {
+            if ($(this).is(":checked")) {
+                vm[pro] = true;
+                vm[pro + RENDEAR]();
             } else {
-                $(this).removeAttr("checked");
+                vm[pro] = false;
+                vm[pro + RENDEAR]();
             }
         });
-        /*********************** class样式  *******************************/
-        for (var i = 0; i < _classList.length; i++) {
-            var _express;
-            if (isNum(value) || typeof value == "boolean" || value == null) {
-                _express = _classList[i].express.replace(/value/g, value);
-            } else {
-                _express = _classList[i].express.replace(/value/g, "\"" + value + "\"");
+        /*********************** selectBox  *******************************/
+        _elSelect.removeAttr(PREFIX + "-select");
+        _elSelect.find("option[value='" + vm[pro] + "']").attr("selected", "selected");
+        _elSelect.change(function () {
+            vm[pro] = $(this).val();
+            vm[pro + RENDEAR]();
+        });
+        /*********************** Radio  *******************************/
+        _eltRadio.removeAttr(PREFIX + "-radio");
+        _eltRadio.each(function () {
+            if ($(this).val() == vm[pro]) {
+                //$(this).attr("checked", "checked");元写法在火狐下有bug
+                $(this).click();
             }
-            var _classIntem = _express.split(",");
-            for (var j = 0; j < _classIntem.length; j++) {
-                var index = _classIntem[j].indexOf(":");
-                var _cname = _classIntem[j].substr(0, index);
-                var _cexpress = _classIntem[j].substr(index + 1);
+        });
+        _eltRadio.change(function () {
+            if ($(this).is(':checked')) {
+                vm[pro] = $(this).val();
+                vm[pro + RENDEAR]();
+            }
+        });
+        /*********************** class 样式 *******************************/
+        var _classList = [];
+        _eltClass.each(function () {
+            var _sx = $(this).attr(PREFIX + "-class");
+            var _sx0 = $(this).attr(PREFIX + "-class-" + pro);
+            var _expression;
+            if (typeof _sx == "undefined") {
+                _expression = _sx0;
+            } else {
+                _expression = _sx.substring(_sx.indexOf("(") + 1, _sx.lastIndexOf(")"));
+            }
+
+            _classList.push({"element": $(this), "express": _expression});
+            var _express;
+            if (isNum(vm[pro]) || typeof vm[pro] == "boolean") {
+
+                _express = _expression.replace(/value/g, vm[pro]);
+            } else {
+
+                _express = _expression.replace(/value/g, "\"" + vm[pro] + "\"");
+            }
+            var _classArr = _express.split(",");
+            $(this).removeAttr(PREFIX + "-class");
+            $(this).removeAttr(PREFIX + "-class-" + pro);
+            for (var i = 0; i < _classArr.length; i++) {
+                var index = _classArr[i].indexOf(":");
+                var _cname = _classArr[i].substr(0, index);
+                var _cexpress = _classArr[i].substr(index + 1)
                 eval("var myValue = " + _cexpress);
                 if (myValue) {
-                    _classList[i].element.addClass(_cname);
+                    $(this).addClass(_cname);
                 } else {
-                    _classList[i].element.removeClass(_cname);
+                    $(this).removeClass(_cname);
                 }
             }
-        }
-        /*********************** text 标签值  *******************************/
-        vm.$$renderText();
-        /*********************** value 文本  *******************************/
-        _eltValue.val(vm[pro]);
-        _eltChange.each(function () {
-            if (!$(this).is(':focus')) {
-                $(this).val(vm[pro])
-            }
-
         });
-        _eltBlur.val(vm[pro]);
-        /*********************** attract 属性值  *******************************/
-        for (var i = 0; i < _attrList.length; i++) {
+        /*********************** value 文本  *******************************/
+        var temp = $("<div>" + vm[pro] + "</div>");
+        _eltValue.removeAttr(PREFIX + "-value").val(temp.text());
+        /*********************** text 属性  *******************************/
+        var _attrList = [];
+        _eltAttr.each(function () {
+            var _sx = $(this).attr(PREFIX + "-attr");
+            var _attr = _sx.substring(_sx.indexOf("(") + 1, _sx.indexOf(","));
+            var _expression = _sx.substring(_sx.indexOf(",") + 1, _sx.lastIndexOf(")"));
+            _attrList.push({"attr": _attr, "element": $(this), "express": _expression});
             var _express;
-            if (isNum(value) || typeof value == "boolean" || value == null) {
-                _express = _attrList[i].express.replace(/value/g, value);
+            if (isNum(vm[pro]) || typeof vm[pro] == "boolean") {
+
+                _express = _expression.replace(/value/g, vm[pro]);
             } else {
-                _express = _attrList[i].express.replace(/value/g, "\"" + value + "\"");
+
+                _express = _expression.replace(/value/g, "\"" + vm[pro] + "\"");
             }
             eval("var myValue = " + _express);
-            _attrList[i].element.attr(_attrList[i].attr, myValue);
-        }
-        /*********************** style 式 属性值  *******************************/
-        for (var i = 0; i < _cssList.length; i++) {
+            $(this).removeAttr(PREFIX + "-attr").attr(_attr, myValue)
+        });
+        /*********************** css style样式  *******************************/
+        var _cssList = [];
+        _eltCss.each(function () {
+            var _sx = $(this).attr(PREFIX + "-css");
+            var _css = _sx.substring(_sx.indexOf("(") + 1, _sx.indexOf(","));
+            var _expression = _sx.substring(_sx.indexOf(",") + 1, _sx.lastIndexOf(")"));
+            _cssList.push({"css": _css, "element": $(this), "express": _expression});
             var _express;
-            if (isNum(value) || typeof value == "boolean" || value == null) {
-                _express = _cssList[i].express.replace(/value/g, value);
+            if (isNum(vm[pro]) || typeof vm[pro] == "boolean") {
+
+                _express = _expression.replace(/value/g, vm[pro]);
             } else {
-                _express = _cssList[i].express.replace(/value/g, "\"" + value + "\"");
+
+                _express = _expression.replace(/value/g, "\"" + vm[pro] + "\"");
             }
             eval("var myValue = " + _express);
-            _cssList[i].element.css(_cssList[i].css, myValue);
-        }
-        /*********************** style 式 刷新扩展属性  *******************************/
+            $(this).removeAttr(PREFIX + "-css").css(_css, myValue)
+        });
+        /*********************** 绑定扩展属性  *******************************/
+        var _eblist = [];
         for (var i = 0; i < groot.bindingHandler.length; i++) {
             var _temp = groot.bindingHandler[i];
-            _temp.Handler(_eblist[i], value);
+            var _elts = $("[" + PREFIX + "-" + _temp.Name + "='" + pro + "']", element).removeAttr(PREFIX + "-" + _temp.Name);
+            _temp.Handler(_elts, vm[pro]);
+            _eblist.push(_elts);
         }
-    };
-}
+        /*********************** 绑定输入框值变化  *******************************/
+        var temp = $("<div>" + vm[pro] + "</div>");
+        _eltChange.removeAttr(PREFIX + "-value-change").val(temp.text());
+        _eltChange.bind("input propertychange", function () {
+            vm[pro] = $(this).val();
+            vm[pro + RENDEAR]();
 
-/*绑定数组
- @element html元素
- @vm 绑定的数据模型
- @pro 要绑定的属性
- * */
-function _bindingArry(vm, pro, ve) {
-    _initArry(vm, pro, ve);
-    vm[pro + RENDEAR] = function () {
-        if (arguments.length > 0) {
-            var _child = vm["$$child" + pro][arguments[0]];
-            var _temp = $(vm["$$arr" + pro].tmpl).insertBefore(_child);
-            _child.remove();
-            vm["$$child" + pro][arguments[0]] = _temp;
-            _IndexInit(vm[pro])
-            _creatArrProperty(vm, vm[pro], vm[pro][arguments[0]]);
-            _bindData(vm[pro][arguments[0]], _temp, ve);
-            _IndexRender(vm[pro])
-        } else {
-            _initArry(vm, pro, ve);
+        });
+        /*********************** 绑定输入失去焦点 *******************************/
+        var temp = $("<div>" + vm[pro] + "</div>");
+        _eltBlur.removeAttr(PREFIX + "-value-blur").val(temp.text());
+        _eltBlur.change(function () {
+            vm[pro] = $(this).val();
+            vm[pro + RENDEAR]();
+        });
+        vm[pro + RENDEAR] = function () {
+            var value = vm[pro];
+            /*********************** 渲染控件  *******************************/
+            for (var i = 0; i < _uiList.length; i++) {
+                groot.vms[_uiList[i]].uivalue = value;
+                groot.vms[_uiList[i]].uivalueRender();
+            }
+            /*********************** 触发监控  *******************************/
+            if ($.isFunction(vm[pro + "watch"])) {
+                vm[pro + "watch"](vm, value);//调用监控函数
+            }
+            /*********************** checkBox  *******************************/
+            if (vm[pro]) {
+                _elCheck.attr("checked", "checked");//.is(":checked")
+            } else {
+                _elCheck.removeAttr("checked");
+            }
+            /*********************** selectBox  *******************************/
+            _elSelect.find("option[value='" + vm[pro] + "']").attr("selected", "selected");
+            /*********************** Radio  *******************************/
+            _eltRadio.each(function () {
+                if ($(this).val() == value) {
+                    $(this).attr("checked", "checked");
+                } else {
+                    $(this).removeAttr("checked");
+                }
+            });
+            /*********************** class样式  *******************************/
+            for (var i = 0; i < _classList.length; i++) {
+                var _express;
+                if (isNum(value) || typeof value == "boolean" || value == null) {
+                    _express = _classList[i].express.replace(/value/g, value);
+                } else {
+                    _express = _classList[i].express.replace(/value/g, "\"" + value + "\"");
+                }
+                var _classIntem = _express.split(",");
+                for (var j = 0; j < _classIntem.length; j++) {
+                    var index = _classIntem[j].indexOf(":");
+                    var _cname = _classIntem[j].substr(0, index);
+                    var _cexpress = _classIntem[j].substr(index + 1);
+                    eval("var myValue = " + _cexpress);
+                    if (myValue) {
+                        _classList[i].element.addClass(_cname);
+                    } else {
+                        _classList[i].element.removeClass(_cname);
+                    }
+                }
+            }
+            /*********************** text 标签值  *******************************/
+            vm.$$renderText();
+            /*********************** value 文本  *******************************/
+            _eltValue.val(vm[pro]);
+            _eltChange.each(function () {
+                if (!$(this).is(':focus')) {
+                    $(this).val(vm[pro])
+                }
+
+            });
+            _eltBlur.val(vm[pro]);
+            /*********************** attract 属性值  *******************************/
+            for (var i = 0; i < _attrList.length; i++) {
+                var _express;
+                if (isNum(value) || typeof value == "boolean" || value == null) {
+                    _express = _attrList[i].express.replace(/value/g, value);
+                } else {
+                    _express = _attrList[i].express.replace(/value/g, "\"" + value + "\"");
+                }
+                eval("var myValue = " + _express);
+                _attrList[i].element.attr(_attrList[i].attr, myValue);
+            }
+            /*********************** style 式 属性值  *******************************/
+            for (var i = 0; i < _cssList.length; i++) {
+                var _express;
+                if (isNum(value) || typeof value == "boolean" || value == null) {
+                    _express = _cssList[i].express.replace(/value/g, value);
+                } else {
+                    _express = _cssList[i].express.replace(/value/g, "\"" + value + "\"");
+                }
+                eval("var myValue = " + _express);
+                _cssList[i].element.css(_cssList[i].css, myValue);
+            }
+            /*********************** style 式 刷新扩展属性  *******************************/
+            for (var i = 0; i < groot.bindingHandler.length; i++) {
+                var _temp = groot.bindingHandler[i];
+                _temp.Handler(_eblist[i], value);
+            }
+        };
+    }
+
+    /*绑定数组
+     @element html元素
+     @vm 绑定的数据模型
+     @pro 要绑定的属性
+     * */
+    function _bindingArry(vm, pro, ve) {
+        _initArry(vm, pro, ve);
+        vm[pro + RENDEAR] = function () {
+            if (arguments.length > 0) {
+                var _child = vm["$$child" + pro][arguments[0]];
+                var _temp = $(vm["$$arr" + pro].tmpl).insertBefore(_child);
+                _child.remove();
+                vm["$$child" + pro][arguments[0]] = _temp;
+                _IndexInit(vm[pro])
+                _creatArrProperty(vm, vm[pro], vm[pro][arguments[0]]);
+                _bindData(vm[pro][arguments[0]], _temp, ve);
+                _IndexRender(vm[pro])
+            } else {
+                _initArry(vm, pro, ve);
+            }
         }
     }
-}
 
-function _IndexInit(vm) {
-    for (var i = 0; i < vm.length; i++) {
-        vm[i]["$index"] = i;
-        vm[i]["$first"] = false;
-        vm[i]["$last"] = false;
-        if (i == 0)vm[i]["$first"] = true;
-        if (i == vm.length - 1)vm[i]["$last"] = true;
+    function _IndexInit(vm) {
+        for (var i = 0; i < vm.length; i++) {
+            vm[i]["$index"] = i;
+            vm[i]["$first"] = false;
+            vm[i]["$last"] = false;
+            if (i == 0)vm[i]["$first"] = true;
+            if (i == vm.length - 1)vm[i]["$last"] = true;
+        }
     }
-}
 
-function _IndexRender(vm) {
-    for (var i = 0; i < vm.length; i++) {
-        vm[i].$indexRender();
-        vm[i].$firstRender();
-        vm[i].$lastRender();
+    function _IndexRender(vm) {
+        for (var i = 0; i < vm.length; i++) {
+            vm[i].$indexRender();
+            vm[i].$firstRender();
+            vm[i].$lastRender();
+        }
     }
-}
 
-function _initArry(vm, pro, ve) {
-    _IndexInit(vm[pro]);
-    vm["$$child" + pro] = [];
-    var _arr = vm["$$arr" + pro];
-    _arr.element.html("");
-    for (var i = 0; i < vm[pro].length; i++) {
-        if (!$.isFunction(vm[pro]) && pro.indexOf("$$") < 0) {
+    function _initArry(vm, pro, ve) {
+        _IndexInit(vm[pro]);
+        vm["$$child" + pro] = [];
+        var _arr = vm["$$arr" + pro];
+        _arr.element.html("");
+        for (var i = 0; i < vm[pro].length; i++) {
+            if (!$.isFunction(vm[pro]) && pro.indexOf("$$") < 0) {
+                var _child = $(_arr.tmpl);
+                _arr.element.append(_child);
+                _creatArrProperty(vm, vm[pro], vm[pro][i])
+                _bindData(vm[pro][i], _child, ve);
+                vm["$$child" + pro].push(_child);
+            }
+        }
+        _IndexRender(vm[pro]);
+        vm[pro + "push"] = function (value) {
+            vm[pro].push(value);
+            _IndexInit(vm[pro]);
             var _child = $(_arr.tmpl);
             _arr.element.append(_child);
-            _creatArrProperty(vm, vm[pro], vm[pro][i])
-            _bindData(vm[pro][i], _child, ve);
+            _creatArrProperty(vm, vm[pro], value);
+            _bindData(value, _child, ve);
+            _IndexRender(vm[pro]);
             vm["$$child" + pro].push(_child);
         }
-    }
-    _IndexRender(vm[pro]);
-    vm[pro + "push"] = function (value) {
-        vm[pro].push(value);
-        _IndexInit(vm[pro]);
-        var _child = $(_arr.tmpl);
-        _arr.element.append(_child);
-        _creatArrProperty(vm, vm[pro], value);
-        _bindData(value, _child, ve);
-        _IndexRender(vm[pro]);
-        vm["$$child" + pro].push(_child);
-    }
-    vm[pro + "pop"] = function () {
-        var _arrchid = vm["$$child" + pro].pop();
-        _arrchid.remove();
-        var ret = vm[pro].pop();
-        _IndexInit(vm[pro]);
-        _IndexRender(vm[pro]);
-        return ret;
-    }
-    vm[pro + "shift"] = function () {
-        var _arrchid = vm["$$child" + pro].shift();
-        _arrchid.remove();
-        var ret = vm[pro].shift();
-        _IndexInit(vm[pro]);
-        _IndexRender(vm[pro]);
-        return ret;
-    }
-    vm[pro + "unshift"] = function (value) {
-        vm[pro].unshift(value);
-        _IndexInit(vm[pro]);
-        var _child = $(_arr.tmpl);
-        _arr.element.prepend(_child);
-        _creatArrProperty(vm, vm[pro], value);
-        _bindData(value, _child, ve);
-        _IndexRender(vm[pro]);
-        vm["$$child" + pro].unshift(_child);
-    };
-    vm[pro + "splice"] = function () {
-        var args = arguments;
-        if (args.length < 0)return;
-        if (args.length == 1) {
-            if (args[0] < 0)return;
-        }
-        if (args.length > 1) {
-            if (args[0] < 0 || args[1] < 0)return;
-        }
-        if (args.length > 2) {
-            var _data = [];
-            var _start = args[0];
-            var _end = -1;
-            for (var i = 0; i < args.length; i++) {
-                if (i > 1) {
-                    _end++;
-                    var _child = $(_arr.tmpl);
-                    _data.push(args[i]);
-                }
-            }
-            _end = _start + _end;
-            var _removeChild = vm["$$child" + pro].splice(args[0], args[1]);
-            vm[pro].splice.apply(vm[pro], args);
-            for (var i = 0; i < _removeChild.length; i++) {
-                _removeChild.remove();
-            }//删除多余 插入新元素
-            var _eleAffter = null;
-            if (args[0] != 0) {
-                _eleAffter = vm["$$child" + pro][args[0] - 1];
-            }
-            _IndexInit(vm[pro]);
-            for (var d = 0; d < vm[pro].length; d++) {
-                if (d >= _start && d <= _end) {
-                    var _child = $(_arr.tmpl);
-                    var _d = vm[pro][d];
-                    if (_eleAffter == null) {
-                        _arr.element.prepend(_child);
-                    } else {
-                        _child.insertAfter(_eleAffter);
-                    }
-                    vm["$$child" + pro].splice(args[0] + _start - d, 0, _child);
-                    _eleAffter = _child;
-                    _bindData(_d, _child, ve);
-                    _creatArrProperty(vm, vm[pro], _d);
-                }
-            }
-            _IndexRender(vm[pro])
-        } else if (args.length <= 2 && args.length > 0) {
-            var _removeChild = vm["$$child" + pro].splice.apply(vm["$$child" + pro], arguments);
-            vm[pro].splice.apply(vm[pro], arguments);
-            for (var i = 0; i < _removeChild.length; i++) {
-                _removeChild[i].remove();
-            }
+        vm[pro + "pop"] = function () {
+            var _arrchid = vm["$$child" + pro].pop();
+            _arrchid.remove();
+            var ret = vm[pro].pop();
             _IndexInit(vm[pro]);
             _IndexRender(vm[pro]);
-        } else {
-            return;
+            return ret;
         }
-    };
-    vm[pro + "concat"] = function () {
-        var args = arguments;
-        for (var i = 0; i < args.length; i++) {
-            if ($.isArray(args[i])) {
-                for (var j = 0; j < args[i].length; j++) {
+        vm[pro + "shift"] = function () {
+            var _arrchid = vm["$$child" + pro].shift();
+            _arrchid.remove();
+            var ret = vm[pro].shift();
+            _IndexInit(vm[pro]);
+            _IndexRender(vm[pro]);
+            return ret;
+        }
+        vm[pro + "unshift"] = function (value) {
+            vm[pro].unshift(value);
+            _IndexInit(vm[pro]);
+            var _child = $(_arr.tmpl);
+            _arr.element.prepend(_child);
+            _creatArrProperty(vm, vm[pro], value);
+            _bindData(value, _child, ve);
+            _IndexRender(vm[pro]);
+            vm["$$child" + pro].unshift(_child);
+        };
+        vm[pro + "splice"] = function () {
+            var args = arguments;
+            if (args.length < 0)return;
+            if (args.length == 1) {
+                if (args[0] < 0)return;
+            }
+            if (args.length > 1) {
+                if (args[0] < 0 || args[1] < 0)return;
+            }
+            if (args.length > 2) {
+                var _data = [];
+                var _start = args[0];
+                var _end = -1;
+                for (var i = 0; i < args.length; i++) {
+                    if (i > 1) {
+                        _end++;
+                        var _child = $(_arr.tmpl);
+                        _data.push(args[i]);
+                    }
+                }
+                _end = _start + _end;
+                var _removeChild = vm["$$child" + pro].splice(args[0], args[1]);
+                vm[pro].splice.apply(vm[pro], args);
+                for (var i = 0; i < _removeChild.length; i++) {
+                    _removeChild.remove();
+                }//删除多余 插入新元素
+                var _eleAffter = null;
+                if (args[0] != 0) {
+                    _eleAffter = vm["$$child" + pro][args[0] - 1];
+                }
+                _IndexInit(vm[pro]);
+                for (var d = 0; d < vm[pro].length; d++) {
+                    if (d >= _start && d <= _end) {
+                        var _child = $(_arr.tmpl);
+                        var _d = vm[pro][d];
+                        if (_eleAffter == null) {
+                            _arr.element.prepend(_child);
+                        } else {
+                            _child.insertAfter(_eleAffter);
+                        }
+                        vm["$$child" + pro].splice(args[0] + _start - d, 0, _child);
+                        _eleAffter = _child;
+                        _bindData(_d, _child, ve);
+                        _creatArrProperty(vm, vm[pro], _d);
+                    }
+                }
+                _IndexRender(vm[pro])
+            } else if (args.length <= 2 && args.length > 0) {
+                var _removeChild = vm["$$child" + pro].splice.apply(vm["$$child" + pro], arguments);
+                vm[pro].splice.apply(vm[pro], arguments);
+                for (var i = 0; i < _removeChild.length; i++) {
+                    _removeChild[i].remove();
+                }
+                _IndexInit(vm[pro]);
+                _IndexRender(vm[pro]);
+            } else {
+                return;
+            }
+        };
+        vm[pro + "concat"] = function () {
+            var args = arguments;
+            for (var i = 0; i < args.length; i++) {
+                if ($.isArray(args[i])) {
+                    for (var j = 0; j < args[i].length; j++) {
+                        this[pro + "push"](args[i][j]);
+                    }
+                } else {
                     this[pro + "push"](args[i][j]);
                 }
-            } else {
-                this[pro + "push"](args[i][j]);
             }
-        }
 
+        }
     }
-}
 
 //获取model对象
-groot.model = function (o) {
-    var _o;
-    if ($.isArray(o)) {
-        _o = $.extend(true, [], o);
-    } else if (typeof o == "object") {
-        _o = $.extend(true, {}, o);
-    } else {
-        return o;
-    }
-    function _getModel(m) {
-        if ($.isArray(m)) {
-            for (var i = 0; i < m.length; i++) {
-                if ($.isArray(m[i])) {
-                    _getModel(m[i]);
-                } else if (typeof m[i] == "object") {
-                    _getModel(m[i]);
+    groot.model = function (o) {
+        var _o;
+        if ($.isArray(o)) {
+            _o = $.extend(true, [], o);
+        } else if (typeof o == "object") {
+            _o = $.extend(true, {}, o);
+        } else {
+            return o;
+        }
+        function _getModel(m) {
+            if ($.isArray(m)) {
+                for (var i = 0; i < m.length; i++) {
+                    if ($.isArray(m[i])) {
+                        _getModel(m[i]);
+                    } else if (typeof m[i] == "object") {
+                        _getModel(m[i]);
+                    }
                 }
-            }
-        } else if (typeof m == "object") {
-            for (var p in  m) {
-                if ($.isFunction(m[p]) || p.indexOf("$") > -1) {
-                    delete m[p];
-                } else if ($.isArray(m[p])) {
-                    _getModel(m[p]);
-                }
-                else if (typeof m[p] == "object") {
-                    _getModel(m[p]);
+            } else if (typeof m == "object") {
+                for (var p in  m) {
+                    if ($.isFunction(m[p]) || p.indexOf("$") > -1) {
+                        delete m[p];
+                    } else if ($.isArray(m[p])) {
+                        _getModel(m[p]);
+                    }
+                    else if (typeof m[p] == "object") {
+                        _getModel(m[p]);
+                    }
                 }
             }
         }
-    }
 
-    _getModel(_o);
-    return _o;
-}
+        _getModel(_o);
+        return _o;
+    }
 //---------------groot API---------------//
-groot.log = function (a) {//输出到控制台
-    window.console && console.log && console.log(a);
-}
-groot.asyn = function (foo) {//异步函数
-    setTimeout(foo, 10);
-}
-groot.createElement = function (html, id, element) {
-    var _temp = $(html + "<input type='hidden' id=\"" + id + "\">");
-    element.html(_temp);
-    element.attr(PREFIX + "-view", id);
-    _dynVMS[id] = id;
-    return element;
-}
+    groot.log = function (a) {//输出到控制台
+        window.console && console.log && console.log(a);
+    }
+    groot.asyn = function (foo) {//异步函数
+        setTimeout(foo, 10);
+    }
+    groot.createElement = function (html, id, element) {
+        var _temp = $(html + "<input type='hidden' id=\"" + id + "\">");
+        element.html(_temp);
+        element.attr(PREFIX + "-view", id);
+        _dynVMS[id] = id;
+        return element;
+    }
 //groot.absUrl = _absUrl;//根绝相对路径获取绝对路径
-return groot;
+    return groot;
 })
 (jQuery);
 ///bindExtend,自定义属性,自定义属性 gt-width="w"
