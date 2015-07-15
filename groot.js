@@ -445,10 +445,12 @@ var groot = (function ($) {
 
                 $(this).removeAttr(PREFIX + "-ui-data");
             }
-            groot.ui[_uiname]($(this), _id, _data, vm[pro], function () {
-                vm[pro] = groot.vms[_id].uivalue;
-                vm[pro + "Render"]();
-            });
+            groot.ui[_uiname]($(this), _id, _data, vm[pro], (function (_id) {
+                return function () {
+                    vm[pro] = groot.vms[_id].uivalue;
+                    vm[pro + "Render"]();
+                }
+            })(_id));
         });
         /*********************** checkbox  *******************************/
         _elCheck.removeAttr(PREFIX + "-check");
@@ -925,7 +927,7 @@ var groot = (function ($) {
         {
             "Name": "readonly",
             "Handler": function (elment, value) {
-                if (value) {
+                if (value==false) {
                     elment.attr("readonly", "readonly");
                 } else {
                     elment.removeAttr("readonly");
@@ -936,7 +938,7 @@ var groot = (function ($) {
         {
             "Name": "disabled",
             "Handler": function (elment, value) {
-                if (value) {
+                if (value==false) {
                     elment.attr("disabled", "disabled");
                 } else {
                     elment.removeAttr("disabled");
