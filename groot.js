@@ -211,6 +211,7 @@ var groot = (function ($) {
 
     //---------------私有函数-----------------//
     function _bindData(vm, element, ve) {
+        vm.$$selector=element[0];
         var _include = $("[" + PREFIX + "-include]", element);
         _include.each(function () {
             var _text = require($(this).attr(PREFIX + "-include") + "!text");
@@ -253,9 +254,9 @@ var groot = (function ($) {
         _bindText(element, vm, textlsit);//绑定text
         for (var pro in  vm) {//初始化对象
             if (!$.isFunction(vm[pro]) && pro.indexOf("$$") < 0) {
-                if ($.isArray(vm[pro])) {//绑定数组
+                if ($.isArray(vm[pro]) && vm.hasOwnProperty("$$arr" + pro)) {//绑定数组
                     _bindingArry(vm, pro, ve);
-                } else if (typeof vm[pro] == "object") {
+                } else if (typeof vm[pro] == "object" && vm.hasOwnProperty("$$obj" + pro)) {
                     _bindingObject(vm, pro, ve);//绑定对象
                 } else {//绑定属性
                     _bindingProperty(element, vm, pro, ve);
@@ -770,62 +771,11 @@ var groot = (function ($) {
         };
         vm[pro + "splice"] = function () {
             var args = arguments;
-            if (args.length < 0)return;
-            if (args.length == 1) {
-                if (args[0] < 0)return;
-            }
-            if (args.length > 1) {
-                if (args[0] < 0 || args[1] < 0)return;
-            }
-            if (args.length > 2) {
-                var _data = [];
-                var _start = args[0];
-                var _end = -1;
-                for (var i = 0; i < args.length; i++) {
-                    if (i > 1) {
-                        _end++;
-                        var _child = $(_arr.tmpl);
-                        _data.push(args[i]);
-                    }
-                }
-                _end = _start + _end;
-                var _removeChild = vm["$$child" + pro].splice(args[0], args[1]);
-                vm[pro].splice.apply(vm[pro], args);
-                for (var i = 0; i < _removeChild.length; i++) {
-                    _removeChild.remove();
-                }//删除多余 插入新元素
-                var _eleAffter = null;
-                if (args[0] != 0) {
-                    _eleAffter = vm["$$child" + pro][args[0] - 1];
-                }
-                _IndexInit(vm[pro]);
-                for (var d = 0; d < vm[pro].length; d++) {
-                    if (d >= _start && d <= _end) {
-                        var _child = $(_arr.tmpl);
-                        var _d = vm[pro][d];
-                        if (_eleAffter == null) {
-                            _arr.element.prepend(_child);
-                        } else {
-                            _child.insertAfter(_eleAffter);
-                        }
-                        vm["$$child" + pro].splice(args[0] + _start - d, 0, _child);
-                        _eleAffter = _child;
-                        _bindData(_d, _child, ve);
-                        _creatArrProperty(vm, vm[pro], _d);
-                    }
-                }
-                _IndexRender(vm[pro])
-            } else if (args.length <= 2 && args.length > 0) {
-                var _removeChild = vm["$$child" + pro].splice.apply(vm["$$child" + pro], arguments);
-                vm[pro].splice.apply(vm[pro], arguments);
-                for (var i = 0; i < _removeChild.length; i++) {
-                    _removeChild[i].remove();
-                }
-                _IndexInit(vm[pro]);
-                _IndexRender(vm[pro]);
-            } else {
-                return;
-            }
+            var list = groot.model(vm[pro]);
+            var retList = list.splice.apply(list, args);
+            vm[pro] = list;
+            vm[pro + "Render"]();
+            return retList;
         };
         vm[pro + "concat"] = function () {
             var args = arguments;
@@ -927,7 +877,7 @@ var groot = (function ($) {
         {
             "Name": "readonly",
             "Handler": function (elment, value) {
-                if (value==false) {
+                if (value == false) {
                     elment.attr("readonly", "readonly");
                 } else {
                     elment.removeAttr("readonly");
@@ -938,10 +888,18 @@ var groot = (function ($) {
         {
             "Name": "disabled",
             "Handler": function (elment, value) {
-                if (value==false) {
+                if (value == false) {
                     elment.attr("disabled", "disabled");
                 } else {
                     elment.removeAttr("disabled");
+                }
+            }
+        },
+        {
+            "Name": "focus",
+            "Handler": function (elment, value) {
+                if (value) {
+                    elment.focus()
                 }
             }
         }
