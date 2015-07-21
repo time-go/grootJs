@@ -205,7 +205,7 @@ var groot = (function ($) {
 
     function _triggerEvents(ve, args) {
         return function () {
-            ve.apply(this, args);
+            ve.apply(this, [args]);
         }
     }
 
