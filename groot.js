@@ -205,13 +205,13 @@ var groot = (function ($) {
 
     function _triggerEvents(ve, args) {
         return function () {
-            ve(args);
+            ve.apply(this, args);
         }
     }
 
     //---------------私有函数-----------------//
     function _bindData(vm, element, ve) {
-        vm.$$selector=element[0];
+        vm.$$selector = element[0];
         var _include = $("[" + PREFIX + "-include]", element);
         _include.each(function () {
             var _text = require($(this).attr(PREFIX + "-include") + "!text");
@@ -420,7 +420,12 @@ var groot = (function ($) {
             if (typeof _elmt.attr(PREFIX + "-watch") != "undefined") {
                 var _fun = _elmt.attr(PREFIX + "-watch");
                 if ($.isFunction(ve[_fun])) {
-                    vm[pro + "watch"] = ve[_fun];
+                    vm[pro + "watch"] = (function ($this, $ve) {
+                        return function () {
+                            var args = $.makeArray(arguments);
+                            $ve.apply($this, args);
+                        }
+                    })(_elmt[0], ve[_fun])
                 }
                 _elmt.removeAttr(PREFIX + "-watch");
             }
@@ -541,7 +546,8 @@ var groot = (function ($) {
 
                 _express = _expression.replace(/value/g, vm[pro]);
             } else {
-
+                var txt = $("<div>" + vm[pro] + "</div>");
+                vm[pro] = txt.html();
                 _express = _expression.replace(/value/g, "\"" + vm[pro] + "\"");
             }
             eval("var myValue = " + _express);
