@@ -218,6 +218,21 @@ var groot = (function ($) {
             $(this).html(_text);
             $(this).removeAttr(PREFIX + "-include");
         });
+        var pvm = null;
+        if (vm.hasOwnProperty("outerParent")) {
+            pvm = vm.outerParent();
+        } else if (vm.hasOwnProperty("parent")) {
+            pvm = vm.parent();
+        }
+        if (pvm != null) {
+            for (var p in  pvm) {
+                if (!$.isFunction(pvm[p]) && p.indexOf("$$") < 0) {
+                    if (!$.isArray(pvm[p]) && typeof pvm[p] !== "object") {
+                        vm["$p" + p] = pvm[p];
+                    }
+                }
+            }
+        }
         function findArr(p) {
             var _eltArrs = $("[" + PREFIX + "-each='" + p + "']", element).first().removeAttr(PREFIX + "-each");
             if (_eltArrs.length > 0) {
@@ -247,19 +262,24 @@ var groot = (function ($) {
         for (var pro in  vm) {
             if (vm[pro] == null)vm[pro] = "";
             if (!$.isFunction(vm[pro]) && pro.indexOf("$$") < 0) {
-                if (!$.isArray(vm[pro]) && typeof vm[pro] !== "object") {
+                if (!$.isArray(vm[pro]) && typeof vm[pro] != "object") {
                     textlsit.push(pro);
                 }
             }
         }
-        _bindText(element, vm, textlsit);//绑定text
         for (var pro in  vm) {//初始化对象
             if (!$.isFunction(vm[pro]) && pro.indexOf("$$") < 0) {
                 if ($.isArray(vm[pro]) && vm.hasOwnProperty("$$arr" + pro)) {//绑定数组
                     _bindingArry(vm, pro, ve);
                 } else if (typeof vm[pro] == "object" && vm.hasOwnProperty("$$obj" + pro)) {
                     _bindingObject(vm, pro, ve);//绑定对象
-                } else {//绑定属性
+                }
+            }
+        }
+        _bindText(element, vm, textlsit);//绑定text
+        for (var pro in  vm) {//初始化对象
+            if (!$.isFunction(vm[pro]) && pro.indexOf("$$") < 0) {
+                if (typeof vm[pro] !== "object") {
                     _bindingProperty(element, vm, pro, ve);
                 }
             }
@@ -374,7 +394,20 @@ var groot = (function ($) {
      @pro 要绑定的属性
      * */
     function _bindingProperty(element, vm, pro, ve) {
+        for (var p in  vm) {
+            if (!$.isFunction(vm[p]) && p.indexOf("$$") < 0) {
+                if ($.isArray(vm[p])) {
+                    for (var i = 0; i < vm[p].length; i++) {
+                        vm[p][i]["$p" + pro] = vm[pro];
+                        vm[p][i]["$p" + pro + "Render"]();
+                    }
 
+                } else if (typeof vm[p] == "object") {
+                    vm[p]["$p" + pro] = vm[pro];
+                    vm[p]["$p" + pro + "Render"]();
+                }
+            }
+        }
         function _selecs(selector) {
             var _ls = [];
             if (element.attr(selector) != undefined && element.attr(selector).indexOf(pro) == 0) {
@@ -382,9 +415,13 @@ var groot = (function ($) {
             }
             var _ele0 = $("[" + selector + "^='" + pro + "(']", element);
             var _ele1 = $("[" + selector + "='" + pro + "']", element);
-            var _ele2;
+            var _ele2 = null;
             if (selector == (PREFIX + "-class")) {
-                _ele2 = $("[" + selector + "-" + pro.replace(/\$/g, "") + "]", element);
+                try {
+                    _ele2 = $("[" + selector + "-" + pro.replace(/\$/g, "") + "]", element);
+                } catch (e) {
+
+                }
             }
             _ele0.each(function () {
                 _ls.push(this)
@@ -392,7 +429,7 @@ var groot = (function ($) {
             _ele1.each(function () {
                 _ls.push(this)
             })
-            if (selector == (PREFIX + "-class")) {
+            if (selector == (PREFIX + "-class") && _ele2 != null) {
                 _ele2.each(function () {
                     _ls.push(this)
                 })
@@ -604,6 +641,20 @@ var groot = (function ($) {
             vm[pro + RENDEAR]();
         });
         vm[pro + RENDEAR] = function () {
+            for (var p in  vm) {
+                if (!$.isFunction(vm[p]) && p.indexOf("$$") < 0) {
+                    if ($.isArray(vm[p])) {
+                        for (var i = 0; i < vm[p].length; i++) {
+                            vm[p][i]["$p" + pro] = vm[pro];
+                            vm[p][i]["$p" + pro + "Render"]();
+                        }
+
+                    } else if (typeof vm[p] == "object") {
+                        vm[p]["$p" + pro] = vm[pro];
+                        vm[p]["$p" + pro + "Render"]();
+                    }
+                }
+            }
             var value = vm[pro];
             /*********************** 渲染控件  *******************************/
             for (var i = 0; i < _uiList.length; i++) {
