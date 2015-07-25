@@ -258,15 +258,6 @@ var groot = (function ($) {
                 }
             }
         }
-        var textlsit = [];
-        for (var pro in  vm) {
-            if (vm[pro] == null)vm[pro] = "";
-            if (!$.isFunction(vm[pro]) && pro.indexOf("$$") < 0) {
-                if (!$.isArray(vm[pro]) && typeof vm[pro] != "object") {
-                    textlsit.push(pro);
-                }
-            }
-        }
         for (var pro in  vm) {//初始化对象
             if (!$.isFunction(vm[pro]) && pro.indexOf("$$") < 0) {
                 if ($.isArray(vm[pro]) && vm.hasOwnProperty("$$arr" + pro)) {//绑定数组
@@ -276,7 +267,7 @@ var groot = (function ($) {
                 }
             }
         }
-        _bindText(element, vm, textlsit);//绑定text
+        _bindText(element, vm);//绑定text
         for (var pro in  vm) {//初始化对象
             if (!$.isFunction(vm[pro]) && pro.indexOf("$$") < 0) {
                 if (typeof vm[pro] !== "object") {
@@ -292,12 +283,19 @@ var groot = (function ($) {
      @vm 绑定的数据模型
      @textlsit 要绑定的属性数组
      * */
-    function _bindText(element, vm, textlsit) {
+    function _bindText(element, vm) {
+        ///text
+        var textlsit = [];
+        for (var pro in  vm) {
+            if (vm[pro] == null)vm[pro] = "";
+            if (!$.isFunction(vm[pro]) && pro.indexOf("$$") < 0) {
+                if (!$.isArray(vm[pro]) && typeof vm[pro] != "object") {
+                    textlsit.push(pro);
+                }
+            }
+        }
         function _selecs(selector) {
             var _ls = [];
-            if (element.attr(selector) != undefined) {
-                _ls.push(element[0]);
-            }
             var _ele = $("[" + selector + "]", element);
             if (_ele.length > 0) {
                 _ele.each(function () {
@@ -308,12 +306,36 @@ var groot = (function ($) {
         }
 
         var _eltText = _selecs(PREFIX + "-text");
-        var _expressions = [];
+        var _expressionsText = [];
         _eltText.each(function () {
             var _expression = $(this).attr(PREFIX + "-text");
-            _expressions.push({ele: this, expr: _expression});
+            _expressionsText.push({ele: this, expr: _expression});
         });
         _eltText.removeAttr(PREFIX + "-text");
+        ///class
+        var _eltClass = _selecs(PREFIX + "-class");
+        var _expressionsClass = [];
+        _eltClass.each(function () {
+            var _expression = $(this).attr(PREFIX + "-class");
+            _expressionsClass.push({ele: this, expr: _expression});
+        });
+        _eltClass.removeAttr(PREFIX + "-class");
+        ///css
+        var _eltCss = _selecs(PREFIX + "-css");
+        var _expressionsCss = [];
+        _eltCss.each(function () {
+            var _expression = $(this).attr(PREFIX + "-css");
+            _expressionsCss.push({ele: this, expr: _expression});
+        });
+        _eltCss.removeAttr(PREFIX + "-css");
+        ///attr
+        var _eltAttr = _selecs(PREFIX + "-attr");
+        var _expressionsAttr = [];
+        _eltAttr.each(function () {
+            var _expression = $(this).attr(PREFIX + "-attr");
+            _expressionsAttr.push({ele: this, expr: _expression});
+        });
+        _eltAttr.removeAttr(PREFIX + "-attr");
         function replaceAll(str, ostr, nstr) {
             if (str.indexOf(ostr) > -1) {
                 str = str.replace(ostr, nstr);
@@ -324,8 +346,8 @@ var groot = (function ($) {
         }
 
         function renderText() {
-            for (var i = 0; i < _expressions.length; i++) {
-                var _o = _expressions[i];
+            for (var i = 0; i < _expressionsText.length; i++) {
+                var _o = _expressionsText[i];
                 var _expshow = _o.expr;
                 for (var k = 0; k < textlsit.length; k++) {
                     try {
@@ -341,10 +363,10 @@ var groot = (function ($) {
                 }
                 _expshow = _expshow.replace(/(\n)|(\r\n)/g, "\\\r\\\n");
                 try {
-                    eval("var _v=" + _expshow);
-                    var t = typeof _v;
-                    if (t == "string" || t == "string" || t == "boolean") {
-                        $(_o.ele).html(_v);
+                    eval("var myValue=" + _expshow);
+                    var t = typeof myValue;
+                    if (t == "string" || t == "number" || t == "boolean") {
+                        $(_o.ele).html(myValue);
                     }
 
                 } catch (e) {
@@ -353,8 +375,115 @@ var groot = (function ($) {
             }
         }
 
-        renderText();
-        vm.$$renderText = renderText;
+        function renderClass() {
+            for (var i = 0; i < _expressionsClass.length; i++) {
+                var _o = _expressionsClass[i];
+                var _expshow = _o.expr;
+                var _arr = _o.expr.split(",");
+                for (var m = 0; m < _arr.length; m++) {
+                    var index = _arr[m].indexOf(":");
+                    var _cname = _arr[m].substr(0, index);
+                    var _cexpress = _arr[m].substr(index + 1);
+                    for (var k = 0; k < textlsit.length; k++) {
+                        try {
+                            if (isNum(vm[textlsit[k]]) || typeof vm[textlsit[k]] == "boolean") {
+                                _cexpress = replaceAll(_expshow, "{" + textlsit[k] + "}", vm[textlsit[k]]);
+                                _cexpress = _cexpress.replace(new RegExp("{" + textlsit[k].replace("$", "\\$") + "}", "g"), vm[textlsit[k]]);
+                            } else {
+                                _cexpress = replaceAll(_cexpress, "{" + textlsit[k] + "}", "\"" + vm[textlsit[k]].replace(/\"/g, "\\\"") + "\"");
+                            }
+                        } catch (e) {
+                            console.log(textlsit[k]);
+                        }
+                    }
+                    _cexpress = _cexpress.replace(/(\n)|(\r\n)/g, "\\\r\\\n");
+                    try {
+                        eval("var myValue = " + _cexpress);
+                        if (myValue === true) {
+                            $(_o.ele).addClass(_cname);
+                        } else if (myValue === false) {
+                            $(_o.ele).removeClass(_cname);
+                        }
+                    } catch (e) {
+
+                    }
+                }
+            }
+        }
+
+        function renderCss() {
+            for (var i = 0; i < _expressionsCss.length; i++) {
+                var _o = _expressionsCss[i];
+                var _expshow = _o.expr;
+                var index = _o.expr.split(",");
+                var _cname = _expshow.substr(0, index);
+                var _cexpress = _expshow.substr(index + 1);
+                for (var k = 0; k < textlsit.length; k++) {
+                    try {
+                        if (isNum(vm[textlsit[k]]) || typeof vm[textlsit[k]] == "boolean") {
+                            _cexpress = replaceAll(_expshow, "{" + textlsit[k] + "}", vm[textlsit[k]]);
+                            _cexpress = _cexpress.replace(new RegExp("{" + textlsit[k].replace("$", "\\$") + "}", "g"), vm[textlsit[k]]);
+                        } else {
+                            _cexpress = replaceAll(_cexpress, "{" + textlsit[k] + "}", "\"" + vm[textlsit[k]].replace(/\"/g, "\\\"") + "\"");
+                        }
+                    } catch (e) {
+                        console.log(textlsit[k]);
+                    }
+                }
+                _cexpress = _cexpress.replace(/(\n)|(\r\n)/g, "\\\r\\\n");
+                try {
+                    eval("var myValue = " + _cexpress);
+                    var t = typeof myValue;
+                    if (t === "string" || t === "number" || t === "boolean") {
+                        $(_o.ele).css(_cname, myValue);
+                    }
+                } catch (e) {
+
+                }
+            }
+        }
+
+        function renderAttr() {
+            for (var i = 0; i < _expressionsAttr.length; i++) {
+                var _o = _expressionsAttr[i];
+                var _expshow = _o.expr;
+                var index = _o.expr.split(",");
+                var _cname = _expshow.substr(0, index);
+                var _cexpress = _expshow.substr(index + 1);
+                for (var k = 0; k < textlsit.length; k++) {
+                    try {
+                        if (isNum(vm[textlsit[k]]) || typeof vm[textlsit[k]] == "boolean") {
+                            _cexpress = replaceAll(_expshow, "{" + textlsit[k] + "}", vm[textlsit[k]]);
+                            _cexpress = _cexpress.replace(new RegExp("{" + textlsit[k].replace("$", "\\$") + "}", "g"), vm[textlsit[k]]);
+                        } else {
+                            _cexpress = replaceAll(_cexpress, "{" + textlsit[k] + "}", "\"" + vm[textlsit[k]].replace(/\"/g, "\\\"") + "\"");
+                        }
+                    } catch (e) {
+                        console.log(textlsit[k]);
+                    }
+                }
+                _cexpress = _cexpress.replace(/(\n)|(\r\n)/g, "\\\r\\\n");
+                try {
+                    eval("var myValue = " + _cexpress);
+                    var t = typeof myValue;
+                    if (t === "string" || t === "number" || t === "boolean") {
+                        $(_o.ele).attr(_cname, myValue);
+                    }
+                } catch (e) {
+
+                }
+            }
+        }
+
+        function _render() {
+            renderText();
+            renderClass();
+            renderCss();
+            renderAttr();
+        }
+
+        _render();
+        vm.$$renderText = _render;
 
     }
 
@@ -398,51 +527,32 @@ var groot = (function ($) {
             if (!$.isFunction(vm[p]) && p.indexOf("$$") < 0) {
                 if ($.isArray(vm[p])) {
                     for (var i = 0; i < vm[p].length; i++) {
-                        vm[p][i]["$p" + pro] = vm[pro];
-                        vm[p][i]["$p" + pro + "Render"]();
+                        if(vm[p][i].hasOwnProperty("$p" + pro)) {
+                            vm[p][i]["$p" + pro] = vm[pro];
+                            vm[p][i]["$p" + pro + "Render"]();
+                        }
                     }
 
                 } else if (typeof vm[p] == "object") {
-                    vm[p]["$p" + pro] = vm[pro];
-                    vm[p]["$p" + pro + "Render"]();
+                    if(vm[p].hasOwnProperty("$p" + pro)) {
+                        vm[p]["$p" + pro] = vm[pro];
+                        vm[p]["$p" + pro + "Render"]();
+                    }
                 }
             }
         }
         function _selecs(selector) {
             var _ls = [];
-            if (element.attr(selector) != undefined && element.attr(selector).indexOf(pro) == 0) {
-                _ls.push(element[0]);
-            }
-            var _ele0 = $("[" + selector + "^='" + pro + "(']", element);
-            var _ele1 = $("[" + selector + "='" + pro + "']", element);
-            var _ele2 = null;
-            if (selector == (PREFIX + "-class")) {
-                try {
-                    _ele2 = $("[" + selector + "-" + pro.replace(/\$/g, "") + "]", element);
-                } catch (e) {
-
-                }
-            }
+            var _ele0 = $("[" + selector + "='" + pro + "']", element);
             _ele0.each(function () {
                 _ls.push(this)
-            })
-            _ele1.each(function () {
-                _ls.push(this)
-            })
-            if (selector == (PREFIX + "-class") && _ele2 != null) {
-                _ele2.each(function () {
-                    _ls.push(this)
-                })
-            }
+            });
 
             return $(_ls);
         }
-
         var _eltValue = _selecs(PREFIX + "-value");
         var _eltChange = _selecs(PREFIX + "-value-change");
         var _eltBlur = _selecs(PREFIX + "-value-blur");
-        var _eltAttr = _selecs(PREFIX + "-attr");
-        var _eltCss = _selecs(PREFIX + "-css");//"pro(id,value+""")"
         var _eltClass = _selecs(PREFIX + "-class");
         var _eltRadio = _selecs(PREFIX + "-radio");
         var _elSelect = _selecs(PREFIX + "-select");
@@ -452,8 +562,6 @@ var groot = (function ($) {
             "_eltValue": _eltValue,
             "_eltChange": _eltChange,
             "_eltBlur": _eltBlur,
-            "_eltAttr": _eltAttr,
-            "_eltCss": _eltCss,
             "_eltClass": _eltClass,
             "_eltRadio": _eltRadio,
             "_elSelect": _elSelect,
@@ -541,82 +649,9 @@ var groot = (function ($) {
                 vm[pro + RENDEAR]();
             }
         });
-        /*********************** class 样式 *******************************/
-        var _classList = [];
-        _eltClass.each(function () {
-            var _sx = $(this).attr(PREFIX + "-class");
-            var _sx0 = $(this).attr(PREFIX + "-class-" + pro);
-            var _expression;
-            if (typeof _sx == "undefined") {
-                _expression = _sx0;
-            } else {
-                _expression = _sx.substring(_sx.indexOf("(") + 1, _sx.lastIndexOf(")"));
-            }
-
-            _classList.push({"element": $(this), "express": _expression});
-            var _express;
-            if (isNum(vm[pro]) || typeof vm[pro] == "boolean") {
-
-                _express = _expression.replace(/value/g, vm[pro]);
-            } else {
-
-                _express = _expression.replace(/value/g, "\"" + vm[pro] + "\"");
-            }
-            var _classArr = _express.split(",");
-            $(this).removeAttr(PREFIX + "-class");
-            $(this).removeAttr(PREFIX + "-class-" + pro);
-            for (var i = 0; i < _classArr.length; i++) {
-                var index = _classArr[i].indexOf(":");
-                var _cname = _classArr[i].substr(0, index);
-                var _cexpress = _classArr[i].substr(index + 1)
-                eval("var myValue = " + _cexpress);
-                if (myValue) {
-                    $(this).addClass(_cname);
-                } else {
-                    $(this).removeClass(_cname);
-                }
-            }
-        });
         /*********************** value 文本  *******************************/
         var temp = $("<div>" + vm[pro] + "</div>");
         _eltValue.removeAttr(PREFIX + "-value").val(temp.text());
-        /*********************** text 属性  *******************************/
-        var _attrList = [];
-        _eltAttr.each(function () {
-            var _sx = $(this).attr(PREFIX + "-attr");
-            var _attr = _sx.substring(_sx.indexOf("(") + 1, _sx.indexOf(","));
-            var _expression = _sx.substring(_sx.indexOf(",") + 1, _sx.lastIndexOf(")"));
-            _attrList.push({"attr": _attr, "element": $(this), "express": _expression});
-            var _express;
-            if (isNum(vm[pro]) || typeof vm[pro] == "boolean") {
-
-                _express = _expression.replace(/value/g, vm[pro]);
-            } else {
-                var txt = $("<div>" + vm[pro] + "</div>");
-                vm[pro] = txt.html();
-                _express = _expression.replace(/value/g, "\"" + vm[pro] + "\"");
-            }
-            eval("var myValue = " + _express);
-            $(this).removeAttr(PREFIX + "-attr").attr(_attr, myValue)
-        });
-        /*********************** css style样式  *******************************/
-        var _cssList = [];
-        _eltCss.each(function () {
-            var _sx = $(this).attr(PREFIX + "-css");
-            var _css = _sx.substring(_sx.indexOf("(") + 1, _sx.indexOf(","));
-            var _expression = _sx.substring(_sx.indexOf(",") + 1, _sx.lastIndexOf(")"));
-            _cssList.push({"css": _css, "element": $(this), "express": _expression});
-            var _express;
-            if (isNum(vm[pro]) || typeof vm[pro] == "boolean") {
-
-                _express = _expression.replace(/value/g, vm[pro]);
-            } else {
-
-                _express = _expression.replace(/value/g, "\"" + vm[pro] + "\"");
-            }
-            eval("var myValue = " + _express);
-            $(this).removeAttr(PREFIX + "-css").css(_css, myValue)
-        });
         /*********************** 绑定扩展属性  *******************************/
         var _eblist = [];
         for (var i = 0; i < groot.bindingHandler.length; i++) {
@@ -645,13 +680,17 @@ var groot = (function ($) {
                 if (!$.isFunction(vm[p]) && p.indexOf("$$") < 0) {
                     if ($.isArray(vm[p])) {
                         for (var i = 0; i < vm[p].length; i++) {
-                            vm[p][i]["$p" + pro] = vm[pro];
-                            vm[p][i]["$p" + pro + "Render"]();
+                            if(vm[p][i].hasOwnProperty("$p" + pro)) {
+                                vm[p][i]["$p" + pro] = vm[pro];
+                                vm[p][i]["$p" + pro + "Render"]();
+                            }
                         }
 
                     } else if (typeof vm[p] == "object") {
-                        vm[p]["$p" + pro] = vm[pro];
-                        vm[p]["$p" + pro + "Render"]();
+                        if(vm[p].hasOwnProperty("$p" + pro)) {
+                            vm[p]["$p" + pro] = vm[pro];
+                            vm[p]["$p" + pro + "Render"]();
+                        }
                     }
                 }
             }
@@ -681,27 +720,6 @@ var groot = (function ($) {
                     $(this).removeAttr("checked");
                 }
             });
-            /*********************** class样式  *******************************/
-            for (var i = 0; i < _classList.length; i++) {
-                var _express;
-                if (isNum(value) || typeof value == "boolean" || value == null) {
-                    _express = _classList[i].express.replace(/value/g, value);
-                } else {
-                    _express = _classList[i].express.replace(/value/g, "\"" + value + "\"");
-                }
-                var _classIntem = _express.split(",");
-                for (var j = 0; j < _classIntem.length; j++) {
-                    var index = _classIntem[j].indexOf(":");
-                    var _cname = _classIntem[j].substr(0, index);
-                    var _cexpress = _classIntem[j].substr(index + 1);
-                    eval("var myValue = " + _cexpress);
-                    if (myValue) {
-                        _classList[i].element.addClass(_cname);
-                    } else {
-                        _classList[i].element.removeClass(_cname);
-                    }
-                }
-            }
             /*********************** text 标签值  *******************************/
             vm.$$renderText();
             /*********************** value 文本  *******************************/
@@ -713,28 +731,6 @@ var groot = (function ($) {
 
             });
             _eltBlur.val(vm[pro]);
-            /*********************** attract 属性值  *******************************/
-            for (var i = 0; i < _attrList.length; i++) {
-                var _express;
-                if (isNum(value) || typeof value == "boolean" || value == null) {
-                    _express = _attrList[i].express.replace(/value/g, value);
-                } else {
-                    _express = _attrList[i].express.replace(/value/g, "\"" + value + "\"");
-                }
-                eval("var myValue = " + _express);
-                _attrList[i].element.attr(_attrList[i].attr, myValue);
-            }
-            /*********************** style 式 属性值  *******************************/
-            for (var i = 0; i < _cssList.length; i++) {
-                var _express;
-                if (isNum(value) || typeof value == "boolean" || value == null) {
-                    _express = _cssList[i].express.replace(/value/g, value);
-                } else {
-                    _express = _cssList[i].express.replace(/value/g, "\"" + value + "\"");
-                }
-                eval("var myValue = " + _express);
-                _cssList[i].element.css(_cssList[i].css, myValue);
-            }
             /*********************** style 式 刷新扩展属性  *******************************/
             for (var i = 0; i < groot.bindingHandler.length; i++) {
                 var _temp = groot.bindingHandler[i];
