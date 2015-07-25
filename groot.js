@@ -245,6 +245,7 @@ var groot = (function ($) {
         }
         var textlsit = [];
         for (var pro in  vm) {
+            if (vm[pro] == null)vm[pro] = "";
             if (!$.isFunction(vm[pro]) && pro.indexOf("$$") < 0) {
                 if (!$.isArray(vm[pro]) && typeof vm[pro] !== "object") {
                     textlsit.push(pro);
@@ -319,8 +320,16 @@ var groot = (function ($) {
                     }
                 }
                 _expshow = _expshow.replace(/(\n)|(\r\n)/g, "\\\r\\\n");
-                eval("var _v=" + _expshow);
-                $(_o.ele).html(_v);
+                try {
+                    eval("var _v=" + _expshow);
+                    var t = typeof _v;
+                    if (t == "string" || t == "string" || t == "boolean") {
+                        $(_o.ele).html(_v);
+                    }
+
+                } catch (e) {
+
+                }
             }
         }
 
