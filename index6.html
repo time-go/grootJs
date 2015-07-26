@@ -15,12 +15,12 @@
 </head>
 <body>
 <div gt-view="myview">
-    <div gt-css="c(color,value)">你好</div>
+    <div gt-css="color,{c}">你好</div>
     <input gt-attr="uid(id,'view'+value)" type="text" gt-value-change="say"><span gt-text="{uid}+':说'+{say}"></span>
 
     <div>
         <ul gt-each="list">
-           <li gt-class="$index(back0:value % 2 ==0,back1:value % 2==1)"><span gt-text="{$index}+1"></span><span>姓名:</span><span
+           <li gt-class="back0:{$index} % 2 ==0,back1:{$index} % 2==1"><span gt-text="{$index}+1"></span><span>姓名:</span><span
                     gt-text="{name}"></span>---<span>性别:</span><span
                     gt-text="{sex}"></span></li>
         </ul>
