@@ -20,6 +20,6 @@ grootJs不同于其他mvvm的三大亮点：
 
 作者联系方式:qq289880020，官方技术支持QQ群330603020 如有bug 疑问 或问题 请联系作者:-)
 
-简明教程地址http://www.cnblogs.com/blowfish/p/3778539.html
+官网地址http://gt.fqphp.com/index.html
 
-进阶教程地址http://www.cnblogs.com/blowfish/p/3783937.html
+grootjs最近进行了大量改版，欢迎试用拍砖
