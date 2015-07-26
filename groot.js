@@ -195,6 +195,12 @@ var groot = (function ($) {
     function _sweepEvents(vm, element, ve) {
         for (var e in ve) {//绑定事件
             for (var i = 0; i < _bindEvents.length; i++) {
+                if(element.attr(PREFIX + "-" + _bindEvents[i])===e){
+                    element
+                        .unbind(_bindEvents[i])
+                        .bind(_bindEvents[i], _triggerEvents(ve[e], vm))
+                        .removeAttr(PREFIX + "-" + _bindEvents[i]);
+                }
                 $("[" + PREFIX + "-" + _bindEvents[i] + "='" + e + "']", element)
                     .unbind(_bindEvents[i])
                     .bind(_bindEvents[i], _triggerEvents(ve[e], vm))
