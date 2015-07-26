@@ -228,7 +228,7 @@ var groot = (function ($) {
             for (var p in  pvm) {
                 if (!$.isFunction(pvm[p]) && p.indexOf("$$") < 0) {
                     if (!$.isArray(pvm[p]) && typeof pvm[p] !== "object") {
-                        vm["$p" + p] = pvm[p];
+                        vm["$p." + p] = pvm[p];
                     }
                 }
             }
@@ -527,16 +527,16 @@ var groot = (function ($) {
             if (!$.isFunction(vm[p]) && p.indexOf("$$") < 0) {
                 if ($.isArray(vm[p])) {
                     for (var i = 0; i < vm[p].length; i++) {
-                        if(vm[p][i].hasOwnProperty("$p" + pro)) {
-                            vm[p][i]["$p" + pro] = vm[pro];
-                            vm[p][i]["$p" + pro + "Render"]();
+                        if(vm[p][i].hasOwnProperty("$p." + pro)) {
+                            vm[p][i]["$p." + pro] = vm[pro];
+                            vm[p][i]["$p." + pro + "Render"]();
                         }
                     }
 
                 } else if (typeof vm[p] == "object") {
-                    if(vm[p].hasOwnProperty("$p" + pro)) {
-                        vm[p]["$p" + pro] = vm[pro];
-                        vm[p]["$p" + pro + "Render"]();
+                    if(vm[p].hasOwnProperty("$p." + pro)) {
+                        vm[p]["$p." + pro] = vm[pro];
+                        vm[p]["$p." + pro + "Render"]();
                     }
                 }
             }
@@ -680,16 +680,16 @@ var groot = (function ($) {
                 if (!$.isFunction(vm[p]) && p.indexOf("$$") < 0) {
                     if ($.isArray(vm[p])) {
                         for (var i = 0; i < vm[p].length; i++) {
-                            if(vm[p][i].hasOwnProperty("$p" + pro)) {
-                                vm[p][i]["$p" + pro] = vm[pro];
-                                vm[p][i]["$p" + pro + "Render"]();
+                            if(vm[p][i].hasOwnProperty("$p." + pro)) {
+                                vm[p][i]["$p." + pro] = vm[pro];
+                                vm[p][i]["$p." + pro + "Render"]();
                             }
                         }
 
                     } else if (typeof vm[p] == "object") {
-                        if(vm[p].hasOwnProperty("$p" + pro)) {
-                            vm[p]["$p" + pro] = vm[pro];
-                            vm[p]["$p" + pro + "Render"]();
+                        if(vm[p].hasOwnProperty("$p." + pro)) {
+                            vm[p]["$p." + pro] = vm[pro];
+                            vm[p]["$p." + pro + "Render"]();
                         }
                     }
                 }
