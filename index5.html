@@ -7,7 +7,7 @@
 <body>
 <div gt-view="myview">
     <ul gt-each="list">
-        <li gt-attr="$index(id,value +1)"><span gt-text="{$index}+1"></span><span>姓名:</span><span
+        <li gt-attr="id,{$index} +1"><span gt-text="{$index}+1"></span><span>姓名:</span><span
                 gt-text="{name}"></span>---<span>性别:</span><span
                 gt-text="{sex}"></span><input
                 type="{text}" gt-value-change="name"/><input type="button" value="按钮" gt-click="click"></li>
