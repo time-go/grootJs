@@ -2,7 +2,7 @@
     //---------------commonjs规范----------------//
     var tmpTag = document.location.protocol + "//";
     var _cssCache = {};
-       var _absUrl = (function () {
+    var _absUrl = (function () {
         var a;
         return function (url) {
             if (!a) a = document.createElement('a');
@@ -73,10 +73,10 @@
             var _script = "_define(function(exports,module){\n";
             _script += "var $parent = \"" + _basePath + "\";\n";
             _script += _moudle.replace(/require\(/g, "_require($parent,");
-            _script += ";\n});" + "//@ sourceURL=" + _absUrl(path);
+            _script += ";\n});" + "//@ sourceURL=" + _myUrl;
             _moudle = eval(_script);
         } else if (_type == "css") {
-            var _key = _absUrl(path);
+            var _key = _myUrl;
             if (!_cssCache.hasOwnProperty(_key)) {
                 $("<style></style>").html(_moudle).appendTo("head");
                 _cssCache[_key] = "load";
