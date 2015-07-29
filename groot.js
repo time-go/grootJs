@@ -569,6 +569,7 @@ var groot = (function ($) {
 
             return $(_ls);
         }
+
         var _eltValue = _selecs(PREFIX + "-value");
         var _eltChange = _selecs(PREFIX + "-value-change");
         var _eltBlur = _selecs(PREFIX + "-value-blur");
@@ -846,7 +847,7 @@ var groot = (function ($) {
                 vm["$$child" + pro].push(_child);
             }
         }
-        _IndexRender(vm[pro]);
+        ;
         vm[pro + "push"] = function (value) {
             vm[pro].push(value);
             _IndexInit(vm[pro]);
@@ -854,24 +855,19 @@ var groot = (function ($) {
             _arr.element.append(_child);
             _creatArrProperty(vm, vm[pro], value);
             _bindData(value, _child, ve);
-            _IndexRender(vm[pro]);
             vm["$$child" + pro].push(_child);
         }
         vm[pro + "pop"] = function () {
             var _arrchid = vm["$$child" + pro].pop();
             _arrchid.remove();
-            var ret = vm[pro].pop();
-            _IndexInit(vm[pro]);
-            _IndexRender(vm[pro]);
-            return ret;
+            vm[pro].pop();
         }
         vm[pro + "shift"] = function () {
             var _arrchid = vm["$$child" + pro].shift();
             _arrchid.remove();
-            var ret = vm[pro].shift();
+            vm[pro].shift();
             _IndexInit(vm[pro]);
             _IndexRender(vm[pro]);
-            return ret;
         }
         vm[pro + "unshift"] = function (value) {
             vm[pro].unshift(value);
