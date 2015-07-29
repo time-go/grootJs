@@ -716,10 +716,8 @@ var groot = (function ($) {
                             parent = parent.parent();
                         }
                     }
-                    if (parent.hasOwnProperty(arr[arr.length - 1] + RENDEAR)) {
-                        parent[arr[arr.length - 1]] = vm[pro];
-                        parent[arr[arr.length - 1] + RENDEAR]();
-                    }
+                    parent[arr[arr.length - 1]] = vm[pro];
+                    parent[arr[arr.length - 1] + RENDEAR]();
                     return;
                 }
             }
