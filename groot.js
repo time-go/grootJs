@@ -60,7 +60,7 @@
             "url": _myUrl + "?r=" + (new Date() - 1),
             "cache": true,
             "dataType": "text",
-            "error": function (err) {
+            "error": function () {
                 console && console.log(_myUrl + "加载失败");
             },
             "async": false,
@@ -172,6 +172,12 @@ var groot = (function ($) {
     function _sweepEvents(vm, element, ve) {
         for (var e in ve) {//绑定事件
             for (var i = 0; i < _bindEvents.length; i++) {
+                if (element.attr(PREFIX + "-" + _bindEvents[i]) === e) {
+                    element
+                        .unbind(_bindEvents[i])
+                        .bind(_bindEvents[i], _triggerEvents(ve[e], vm))
+                        .removeAttr(PREFIX + "-" + _bindEvents[i]);
+                }
                 $("[" + PREFIX + "-" + _bindEvents[i] + "='" + e + "']", element)
                     .unbind(_bindEvents[i])
                     .bind(_bindEvents[i], _triggerEvents(ve[e], vm))
@@ -195,6 +201,21 @@ var groot = (function ($) {
             $(this).html(_text);
             $(this).removeAttr(PREFIX + "-include");
         });
+        var pvm = null;
+        if (vm.hasOwnProperty("outerParent")) {
+            pvm = vm.outerParent();
+        } else if (vm.hasOwnProperty("parent")) {
+            pvm = vm.parent();
+        }
+        if (pvm != null) {
+            for (var p in  pvm) {
+                if (!$.isFunction(pvm[p]) && p.indexOf("$$") < 0) {
+                    if (!$.isArray(pvm[p]) && typeof pvm[p] !== "object") {
+                        vm["$p." + p] = pvm[p];
+                    }
+                }
+            }
+        }
         function findArr(p) {
             var _eltArrs = $("[" + PREFIX + "-each='" + p + "']", element).first().removeAttr(PREFIX + "-each");
             if (_eltArrs.length > 0) {
@@ -220,27 +241,25 @@ var groot = (function ($) {
                 }
             }
         }
-        var textlsit = [];
-        for (var pro in  vm) {
-            if (!$.isFunction(vm[pro]) && pro.indexOf("$$") < 0) {
-                if (!$.isArray(vm[pro]) && typeof vm[pro] !== "object") {
-                    textlsit.push(pro);
-                }
-            }
-        }
-        _bindText(element, vm, textlsit);//绑定text
         for (var pro in  vm) {//初始化对象
             if (!$.isFunction(vm[pro]) && pro.indexOf("$$") < 0) {
                 if ($.isArray(vm[pro]) && vm.hasOwnProperty("$$arr" + pro)) {//绑定数组
                     _bindingArry(vm, pro, ve);
                 } else if (typeof vm[pro] == "object" && vm.hasOwnProperty("$$obj" + pro)) {
                     _bindingObject(vm, pro, ve);//绑定对象
-                } else {//绑定属性
+                }
+            }
+        }
+        var _renderText = _bindText(element, vm);//绑定text
+        for (var pro in  vm) {//初始化对象
+            if (!$.isFunction(vm[pro]) && pro.indexOf("$$") < 0) {
+                if (typeof vm[pro] !== "object") {
                     _bindingProperty(element, vm, pro, ve);
                 }
             }
         }
         _sweepEvents(vm, element, ve);//绑定事件
+        _renderText();
         _collection();//回收垃圾
     }
 
@@ -248,11 +267,21 @@ var groot = (function ($) {
      @vm 绑定的数据模型
      @textlsit 要绑定的属性数组
      * */
-    function _bindText(element, vm, textlsit) {
+    function _bindText(element, vm) {
+        ///text
+        var textlsit = [];
+        for (var pro in  vm) {
+            if (vm[pro] == null)vm[pro] = "";
+            if (!$.isFunction(vm[pro]) && pro.indexOf("$$") < 0) {
+                if (!$.isArray(vm[pro]) && typeof vm[pro] != "object") {
+                    textlsit.push(pro);
+                }
+            }
+        }
         function _selecs(selector) {
             var _ls = [];
             if (element.attr(selector) != undefined) {
-                _ls.push(element[0]);
+                _ls.push(element[0])
             }
             var _ele = $("[" + selector + "]", element);
             if (_ele.length > 0) {
@@ -264,12 +293,43 @@ var groot = (function ($) {
         }
 
         var _eltText = _selecs(PREFIX + "-text");
-        var _expressions = [];
+        var _expressionsText = [];
         _eltText.each(function () {
             var _expression = $(this).attr(PREFIX + "-text");
-            _expressions.push({ele: this, expr: _expression});
+            _expressionsText.push({ele: this, expr: _expression});
         });
         _eltText.removeAttr(PREFIX + "-text");
+        ///class
+        var _eltClass = _selecs(PREFIX + "-class");
+        var _expressionsClass = [];
+        _eltClass.each(function () {
+            var _expression = $(this).attr(PREFIX + "-class");
+            _expressionsClass.push({ele: this, expr: _expression});
+        });
+        _eltClass.removeAttr(PREFIX + "-class");
+        ///css
+        var _eltCss = _selecs(PREFIX + "-css");
+        var _expressionsCss = [];
+        _eltCss.each(function () {
+            var _expression = $(this).attr(PREFIX + "-css");
+            _expressionsCss.push({ele: this, expr: _expression});
+        });
+        _eltCss.removeAttr(PREFIX + "-css");
+        ///attr
+        var _eltAttr = _selecs(PREFIX + "-attr");
+        var _expressionsAttr = [];
+        _eltAttr.each(function () {
+            var _expression = $(this).attr(PREFIX + "-attr");
+            _expressionsAttr.push({ele: this, expr: _expression});
+        });
+        _eltAttr.removeAttr(PREFIX + "-attr");
+        var _eltVisable = _selecs(PREFIX + "-visible");
+        var _expressionsVisible = [];
+        _eltVisable.each(function () {
+            var _expression = $(this).attr(PREFIX + "-visible");
+            _expressionsVisible.push({ele: this, expr: _expression});
+        });
+        _eltVisable.removeAttr(PREFIX + "-visible");
         function replaceAll(str, ostr, nstr) {
             if (str.indexOf(ostr) > -1) {
                 str = str.replace(ostr, nstr);
@@ -280,8 +340,8 @@ var groot = (function ($) {
         }
 
         function renderText() {
-            for (var i = 0; i < _expressions.length; i++) {
-                var _o = _expressions[i];
+            for (var i = 0; i < _expressionsText.length; i++) {
+                var _o = _expressionsText[i];
                 var _expshow = _o.expr;
                 for (var k = 0; k < textlsit.length; k++) {
                     try {
@@ -296,14 +356,169 @@ var groot = (function ($) {
                     }
                 }
                 _expshow = _expshow.replace(/(\n)|(\r\n)/g, "\\\r\\\n");
-                eval("var _v=" + _expshow);
-                $(_o.ele).html(_v);
+                try {
+                    eval("var myValue=" + _expshow);
+                    var t = typeof myValue;
+                    if (t == "string" || t == "number" || t == "boolean") {
+                        $(_o.ele).html(myValue);
+                    }
+
+                } catch (e) {
+
+                }
             }
         }
 
-        renderText();
-        vm.$$renderText = renderText;
+        function renderClass() {
+            for (var i = 0; i < _expressionsClass.length; i++) {
+                var _o = _expressionsClass[i];
+                var _expshow = _o.expr;
+                var _arr = _o.expr.split(",");
+                for (var m = 0; m < _arr.length; m++) {
+                    var index = _arr[m].indexOf(":");
+                    var _cname = _arr[m].substr(0, index);
+                    var _cexpress = _arr[m].substr(index + 1);
+                    for (var k = 0; k < textlsit.length; k++) {
+                        try {
+                            if (isNum(vm[textlsit[k]]) || typeof vm[textlsit[k]] == "boolean") {
+                                _cexpress = replaceAll(_cexpress, "{" + textlsit[k] + "}", vm[textlsit[k]]);
+                                _cexpress = _cexpress.replace(new RegExp("{" + textlsit[k].replace("$", "\\$") + "}", "g"), vm[textlsit[k]]);
+                            } else {
+                                _cexpress = replaceAll(_cexpress, "{" + textlsit[k] + "}", "\"" + vm[textlsit[k]].replace(/\"/g, "\\\"") + "\"");
+                            }
+                        } catch (e) {
+                            console.log(textlsit[k]);
+                        }
+                    }
+                    _cexpress = _cexpress.replace(/(\n)|(\r\n)/g, "\\\r\\\n");
+                    try {
+                        eval("var myValue = " + _cexpress);
+                        if (myValue === true) {
+                            $(_o.ele).addClass(_cname);
+                        } else if (myValue === false) {
+                            $(_o.ele).removeClass(_cname);
+                        }
+                    } catch (e) {
 
+                    }
+                }
+            }
+        }
+
+        function renderCss() {
+            for (var i = 0; i < _expressionsCss.length; i++) {
+                var _o = _expressionsCss[i];
+                var _expshow = _o.expr;
+                var index = _o.expr.indexOf(",");
+                var _cname = _expshow.substr(0, index);
+                var _cexpress = _expshow.substr(index + 1);
+                for (var k = 0; k < textlsit.length; k++) {
+                    try {
+                        if (isNum(vm[textlsit[k]]) || typeof vm[textlsit[k]] == "boolean") {
+                            _cexpress = replaceAll(_cexpress, "{" + textlsit[k] + "}", vm[textlsit[k]]);
+                            _cexpress = _cexpress.replace(new RegExp("{" + textlsit[k].replace("$", "\\$") + "}", "g"), vm[textlsit[k]]);
+                        } else {
+                            _cexpress = replaceAll(_cexpress, "{" + textlsit[k] + "}", "\"" + vm[textlsit[k]].replace(/\"/g, "\\\"") + "\"");
+                        }
+                    } catch (e) {
+                        console.log(textlsit[k]);
+                    }
+                }
+                _cexpress = _cexpress.replace(/(\n)|(\r\n)/g, "\\\r\\\n");
+                try {
+                    eval("var myValue = " + _cexpress);
+                    var t = typeof myValue;
+                    if (t === "string" || t === "number" || t === "boolean") {
+                        $(_o.ele).css(_cname, myValue);
+                    }
+                } catch (e) {
+
+                }
+            }
+        }
+
+        function renderAttr() {
+            for (var i = 0; i < _expressionsAttr.length; i++) {
+                var _o = _expressionsAttr[i];
+                var _expshow = _o.expr;
+                var index = _o.expr.indexOf(",");
+                var _cname = _expshow.substr(0, index);
+                var _cexpress = _expshow.substr(index + 1);
+                for (var k = 0; k < textlsit.length; k++) {
+                    try {
+                        if (isNum(vm[textlsit[k]]) || typeof vm[textlsit[k]] == "boolean") {
+                            _cexpress = replaceAll(_cexpress, "{" + textlsit[k] + "}", vm[textlsit[k]]);
+                            _cexpress = _cexpress.replace(new RegExp("{" + textlsit[k].replace("$", "\\$") + "}", "g"), vm[textlsit[k]]);
+                        } else {
+                            _cexpress = replaceAll(_cexpress, "{" + textlsit[k] + "}", "\"" + vm[textlsit[k]].replace(/\"/g, "\\\"") + "\"");
+                        }
+                    } catch (e) {
+                        console.log(textlsit[k]);
+                    }
+                }
+                _cexpress = _cexpress.replace(/(\n)|(\r\n)/g, "\\\r\\\n");
+                try {
+                    eval("var myValue = " + _cexpress);
+                    var t = typeof myValue;
+                    if (t === "string" || t === "number" || t === "boolean") {
+                        $(_o.ele).attr(_cname, myValue);
+                    }
+                } catch (e) {
+
+                }
+            }
+        }
+
+        function renderVisable() {
+            for (var i = 0; i < _expressionsVisible.length; i++) {
+                var _o = _expressionsVisible[i];
+                var _expshow = _o.expr;
+                for (var k = 0; k < textlsit.length; k++) {
+                    try {
+                        if (isNum(vm[textlsit[k]]) || typeof vm[textlsit[k]] == "boolean") {
+                            _expshow = replaceAll(_expshow, "{" + textlsit[k] + "}", vm[textlsit[k]]);
+                            _expshow = _expshow.replace(new RegExp("{" + textlsit[k].replace("$", "\\$") + "}", "g"), vm[textlsit[k]]);
+                        } else {
+                            _expshow = replaceAll(_expshow, "{" + textlsit[k] + "}", "\"" + vm[textlsit[k]].replace(/\"/g, "\\\"") + "\"");
+                        }
+                    } catch (e) {
+                        console.log(textlsit[k]);
+                    }
+                }
+                _expshow = _expshow.replace(/(\n)|(\r\n)/g, "\\\r\\\n");
+                try {
+                    eval("var myValue=" + _expshow);
+                    var t = typeof myValue;
+                    if (myValue == true) {
+                        if (typeof _o.wrap != "undefined") {
+                            $(_o.ele).insertAfter($(_o.wrap));
+                            $(_o.wrap).remove();
+                            delete _o.wrap;
+                        }
+                    } else {
+                        if (typeof _o.wrap == "undefined") {
+                            _o.wrap = $("<!--占位符-->")[0];
+                            $(_o.wrap).insertAfter($(_o.ele));
+                            $(_o.ele).detach();
+                        }
+                    }
+
+                } catch (e) {
+
+                }
+            }
+        }
+
+        function _render() {
+            renderText();
+            renderClass();
+            renderCss();
+            renderAttr();
+            renderVisable();
+        }
+
+        vm.$$renderText = _render;
+        return _render;
     }
 
     function _creatArrProperty(opvm, pvm, vm) {//创建数组的层次关系
@@ -342,29 +557,33 @@ var groot = (function ($) {
      @pro 要绑定的属性
      * */
     function _bindingProperty(element, vm, pro, ve) {
+        for (var p in  vm) {
+            if (!$.isFunction(vm[p]) && p.indexOf("$$") < 0) {
+                if ($.isArray(vm[p])) {
+                    for (var i = 0; i < vm[p].length; i++) {
+                        if (vm[p][i].hasOwnProperty("$p." + pro)) {
+                            vm[p][i]["$p." + pro] = vm[pro];
+                            vm[p][i]["$p." + pro + "Render"]();
+                        }
+                    }
 
+                } else if (typeof vm[p] == "object") {
+                    if (vm[p].hasOwnProperty("$p." + pro)) {
+                        vm[p]["$p." + pro] = vm[pro];
+                        vm[p]["$p." + pro + "Render"]();
+                    }
+                }
+            }
+        }
         function _selecs(selector) {
             var _ls = [];
-            if (element.attr(selector) != undefined && element.attr(selector).indexOf(pro) == 0) {
-                _ls.push(element[0]);
+            if (element.attr(selector) != undefined) {
+                _ls.push(element[0])
             }
-            var _ele0 = $("[" + selector + "^='" + pro + "(']", element);
-            var _ele1 = $("[" + selector + "='" + pro + "']", element);
-            var _ele2;
-            if (selector == (PREFIX + "-class")) {
-                _ele2 = $("[" + selector + "-" + pro.replace(/\$/g, "") + "]", element);
-            }
+            var _ele0 = $("[" + selector + "='" + pro + "']", element);
             _ele0.each(function () {
                 _ls.push(this)
-            })
-            _ele1.each(function () {
-                _ls.push(this)
-            })
-            if (selector == (PREFIX + "-class")) {
-                _ele2.each(function () {
-                    _ls.push(this)
-                })
-            }
+            });
 
             return $(_ls);
         }
@@ -372,8 +591,6 @@ var groot = (function ($) {
         var _eltValue = _selecs(PREFIX + "-value");
         var _eltChange = _selecs(PREFIX + "-value-change");
         var _eltBlur = _selecs(PREFIX + "-value-blur");
-        var _eltAttr = _selecs(PREFIX + "-attr");
-        var _eltCss = _selecs(PREFIX + "-css");//"pro(id,value+""")"
         var _eltClass = _selecs(PREFIX + "-class");
         var _eltRadio = _selecs(PREFIX + "-radio");
         var _elSelect = _selecs(PREFIX + "-select");
@@ -383,8 +600,6 @@ var groot = (function ($) {
             "_eltValue": _eltValue,
             "_eltChange": _eltChange,
             "_eltBlur": _eltBlur,
-            "_eltAttr": _eltAttr,
-            "_eltCss": _eltCss,
             "_eltClass": _eltClass,
             "_eltRadio": _eltRadio,
             "_elSelect": _elSelect,
@@ -477,82 +692,9 @@ var groot = (function ($) {
                 vm[pro + RENDEAR]();
             }
         });
-        /*********************** class 样式 *******************************/
-        var _classList = [];
-        _eltClass.each(function () {
-            var _sx = $(this).attr(PREFIX + "-class");
-            var _sx0 = $(this).attr(PREFIX + "-class-" + pro);
-            var _expression;
-            if (typeof _sx == "undefined") {
-                _expression = _sx0;
-            } else {
-                _expression = _sx.substring(_sx.indexOf("(") + 1, _sx.lastIndexOf(")"));
-            }
-
-            _classList.push({"element": $(this), "express": _expression});
-            var _express;
-            if (isNum(vm[pro]) || typeof vm[pro] == "boolean") {
-
-                _express = _expression.replace(/value/g, vm[pro]);
-            } else {
-
-                _express = _expression.replace(/value/g, "\"" + vm[pro] + "\"");
-            }
-            var _classArr = _express.split(",");
-            $(this).removeAttr(PREFIX + "-class");
-            $(this).removeAttr(PREFIX + "-class-" + pro);
-            for (var i = 0; i < _classArr.length; i++) {
-                var index = _classArr[i].indexOf(":");
-                var _cname = _classArr[i].substr(0, index);
-                var _cexpress = _classArr[i].substr(index + 1)
-                eval("var myValue = " + _cexpress);
-                if (myValue) {
-                    $(this).addClass(_cname);
-                } else {
-                    $(this).removeClass(_cname);
-                }
-            }
-        });
         /*********************** value 文本  *******************************/
         var temp = $("<div>" + vm[pro] + "</div>");
         _eltValue.removeAttr(PREFIX + "-value").val(temp.text());
-        /*********************** text 属性  *******************************/
-        var _attrList = [];
-        _eltAttr.each(function () {
-            var _sx = $(this).attr(PREFIX + "-attr");
-            var _attr = _sx.substring(_sx.indexOf("(") + 1, _sx.indexOf(","));
-            var _expression = _sx.substring(_sx.indexOf(",") + 1, _sx.lastIndexOf(")"));
-            _attrList.push({"attr": _attr, "element": $(this), "express": _expression});
-            var _express;
-            if (isNum(vm[pro]) || typeof vm[pro] == "boolean") {
-
-                _express = _expression.replace(/value/g, vm[pro]);
-            } else {
-                var txt = $("<div>" + vm[pro] + "</div>");
-                vm[pro] = txt.html();
-                _express = _expression.replace(/value/g, "\"" + vm[pro] + "\"");
-            }
-            eval("var myValue = " + _express);
-            $(this).removeAttr(PREFIX + "-attr").attr(_attr, myValue)
-        });
-        /*********************** css style样式  *******************************/
-        var _cssList = [];
-        _eltCss.each(function () {
-            var _sx = $(this).attr(PREFIX + "-css");
-            var _css = _sx.substring(_sx.indexOf("(") + 1, _sx.indexOf(","));
-            var _expression = _sx.substring(_sx.indexOf(",") + 1, _sx.lastIndexOf(")"));
-            _cssList.push({"css": _css, "element": $(this), "express": _expression});
-            var _express;
-            if (isNum(vm[pro]) || typeof vm[pro] == "boolean") {
-
-                _express = _expression.replace(/value/g, vm[pro]);
-            } else {
-
-                _express = _expression.replace(/value/g, "\"" + vm[pro] + "\"");
-            }
-            eval("var myValue = " + _express);
-            $(this).removeAttr(PREFIX + "-css").css(_css, myValue)
-        });
         /*********************** 绑定扩展属性  *******************************/
         var _eblist = [];
         for (var i = 0; i < groot.bindingHandler.length; i++) {
@@ -577,6 +719,24 @@ var groot = (function ($) {
             vm[pro + RENDEAR]();
         });
         vm[pro + RENDEAR] = function () {
+            for (var p in  vm) {
+                if (!$.isFunction(vm[p]) && p.indexOf("$$") < 0) {
+                    if ($.isArray(vm[p])) {
+                        for (var i = 0; i < vm[p].length; i++) {
+                            if (vm[p][i].hasOwnProperty("$p." + pro)) {
+                                vm[p][i]["$p." + pro] = vm[pro];
+                                vm[p][i]["$p." + pro + "Render"]();
+                            }
+                        }
+
+                    } else if (typeof vm[p] == "object") {
+                        if (vm[p].hasOwnProperty("$p." + pro)) {
+                            vm[p]["$p." + pro] = vm[pro];
+                            vm[p]["$p." + pro + "Render"]();
+                        }
+                    }
+                }
+            }
             var value = vm[pro];
             /*********************** 渲染控件  *******************************/
             for (var i = 0; i < _uiList.length; i++) {
@@ -603,27 +763,6 @@ var groot = (function ($) {
                     $(this).removeAttr("checked");
                 }
             });
-            /*********************** class样式  *******************************/
-            for (var i = 0; i < _classList.length; i++) {
-                var _express;
-                if (isNum(value) || typeof value == "boolean" || value == null) {
-                    _express = _classList[i].express.replace(/value/g, value);
-                } else {
-                    _express = _classList[i].express.replace(/value/g, "\"" + value + "\"");
-                }
-                var _classIntem = _express.split(",");
-                for (var j = 0; j < _classIntem.length; j++) {
-                    var index = _classIntem[j].indexOf(":");
-                    var _cname = _classIntem[j].substr(0, index);
-                    var _cexpress = _classIntem[j].substr(index + 1);
-                    eval("var myValue = " + _cexpress);
-                    if (myValue) {
-                        _classList[i].element.addClass(_cname);
-                    } else {
-                        _classList[i].element.removeClass(_cname);
-                    }
-                }
-            }
             /*********************** text 标签值  *******************************/
             vm.$$renderText();
             /*********************** value 文本  *******************************/
@@ -635,28 +774,6 @@ var groot = (function ($) {
 
             });
             _eltBlur.val(vm[pro]);
-            /*********************** attract 属性值  *******************************/
-            for (var i = 0; i < _attrList.length; i++) {
-                var _express;
-                if (isNum(value) || typeof value == "boolean" || value == null) {
-                    _express = _attrList[i].express.replace(/value/g, value);
-                } else {
-                    _express = _attrList[i].express.replace(/value/g, "\"" + value + "\"");
-                }
-                eval("var myValue = " + _express);
-                _attrList[i].element.attr(_attrList[i].attr, myValue);
-            }
-            /*********************** style 式 属性值  *******************************/
-            for (var i = 0; i < _cssList.length; i++) {
-                var _express;
-                if (isNum(value) || typeof value == "boolean" || value == null) {
-                    _express = _cssList[i].express.replace(/value/g, value);
-                } else {
-                    _express = _cssList[i].express.replace(/value/g, "\"" + value + "\"");
-                }
-                eval("var myValue = " + _express);
-                _cssList[i].element.css(_cssList[i].css, myValue);
-            }
             /*********************** style 式 刷新扩展属性  *******************************/
             for (var i = 0; i < groot.bindingHandler.length; i++) {
                 var _temp = groot.bindingHandler[i];
@@ -759,6 +876,18 @@ var groot = (function ($) {
         };
         vm[pro + "splice"] = function () {
             var args = arguments;
+            if (args.length == 2) {
+                vm[pro].splice(args[0], args[1]);
+                var chs = vm["$$child" + pro].splice(args[0], args[1]);
+                for (var i = 0; i < chs.length; i++) {
+                    $(chs[i]).remove();
+                }
+                _IndexInit(vm[pro]);
+                _IndexRender(vm[pro]);
+                chs = null;
+                var list = groot.model(vm[pro]);
+                return list.splice(args[0], args[1]);
+            }
             var list = groot.model(vm[pro]);
             var retList = list.splice.apply(list, args);
             vm[pro] = list;
@@ -830,6 +959,7 @@ var groot = (function ($) {
         _dynVMS[id] = id;
         return element;
     }
+//groot.absUrl = _absUrl;//根绝相对路径获取绝对路径
     return groot;
 })
 (jQuery);
