@@ -497,7 +497,7 @@ var groot = (function ($) {
                         }
                     } else {
                         if (typeof _o.wrap == "undefined") {
-                            _o.wrap = $("<!--位置记录-->")[0];
+                            _o.wrap = $("<!--占位符-->")[0];
                             $(_o.wrap).insertAfter($(_o.ele));
                             $(_o.ele).parent()[0].removeChild(_o.ele);
                         }
