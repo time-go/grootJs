@@ -491,13 +491,16 @@ var groot = (function ($) {
                     var t = typeof myValue;
                     if (myValue == true) {
                         if (typeof _o.wrap != "undefined") {
-                            $(_o.wrap).replaceWith($(_o.ele));
+                            $(_o.ele).insertAfter($(_o.wrap));
+                            $(_o.wrap).remove();
                             delete _o.wrap;
                         }
                     } else {
-                        _o.wrap = $("<!--位置记录-->")[0];
-                        $(_o.wrap).insertAfter($(_o.ele));
-                        $(_o.ele).parent()[0].removeChild(_o.ele);
+                        if (typeof _o.wrap == "undefined") {
+                            _o.wrap = $("<!--位置记录-->")[0];
+                            $(_o.wrap).insertAfter($(_o.ele));
+                            $(_o.ele).parent()[0].removeChild(_o.ele);
+                        }
                     }
 
                 } catch (e) {
@@ -872,11 +875,11 @@ var groot = (function ($) {
                 vm[pro].splice(args[0], args[1]);
                 var chs = vm["$$child" + pro].splice(args[0], args[1]);
                 for (var i = 0; i < chs.length; i++) {
-                    $(chs).remove();
+                    $(chs[i]).remove();
                 }
                 _IndexInit(vm[pro]);
                 _IndexRender(vm[pro]);
-                chs=null;
+                chs = null;
                 var list = groot.model(vm[pro]);
                 return list.splice(args[0], args[1]);
             }
