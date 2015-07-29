@@ -172,7 +172,7 @@ var groot = (function ($) {
     function _sweepEvents(vm, element, ve) {
         for (var e in ve) {//绑定事件
             for (var i = 0; i < _bindEvents.length; i++) {
-                if(element.attr(PREFIX + "-" + _bindEvents[i])===e){
+                if (element.attr(PREFIX + "-" + _bindEvents[i]) === e) {
                     element
                         .unbind(_bindEvents[i])
                         .bind(_bindEvents[i], _triggerEvents(ve[e], vm))
@@ -250,7 +250,7 @@ var groot = (function ($) {
                 }
             }
         }
-        _bindText(element, vm);//绑定text
+        var _renderText = _bindText(element, vm);//绑定text
         for (var pro in  vm) {//初始化对象
             if (!$.isFunction(vm[pro]) && pro.indexOf("$$") < 0) {
                 if (typeof vm[pro] !== "object") {
@@ -259,6 +259,7 @@ var groot = (function ($) {
             }
         }
         _sweepEvents(vm, element, ve);//绑定事件
+        _renderText();
         _collection();//回收垃圾
     }
 
@@ -279,7 +280,7 @@ var groot = (function ($) {
         }
         function _selecs(selector) {
             var _ls = [];
-            if(element.attr(selector)!=undefined) {
+            if (element.attr(selector) != undefined) {
                 _ls.push(element[0])
             }
             var _ele = $("[" + selector + "]", element);
@@ -322,6 +323,13 @@ var groot = (function ($) {
             _expressionsAttr.push({ele: this, expr: _expression});
         });
         _eltAttr.removeAttr(PREFIX + "-attr");
+        var _eltVisable = _selecs(PREFIX + "-visible");
+        var _expressionsVisible = [];
+        _eltVisable.each(function () {
+            var _expression = $(this).attr(PREFIX + "-visible");
+            _expressionsVisible.push({ele: this, expr: _expression});
+        });
+        _eltVisable.removeAttr(PREFIX + "-visible");
         function replaceAll(str, ostr, nstr) {
             if (str.indexOf(ostr) > -1) {
                 str = str.replace(ostr, nstr);
@@ -461,16 +469,53 @@ var groot = (function ($) {
             }
         }
 
+        function renderVisable() {
+            for (var i = 0; i < _expressionsVisible.length; i++) {
+                var _o = _expressionsVisible[i];
+                var _expshow = _o.expr;
+                for (var k = 0; k < textlsit.length; k++) {
+                    try {
+                        if (isNum(vm[textlsit[k]]) || typeof vm[textlsit[k]] == "boolean") {
+                            _expshow = replaceAll(_expshow, "{" + textlsit[k] + "}", vm[textlsit[k]]);
+                            _expshow = _expshow.replace(new RegExp("{" + textlsit[k].replace("$", "\\$") + "}", "g"), vm[textlsit[k]]);
+                        } else {
+                            _expshow = replaceAll(_expshow, "{" + textlsit[k] + "}", "\"" + vm[textlsit[k]].replace(/\"/g, "\\\"") + "\"");
+                        }
+                    } catch (e) {
+                        console.log(textlsit[k]);
+                    }
+                }
+                _expshow = _expshow.replace(/(\n)|(\r\n)/g, "\\\r\\\n");
+                try {
+                    eval("var myValue=" + _expshow);
+                    var t = typeof myValue;
+                    if (myValue == true) {
+                        if (typeof _o.wrap != "undefined") {
+                            $(_o.wrap).replaceWith($(_o.ele));
+                            delete _o.wrap;
+                        }
+                    } else {
+                        _o.wrap = $("<!--位置记录-->")[0];
+                        $(_o.wrap).insertAfter($(_o.ele));
+                        $(_o.ele).parent()[0].removeChild(_o.ele);
+                    }
+
+                } catch (e) {
+
+                }
+            }
+        }
+
         function _render() {
             renderText();
             renderClass();
             renderCss();
             renderAttr();
+            renderVisable();
         }
 
-        _render();
         vm.$$renderText = _render;
-
+        return _render;
     }
 
     function _creatArrProperty(opvm, pvm, vm) {//创建数组的层次关系
@@ -513,14 +558,14 @@ var groot = (function ($) {
             if (!$.isFunction(vm[p]) && p.indexOf("$$") < 0) {
                 if ($.isArray(vm[p])) {
                     for (var i = 0; i < vm[p].length; i++) {
-                        if(vm[p][i].hasOwnProperty("$p." + pro)) {
+                        if (vm[p][i].hasOwnProperty("$p." + pro)) {
                             vm[p][i]["$p." + pro] = vm[pro];
                             vm[p][i]["$p." + pro + "Render"]();
                         }
                     }
 
                 } else if (typeof vm[p] == "object") {
-                    if(vm[p].hasOwnProperty("$p." + pro)) {
+                    if (vm[p].hasOwnProperty("$p." + pro)) {
                         vm[p]["$p." + pro] = vm[pro];
                         vm[p]["$p." + pro + "Render"]();
                     }
@@ -529,7 +574,7 @@ var groot = (function ($) {
         }
         function _selecs(selector) {
             var _ls = [];
-            if(element.attr(selector)!=undefined) {
+            if (element.attr(selector) != undefined) {
                 _ls.push(element[0])
             }
             var _ele0 = $("[" + selector + "='" + pro + "']", element);
@@ -539,6 +584,7 @@ var groot = (function ($) {
 
             return $(_ls);
         }
+
         var _eltValue = _selecs(PREFIX + "-value");
         var _eltChange = _selecs(PREFIX + "-value-change");
         var _eltBlur = _selecs(PREFIX + "-value-blur");
@@ -669,14 +715,14 @@ var groot = (function ($) {
                 if (!$.isFunction(vm[p]) && p.indexOf("$$") < 0) {
                     if ($.isArray(vm[p])) {
                         for (var i = 0; i < vm[p].length; i++) {
-                            if(vm[p][i].hasOwnProperty("$p." + pro)) {
+                            if (vm[p][i].hasOwnProperty("$p." + pro)) {
                                 vm[p][i]["$p." + pro] = vm[pro];
                                 vm[p][i]["$p." + pro + "Render"]();
                             }
                         }
 
                     } else if (typeof vm[p] == "object") {
-                        if(vm[p].hasOwnProperty("$p." + pro)) {
+                        if (vm[p].hasOwnProperty("$p." + pro)) {
                             vm[p]["$p." + pro] = vm[pro];
                             vm[p]["$p." + pro + "Render"]();
                         }
@@ -822,6 +868,18 @@ var groot = (function ($) {
         };
         vm[pro + "splice"] = function () {
             var args = arguments;
+            if (args.length == 2) {
+                vm[pro].splice(args[0], args[1]);
+                var chs = vm["$$child" + pro].splice(args[0], args[1]);
+                for (var i = 0; i < chs.length; i++) {
+                    $(chs).remove();
+                }
+                _IndexInit(vm[pro]);
+                _IndexRender(vm[pro]);
+                chs=null;
+                var list = groot.model(vm[pro]);
+                return list.splice(args[0], args[1]);
+            }
             var list = groot.model(vm[pro]);
             var retList = list.splice.apply(list, args);
             vm[pro] = list;
