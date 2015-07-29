@@ -557,24 +557,6 @@ var groot = (function ($) {
      @pro 要绑定的属性
      * */
     function _bindingProperty(element, vm, pro, ve) {
-        for (var p in  vm) {
-            if (!$.isFunction(vm[p]) && p.indexOf("$$") < 0) {
-                if ($.isArray(vm[p])) {
-                    for (var i = 0; i < vm[p].length; i++) {
-                        if (vm[p][i].hasOwnProperty("$p." + pro)) {
-                            vm[p][i]["$p." + pro] = vm[pro];
-                            vm[p][i]["$p." + pro + "Render"]();
-                        }
-                    }
-
-                } else if (typeof vm[p] == "object") {
-                    if (vm[p].hasOwnProperty("$p." + pro)) {
-                        vm[p]["$p." + pro] = vm[pro];
-                        vm[p]["$p." + pro + "Render"]();
-                    }
-                }
-            }
-        }
         function _selecs(selector) {
             var _ls = [];
             if (element.attr(selector) != undefined) {
@@ -587,7 +569,6 @@ var groot = (function ($) {
 
             return $(_ls);
         }
-
         var _eltValue = _selecs(PREFIX + "-value");
         var _eltChange = _selecs(PREFIX + "-value-change");
         var _eltBlur = _selecs(PREFIX + "-value-blur");
@@ -719,20 +700,48 @@ var groot = (function ($) {
             vm[pro + RENDEAR]();
         });
         vm[pro + RENDEAR] = function () {
+
+            /*********************** 如果绑定父节点  *******************************/
+            if (pro.indexOf("$p.") > -1) {
+                if (vm.hasOwnProperty(pro + "#")) {
+                    delete vm[pro + "#"];
+                } else {
+                    var arr = pro.split("$p.");
+                    var parent = vm;
+                    for (var i = 0; i < arr.length - 1; i++) {
+                        if (parent.hasOwnProperty("outerParent") && typeof parent["outerParent"] == "function") {
+                            parent = parent.outerParent();
+                        } else {
+                            parent = parent.parent();
+                        }
+                    }
+                    if (parent.hasOwnProperty(arr[arr.length - 1] + RENDEAR)) {
+                        parent[arr[arr.length - 1]] = vm[pro];
+                        parent[arr[arr.length - 1] + RENDEAR]();
+                    }
+                    return;
+                }
+            }
             for (var p in  vm) {
                 if (!$.isFunction(vm[p]) && p.indexOf("$$") < 0) {
                     if ($.isArray(vm[p])) {
                         for (var i = 0; i < vm[p].length; i++) {
                             if (vm[p][i].hasOwnProperty("$p." + pro)) {
-                                vm[p][i]["$p." + pro] = vm[pro];
-                                vm[p][i]["$p." + pro + "Render"]();
+                                {
+                                    vm[p][i]["$p." + pro] = vm[pro];
+                                    vm[p][i]["$p." + pro + "#"] = "#"
+                                    vm[p][i]["$p." + pro + "Render"]();
+                                }
                             }
                         }
 
                     } else if (typeof vm[p] == "object") {
                         if (vm[p].hasOwnProperty("$p." + pro)) {
-                            vm[p]["$p." + pro] = vm[pro];
-                            vm[p]["$p." + pro + "Render"]();
+                            {
+                                vm[p]["$p." + pro] = vm[pro];
+                                vm[p]["$p." + pro + "#"] = "#"
+                                vm[p]["$p." + pro + "Render"]();
+                            }
                         }
                     }
                 }
@@ -779,7 +788,7 @@ var groot = (function ($) {
                 var _temp = groot.bindingHandler[i];
                 _temp.Handler(_eblist[i], value);
             }
-        };
+        }
     }
 
     /*绑定数组
