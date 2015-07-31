@@ -251,13 +251,6 @@ var groot = (function ($) {
             }
         }
         var _renderText = _bindText(element, vm, ve);//绑定text
-        /* for (var pro in  vm) {//初始化对象
-         if (!$.isFunction(vm[pro]) && pro.indexOf("$$") < 0) {
-         if (typeof vm[pro] !== "object") {
-         _bindingProperty(element, vm, pro, ve);
-         }
-         }
-         }*/
         if (!vm.hasOwnProperty("outerParent")) {
             _sweepEvents(vm, element, ve);//绑定事件
         }
