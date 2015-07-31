@@ -880,6 +880,7 @@ var groot = (function ($) {
         }
         var tmpl = $("<div>").append(element.clone()).remove().html();
 
+        _arr.tmplshort = tmpl;
         function events(_e) {
             return function () {
                 var index = $(this).attr("gtindex");
@@ -906,7 +907,7 @@ var groot = (function ($) {
         vm[pro + "push"] = function (value) {
             vm[pro].push(value);
             _IndexInit(vm[pro]);
-            var _child = $(_arr.tmpl);
+            var _child = $(_arr.tmplshort);
             _arr.element.append(_child);
             _creatArrProperty(vm, vm[pro], value);
             _bindData(value, _child, ve);
@@ -927,7 +928,7 @@ var groot = (function ($) {
         vm[pro + "unshift"] = function (value) {
             vm[pro].unshift(value);
             _IndexInit(vm[pro]);
-            var _child = $(_arr.tmpl);
+            var _child = $(_arr.tmplshort);
             _arr.element.prepend(_child);
             _creatArrProperty(vm, vm[pro], value);
             _bindData(value, _child, ve);
