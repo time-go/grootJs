@@ -250,15 +250,17 @@ var groot = (function ($) {
                 }
             }
         }
-        var _renderText = _bindText(element, vm);//绑定text
-        for (var pro in  vm) {//初始化对象
-            if (!$.isFunction(vm[pro]) && pro.indexOf("$$") < 0) {
-                if (typeof vm[pro] !== "object") {
-                    _bindingProperty(element, vm, pro, ve);
-                }
-            }
+        var _renderText = _bindText(element, vm, ve);//绑定text
+        /* for (var pro in  vm) {//初始化对象
+         if (!$.isFunction(vm[pro]) && pro.indexOf("$$") < 0) {
+         if (typeof vm[pro] !== "object") {
+         _bindingProperty(element, vm, pro, ve);
+         }
+         }
+         }*/
+        if (!vm.hasOwnProperty("outerParent")) {
+            _sweepEvents(vm, element, ve);//绑定事件
         }
-        _sweepEvents(vm, element, ve);//绑定事件
         _renderText();
         _collection();//回收垃圾
     }
@@ -267,7 +269,7 @@ var groot = (function ($) {
      @vm 绑定的数据模型
      @textlsit 要绑定的属性数组
      * */
-    function _bindText(element, vm) {
+    function _bindText(element, vm, ve) {
         ///text
         var textlsit = [];
         for (var pro in  vm) {
@@ -518,7 +520,255 @@ var groot = (function ($) {
         }
 
         vm.$$renderText = _render;
+        //单属性绑定
+        (function () {
+            var _eltValue0 = _selecs(PREFIX + "-value");
+            var _eltChange0 = _selecs(PREFIX + "-value-change");
+            var _eltBlur0 = _selecs(PREFIX + "-value-blur");
+            var _eltRadio0 = _selecs(PREFIX + "-radio");
+            var _elSelect0 = _selecs(PREFIX + "-select");
+            var _elCheck0 = _selecs(PREFIX + "-check");
+            var _elUi0 = _selecs(PREFIX + "-ui");
+
+            function bindSinle(vm, pro, ve) {
+                var _eltValue = getElement(_eltValue0, PREFIX + "-value", pro);
+                var _eltChange = getElement(_eltChange0, PREFIX + "-value-change", pro);
+                var _eltBlur = getElement(_eltBlur0, PREFIX + "-value-blur", pro);
+                var _eltRadio = getElement(_eltRadio0, PREFIX + "-radio", pro);
+                var _elSelect = getElement(_elSelect0, PREFIX + "-select", pro);
+                var _elCheck = getElement(_elCheck0, PREFIX + "-check", pro);
+                var _elUi = getElement(_elUi0, PREFIX + "-ui", pro);
+                var _objElements = {
+                    "_eltValue": _eltValue,
+                    "_eltChange": _eltChange,
+                    "_eltBlur": _eltBlur,
+                    "_eltRadio": _eltRadio,
+                    "_elSelect": _elSelect,
+                    "_elCheck": _elCheck,
+                    "_elUi": _elUi
+                };
+                /*********************** watch  *******************************/
+                for (var e in _objElements) {
+                    var _elmt = _objElements[e];
+                    if (typeof _elmt.attr(PREFIX + "-watch") != "undefined") {
+                        var _fun = _elmt.attr(PREFIX + "-watch");
+                        if ($.isFunction(ve[_fun])) {
+                            vm[pro + "watch"] = (function ($this, $ve) {
+                                return function () {
+                                    var args = $.makeArray(arguments);
+                                    $ve.apply($this, args);
+                                }
+                            })(_elmt[0], ve[_fun])
+                        }
+                        _elmt.removeAttr(PREFIX + "-watch");
+                    }
+                }
+                /*********************** ui控件开发扫描  *******************************/
+                var _uiList = [];
+                _elUi.each(function () {
+                    var _uiname = $(this).attr(PREFIX + "-ui");
+                    _uiname = _uiname.substring(_uiname.indexOf("(") + 1, _uiname.lastIndexOf(")"));
+                    $(this).removeAttr(PREFIX + "-ui");
+                    var _data = null;
+                    if (typeof $(this).attr(PREFIX + "-ui-data") != "undefined") {
+                        var _default = $(this).attr(PREFIX + "-ui-data");
+                        if (_default.indexOf("uiInit") > -1) {
+                            _default = _default.substring(_default.indexOf("[") + 1, _default.lastIndexOf("]"));
+                            _data = groot.uiInit[_default];
+                        } else {
+                            _data = eval("(" + _default + ")");
+                        }
+
+                        $(this).removeAttr(PREFIX + "-ui-data");
+                    }
+                    var _id = new Date() - 1;
+                    if (typeof $(this).attr(PREFIX + "-ui-id") != "undefined") {
+                        _id = $(this).attr(PREFIX + "-ui-id");
+                        $(this).removeAttr(PREFIX + "-ui-id");
+                    } else {
+                        _id = "ui" + _id;
+                    }
+                    _uiList.push(_id);
+                    groot.ui[_uiname]($(this), _id, _data, vm[pro], (function (_id) {
+                        return function () {
+                            vm[pro] = groot.vms[_id].uivalue;
+                            vm[pro + "Render"]();
+                        }
+                    })(_id));
+                });
+                /*********************** checkbox  *******************************/
+                _elCheck.removeAttr(PREFIX + "-check");
+                if (vm[pro]) {
+                    _elCheck.attr("checked", "checked");//.is(":checked")
+                } else {
+                    _elCheck.removeAttr("checked");
+                }
+                _elCheck.change(function () {
+                    if ($(this).is(":checked")) {
+                        vm[pro] = true;
+                        vm[pro + RENDEAR]();
+                    } else {
+                        vm[pro] = false;
+                        vm[pro + RENDEAR]();
+                    }
+                });
+                /*********************** selectBox  *******************************/
+                _elSelect.removeAttr(PREFIX + "-select");
+                _elSelect.find("option[value='" + vm[pro] + "']").attr("selected", "selected");
+                _elSelect.change(function () {
+                    vm[pro] = $(this).val();
+                    vm[pro + RENDEAR]();
+                });
+                /*********************** Radio  *******************************/
+                _eltRadio.removeAttr(PREFIX + "-radio");
+                _eltRadio.each(function () {
+                    if ($(this).val() == vm[pro]) {
+                        //$(this).attr("checked", "checked");元写法在火狐下有bug
+                        $(this).click();
+                    }
+                });
+                _eltRadio.change(function () {
+                    if ($(this).is(':checked')) {
+                        vm[pro] = $(this).val();
+                        vm[pro + RENDEAR]();
+                    }
+                });
+                /*********************** value 文本  *******************************/
+                var temp = $("<div>" + vm[pro] + "</div>");
+                _eltValue.removeAttr(PREFIX + "-value").val(temp.text());
+                /*********************** 绑定扩展属性  *******************************/
+                var _eblist = [];
+                for (var i = 0; i < groot.bindingHandler.length; i++) {
+                    var _temp = groot.bindingHandler[i];
+                    var _elts = $("[" + PREFIX + "-" + _temp.Name + "='" + pro + "']", element).removeAttr(PREFIX + "-" + _temp.Name);
+                    _temp.Handler(_elts, vm[pro]);
+                    _eblist.push(_elts);
+                }
+                /*********************** 绑定输入框值变化  *******************************/
+                var temp = $("<div>" + vm[pro] + "</div>");
+                _eltChange.removeAttr(PREFIX + "-value-change").val(temp.text());
+                _eltChange.bind("input propertychange", function () {
+                    vm[pro] = $(this).val();
+                    vm[pro + RENDEAR]();
+
+                });
+                /*********************** 绑定输入失去焦点 *******************************/
+                var temp = $("<div>" + vm[pro] + "</div>");
+                _eltBlur.removeAttr(PREFIX + "-value-blur").val(temp.text());
+                _eltBlur.change(function () {
+                    vm[pro] = $(this).val();
+                    vm[pro + RENDEAR]();
+                });
+                vm[pro + RENDEAR] = function () {
+
+                    /*********************** 如果绑定父节点  *******************************/
+                    if (pro.indexOf("$p.") > -1) {
+                        if (vm.hasOwnProperty(pro + "#")) {
+                            delete vm[pro + "#"];
+                        } else {
+                            var arr = pro.split("$p.");
+                            var parent = vm;
+                            for (var i = 0; i < arr.length - 1; i++) {
+                                if (parent.hasOwnProperty("outerParent") && typeof parent["outerParent"] == "function") {
+                                    parent = parent.outerParent();
+                                } else {
+                                    parent = parent.parent();
+                                }
+                            }
+                            parent[arr[arr.length - 1]] = vm[pro];
+                            parent[arr[arr.length - 1] + RENDEAR]();
+                            return;
+                        }
+                    }
+                    for (var p in  vm) {
+                        if (!$.isFunction(vm[p]) && p.indexOf("$$") < 0) {
+                            if ($.isArray(vm[p])) {
+                                for (var i = 0; i < vm[p].length; i++) {
+                                    if (vm[p][i].hasOwnProperty("$p." + pro)) {
+                                        {
+                                            vm[p][i]["$p." + pro] = vm[pro];
+                                            vm[p][i]["$p." + pro + "#"] = "#"
+                                            vm[p][i]["$p." + pro + "Render"]();
+                                        }
+                                    }
+                                }
+
+                            } else if (typeof vm[p] == "object") {
+                                if (vm[p].hasOwnProperty("$p." + pro)) {
+                                    {
+                                        vm[p]["$p." + pro] = vm[pro];
+                                        vm[p]["$p." + pro + "#"] = "#"
+                                        vm[p]["$p." + pro + "Render"]();
+                                    }
+                                }
+                            }
+                        }
+                    }
+                    var value = vm[pro];
+                    /*********************** 渲染控件  *******************************/
+                    for (var i = 0; i < _uiList.length; i++) {
+                        groot.vms[_uiList[i]].uivalue = value;
+                        groot.vms[_uiList[i]].uivalueRender();
+                    }
+                    /*********************** 触发监控  *******************************/
+                    if ($.isFunction(vm[pro + "watch"])) {
+                        vm[pro + "watch"](vm, value);//调用监控函数
+                    }
+                    /*********************** checkBox  *******************************/
+                    if (vm[pro]) {
+                        _elCheck.attr("checked", "checked");//.is(":checked")
+                    } else {
+                        _elCheck.removeAttr("checked");
+                    }
+                    /*********************** selectBox  *******************************/
+                    _elSelect.find("option[value='" + vm[pro] + "']").attr("selected", "selected");
+                    /*********************** Radio  *******************************/
+                    _eltRadio.each(function () {
+                        if ($(this).val() == value) {
+                            $(this).attr("checked", "checked");
+                        } else {
+                            $(this).removeAttr("checked");
+                        }
+                    });
+                    /*********************** text 标签值  *******************************/
+                    vm.$$renderText();
+                    /*********************** value 文本  *******************************/
+                    _eltValue.val(vm[pro]);
+                    _eltChange.each(function () {
+                        if (!$(this).is(':focus')) {
+                            $(this).val(vm[pro])
+                        }
+
+                    });
+                    _eltBlur.val(vm[pro]);
+                    /*********************** style 式 刷新扩展属性  *******************************/
+                    for (var i = 0; i < groot.bindingHandler.length; i++) {
+                        var _temp = groot.bindingHandler[i];
+                        _temp.Handler(_eblist[i], value);
+                    }
+                }
+            }
+
+            function getElement(eles, selector, value) {
+                var retlist = [];
+                eles.each(function () {
+                    if ($(this).attr(selector) === value) {
+                        retlist.push(this);
+                        $(this).removeAttr(selector);
+                    }
+                })
+                return $(retlist);
+            }
+
+            for (var i = 0; i < textlsit.length; i++) {
+                (function (vm, pro, ve) {
+                    bindSinle(vm, pro, ve);
+                })(vm, textlsit[i], ve)
+
+            }
+        })()
         return _render;
+
     }
 
     function _creatArrProperty(opvm, pvm, vm) {//创建数组的层次关系
@@ -549,245 +799,6 @@ var groot = (function ($) {
             }
             _bindData(vm[pro], _obj.element, ve);
         };
-    }
-
-    /*
-     @element html元素
-     @vm 绑定的数据模型
-     @pro 要绑定的属性
-     * */
-    function _bindingProperty(element, vm, pro, ve) {
-        function _selecs(selector) {
-            var _ls = [];
-            if (element.attr(selector) != undefined) {
-                _ls.push(element[0])
-            }
-            var _ele0 = $("[" + selector + "='" + pro + "']", element);
-            _ele0.each(function () {
-                _ls.push(this)
-            });
-
-            return $(_ls);
-        }
-
-        var _eltValue = _selecs(PREFIX + "-value");
-        var _eltChange = _selecs(PREFIX + "-value-change");
-        var _eltBlur = _selecs(PREFIX + "-value-blur");
-        var _eltClass = _selecs(PREFIX + "-class");
-        var _eltRadio = _selecs(PREFIX + "-radio");
-        var _elSelect = _selecs(PREFIX + "-select");
-        var _elCheck = _selecs(PREFIX + "-check");
-        var _elUi = _selecs(PREFIX + "-ui");
-        var _objElements = {
-            "_eltValue": _eltValue,
-            "_eltChange": _eltChange,
-            "_eltBlur": _eltBlur,
-            "_eltClass": _eltClass,
-            "_eltRadio": _eltRadio,
-            "_elSelect": _elSelect,
-            "_elCheck": _elCheck,
-            "_elUi": _elUi
-        };
-        /*********************** watch  *******************************/
-        for (var e in _objElements) {
-            var _elmt = _objElements[e];
-            if (typeof _elmt.attr(PREFIX + "-watch") != "undefined") {
-                var _fun = _elmt.attr(PREFIX + "-watch");
-                if ($.isFunction(ve[_fun])) {
-                    vm[pro + "watch"] = (function ($this, $ve) {
-                        return function () {
-                            var args = $.makeArray(arguments);
-                            $ve.apply($this, args);
-                        }
-                    })(_elmt[0], ve[_fun])
-                }
-                _elmt.removeAttr(PREFIX + "-watch");
-            }
-        }
-        /*********************** ui控件开发扫描  *******************************/
-        var _uiList = [];
-        _elUi.each(function () {
-            var _uiname = $(this).attr(PREFIX + "-ui");
-            _uiname = _uiname.substring(_uiname.indexOf("(") + 1, _uiname.lastIndexOf(")"));
-            $(this).removeAttr(PREFIX + "-ui");
-            var _data = null;
-            if (typeof $(this).attr(PREFIX + "-ui-data") != "undefined") {
-                var _default = $(this).attr(PREFIX + "-ui-data");
-                if (_default.indexOf("uiInit") > -1) {
-                    _default = _default.substring(_default.indexOf("[") + 1, _default.lastIndexOf("]"));
-                    _data = groot.uiInit[_default];
-                } else {
-                    _data = eval("(" + _default + ")");
-                }
-
-                $(this).removeAttr(PREFIX + "-ui-data");
-            }
-            var _id = new Date() - 1;
-            if (typeof $(this).attr(PREFIX + "-ui-id") != "undefined") {
-                _id = $(this).attr(PREFIX + "-ui-id");
-                $(this).removeAttr(PREFIX + "-ui-id");
-            } else {
-                _id = "ui" + _id;
-            }
-            _uiList.push(_id);
-            groot.ui[_uiname]($(this), _id, _data, vm[pro], (function (_id) {
-                return function () {
-                    vm[pro] = groot.vms[_id].uivalue;
-                    vm[pro + "Render"]();
-                }
-            })(_id));
-        });
-        /*********************** checkbox  *******************************/
-        _elCheck.removeAttr(PREFIX + "-check");
-        if (vm[pro]) {
-            _elCheck.attr("checked", "checked");//.is(":checked")
-        } else {
-            _elCheck.removeAttr("checked");
-        }
-        _elCheck.change(function () {
-            if ($(this).is(":checked")) {
-                vm[pro] = true;
-                vm[pro + RENDEAR]();
-            } else {
-                vm[pro] = false;
-                vm[pro + RENDEAR]();
-            }
-        });
-        /*********************** selectBox  *******************************/
-        _elSelect.removeAttr(PREFIX + "-select");
-        _elSelect.find("option[value='" + vm[pro] + "']").attr("selected", "selected");
-        _elSelect.change(function () {
-            vm[pro] = $(this).val();
-            vm[pro + RENDEAR]();
-        });
-        /*********************** Radio  *******************************/
-        _eltRadio.removeAttr(PREFIX + "-radio");
-        _eltRadio.each(function () {
-            if ($(this).val() == vm[pro]) {
-                //$(this).attr("checked", "checked");元写法在火狐下有bug
-                $(this).click();
-            }
-        });
-        _eltRadio.change(function () {
-            if ($(this).is(':checked')) {
-                vm[pro] = $(this).val();
-                vm[pro + RENDEAR]();
-            }
-        });
-        /*********************** value 文本  *******************************/
-        var temp = $("<div>" + vm[pro] + "</div>");
-        _eltValue.removeAttr(PREFIX + "-value").val(temp.text());
-        /*********************** 绑定扩展属性  *******************************/
-        var _eblist = [];
-        for (var i = 0; i < groot.bindingHandler.length; i++) {
-            var _temp = groot.bindingHandler[i];
-            var _elts = $("[" + PREFIX + "-" + _temp.Name + "='" + pro + "']", element).removeAttr(PREFIX + "-" + _temp.Name);
-            _temp.Handler(_elts, vm[pro]);
-            _eblist.push(_elts);
-        }
-        /*********************** 绑定输入框值变化  *******************************/
-        var temp = $("<div>" + vm[pro] + "</div>");
-        _eltChange.removeAttr(PREFIX + "-value-change").val(temp.text());
-        _eltChange.bind("input propertychange", function () {
-            vm[pro] = $(this).val();
-            vm[pro + RENDEAR]();
-
-        });
-        /*********************** 绑定输入失去焦点 *******************************/
-        var temp = $("<div>" + vm[pro] + "</div>");
-        _eltBlur.removeAttr(PREFIX + "-value-blur").val(temp.text());
-        _eltBlur.change(function () {
-            vm[pro] = $(this).val();
-            vm[pro + RENDEAR]();
-        });
-        vm[pro + RENDEAR] = function () {
-
-            /*********************** 如果绑定父节点  *******************************/
-            if (pro.indexOf("$p.") > -1) {
-                if (vm.hasOwnProperty(pro + "#")) {
-                    delete vm[pro + "#"];
-                } else {
-                    var arr = pro.split("$p.");
-                    var parent = vm;
-                    for (var i = 0; i < arr.length - 1; i++) {
-                        if (parent.hasOwnProperty("outerParent") && typeof parent["outerParent"] == "function") {
-                            parent = parent.outerParent();
-                        } else {
-                            parent = parent.parent();
-                        }
-                    }
-                    parent[arr[arr.length - 1]] = vm[pro];
-                    parent[arr[arr.length - 1] + RENDEAR]();
-                    return;
-                }
-            }
-            for (var p in  vm) {
-                if (!$.isFunction(vm[p]) && p.indexOf("$$") < 0) {
-                    if ($.isArray(vm[p])) {
-                        for (var i = 0; i < vm[p].length; i++) {
-                            if (vm[p][i].hasOwnProperty("$p." + pro)) {
-                                {
-                                    vm[p][i]["$p." + pro] = vm[pro];
-                                    vm[p][i]["$p." + pro + "#"] = "#"
-                                    vm[p][i]["$p." + pro + "Render"]();
-                                }
-                            }
-                        }
-
-                    } else if (typeof vm[p] == "object") {
-                        if (vm[p].hasOwnProperty("$p." + pro)) {
-                            {
-                                vm[p]["$p." + pro] = vm[pro];
-                                vm[p]["$p." + pro + "#"] = "#"
-                                vm[p]["$p." + pro + "Render"]();
-                            }
-                        }
-                    }
-                }
-            }
-            var value = vm[pro];
-            /*********************** 渲染控件  *******************************/
-            for (var i = 0; i < _uiList.length; i++) {
-                groot.vms[_uiList[i]].uivalue = value;
-                groot.vms[_uiList[i]].uivalueRender();
-            }
-            /*********************** 触发监控  *******************************/
-            if ($.isFunction(vm[pro + "watch"])) {
-                vm[pro + "watch"](vm, value);//调用监控函数
-            }
-            /*********************** checkBox  *******************************/
-            if (vm[pro]) {
-                _elCheck.attr("checked", "checked");//.is(":checked")
-            } else {
-                _elCheck.removeAttr("checked");
-            }
-            /*********************** selectBox  *******************************/
-            _elSelect.find("option[value='" + vm[pro] + "']").attr("selected", "selected");
-            /*********************** Radio  *******************************/
-            _eltRadio.each(function () {
-                if ($(this).val() == value) {
-                    $(this).attr("checked", "checked");
-                } else {
-                    $(this).removeAttr("checked");
-                }
-            });
-            /*********************** text 标签值  *******************************/
-            vm.$$renderText();
-            /*********************** value 文本  *******************************/
-            _eltValue.val(vm[pro]);
-            _eltChange.each(function () {
-                if (!$(this).is(':focus')) {
-                    $(this).val(vm[pro])
-                }
-
-            });
-            _eltBlur.val(vm[pro]);
-            /*********************** style 式 刷新扩展属性  *******************************/
-            for (var i = 0; i < groot.bindingHandler.length; i++) {
-                var _temp = groot.bindingHandler[i];
-                _temp.Handler(_eblist[i], value);
-            }
-        }
     }
 
     /*绑定数组
@@ -833,19 +844,65 @@ var groot = (function ($) {
 
     function _initArry(vm, pro, ve) {
         _IndexInit(vm[pro]);
+        var frag = document.createDocumentFragment(); // 创建文档碎片
         vm["$$child" + pro] = [];
         var _arr = vm["$$arr" + pro];
         _arr.element.html("");
+        /**/
+        var element = $(_arr.tmpl);
+        var ves = {};
+        for (var e in ve) {//绑定事件
+            for (var i = 0; i < _bindEvents.length; i++) {
+                if (element.attr(PREFIX + "-" + _bindEvents[i]) === e) {
+                    if (!ves.hasOwnProperty(_bindEvents[i] + "-" + e)) {
+                        var _class = "ve" + (new Date() - 1);
+                        ves[_bindEvents[i] + "-" + e] = {
+                            bname: _bindEvents[i],
+                            bevent: ve[e],
+                            bclass: _class
+                        }
+                        element.removeAttr("gt-attr").attr("gt-attr", "gtindex,{$index}").attr("gtevent", _class).removeAttr(PREFIX + "-" + _bindEvents[i]);
+                    }
+                }
+                var chs = $("[" + PREFIX + "-" + _bindEvents[i] + "='" + e + "']", element)
+                if (chs.length > 0) {
+                    if (!ves.hasOwnProperty(_bindEvents[i] + "-" + e)) {
+                        var _class = "gt" + (new Date() - 1);
+                        ves[_bindEvents[i] + "-" + e] = {
+                            bname: _bindEvents[i],
+                            bevent: ve[e],
+                            bclass: _class
+                        }
+                        chs.removeAttr("gt-attr").attr("gt-attr", "gtindex,{$index}").attr("gtevent", _class).removeAttr(PREFIX + "-" + _bindEvents[i]);
+                    }
+                }
+            }
+        }
+        var tmpl = $("<div>").append(element.clone()).remove().html();
+
+        function events(_e) {
+            return function () {
+                var index = $(this).attr("gtindex");
+                _e.call(this, vm[pro][index]);
+            }
+        }
+
+        for (var e in ves) {
+            _arr.element.off(ves[e]["bname"], "[gtevent='" + ves[e]["bclass"] + "']");
+            _arr.element.on(ves[e]["bname"], "[gtevent='" + ves[e]["bclass"] + "']", events(ves[e]["bevent"]));
+        }
+
+
         for (var i = 0; i < vm[pro].length; i++) {
             if (!$.isFunction(vm[pro]) && pro.indexOf("$$") < 0) {
-                var _child = $(_arr.tmpl);
-                _arr.element.append(_child);
+                var _child = $(tmpl);
+                frag.appendChild(_child[0]);
                 _creatArrProperty(vm, vm[pro], vm[pro][i])
                 _bindData(vm[pro][i], _child, ve);
                 vm["$$child" + pro].push(_child);
             }
         }
-        ;
+        _arr.element.append(frag);//添加数组到文档
         vm[pro + "push"] = function (value) {
             vm[pro].push(value);
             _IndexInit(vm[pro]);
