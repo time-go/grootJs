@@ -418,7 +418,7 @@ var groot = (function ($) {
 
         function renderAttr() {
             //_expressionsAttr
-            renderCCA(_expressionsCss, function (_o, _cname, myValue) {
+            renderCCA(_expressionsAttr, function (_o, _cname, myValue) {
                 var t = typeof myValue;
                 if (t === "string" || t === "number" || t === "boolean") {
                     $(_o.ele).attr(_cname, myValue);
