@@ -810,7 +810,7 @@ var groot = (function ($) {
             for (var i = 0; i < _bindEvents.length; i++) {
                 if (element.attr(PREFIX + "-" + _bindEvents[i]) === e) {
                     if (!ves.hasOwnProperty(_bindEvents[i] + "-" + e)) {
-                        var _class = "ve" + (new Date() - 1);
+                        var _class = PREFIX + (new Date() - 1);
                         ves[_bindEvents[i] + "-" + e] = {
                             bname: _bindEvents[i],
                             bevent: ve[e],
@@ -827,10 +827,17 @@ var groot = (function ($) {
                         }
                     }
                 }
-                var chs = $("[" + PREFIX + "-" + _bindEvents[i] + "='" + e + "']", element)
+                var chs = $("[" + PREFIX + "-" + _bindEvents[i] + "='" + e + "']", element);
+                var chslist = [];
+                chs.each(function () {
+                    if ($(this).parents("[" + PREFIX + "-each]").length == 0 && $(this).parents("[" + PREFIX + "-object]").length == 0) {
+                        chslist.push(this);
+                    }
+                })
+                chs = $(chslist);
                 if (chs.length > 0) {
                     if (!ves.hasOwnProperty(_bindEvents[i] + "-" + e)) {
-                        var _class = "gt" + (new Date() - 1);
+                        var _class = PREFIX + (new Date() - 1);
                         ves[_bindEvents[i] + "-" + e] = {
                             bname: _bindEvents[i],
                             bevent: ve[e],
@@ -852,16 +859,17 @@ var groot = (function ($) {
         var tmpl = $("<div>").append(element.clone()).remove().html();
 
         _arr.tmplshort = tmpl;
-        function events(_e) {
+        function events(_e, _vm) {
+            console.log(pro);
             return function () {
-                var index = $(this).attr("gtindex");
-                _e.call(this, vm[pro][index]);
+                var index = $(this).attr(PREFIX + "index");
+                _e.call(this, _vm[index]);
             }
         }
 
         for (var e in ves) {
             _arr.element.off(ves[e]["bname"], "[" + PREFIX + "event='" + ves[e]["bclass"] + "']");
-            _arr.element.on(ves[e]["bname"], "[" + PREFIX + "event='" + ves[e]["bclass"] + "']", events(ves[e]["bevent"]));
+            _arr.element.on(ves[e]["bname"], "[" + PREFIX + "event='" + ves[e]["bclass"] + "']", events(ves[e]["bevent"], vm[pro]));
         }
 
 
