@@ -61,7 +61,7 @@
             "cache": true,
             "dataType": "text",
             "error": function () {
-               groot.log(_myUrl + "加载失败");
+                groot.log(_myUrl + "加载失败");
             },
             "async": false,
             "success": function (data) {
@@ -708,7 +708,7 @@ var groot = (function ($) {
             function getElement(eles, selector, value) {
                 var retlist = [];
                 eles.each(function () {
-                    if ($(this).attr(selector) === value || $(this).attr(selector) === value + "(") {
+                    if ($(this).attr(selector) === value || ($(this).attr(selector) !== undefined && $(this).attr(selector).indexOf(value + "(") === 0)) {
                         retlist.push(this);
                     }
                 })
