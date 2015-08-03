@@ -61,7 +61,7 @@
             "cache": true,
             "dataType": "text",
             "error": function () {
-                console && console.log(_myUrl + "加载失败");
+               groot.log(_myUrl + "加载失败");
             },
             "async": false,
             "success": function (data) {
@@ -347,7 +347,7 @@ var groot = (function ($) {
                             _expshow = replaceAll(_expshow, "{" + textlsit[k] + "}", "\"" + vm[textlsit[k]].replace(/\"/g, "\\\"") + "\"");
                         }
                     } catch (e) {
-                        console.log(textlsit[k]);
+                        groot.log(textlsit[k]);
                     }
                 }
                 _expshow = _expshow.replace(/(\n)|(\r\n)/g, "\\\r\\\n");
@@ -382,7 +382,7 @@ var groot = (function ($) {
                                 _cexpress = replaceAll(_cexpress, "{" + textlsit[k] + "}", "\"" + vm[textlsit[k]].replace(/\"/g, "\\\"") + "\"");
                             }
                         } catch (e) {
-                            console.log(textlsit[k]);
+                            groot.log(textlsit[k]);
                         }
                     }
                     _cexpress = _cexpress.replace(/(\n)|(\r\n)/g, "\\\r\\\n");
@@ -439,7 +439,7 @@ var groot = (function ($) {
                             _expshow = replaceAll(_expshow, "{" + textlsit[k] + "}", "\"" + vm[textlsit[k]].replace(/\"/g, "\\\"") + "\"");
                         }
                     } catch (e) {
-                        console.log(textlsit[k]);
+                        groot.log(textlsit[k]);
                     }
                 }
                 _expshow = _expshow.replace(/(\n)|(\r\n)/g, "\\\r\\\n");
@@ -600,6 +600,7 @@ var groot = (function ($) {
                     _eblist.push(_elts);
                 }
                 /*********************** 绑定输入框值变化  *******************************/
+
                 var temp = $("<div>" + vm[pro] + "</div>");
                 _eltChange.removeAttr(PREFIX + "-value-change").val(temp.text());
                 _eltChange.bind("input propertychange", function () {
@@ -707,7 +708,7 @@ var groot = (function ($) {
             function getElement(eles, selector, value) {
                 var retlist = [];
                 eles.each(function () {
-                    if ($(this).attr(selector) !== undefined && $(this).attr(selector).indexOf(value) === 0) {
+                    if ($(this).attr(selector) === value || $(this).attr(selector) === value + "(") {
                         retlist.push(this);
                     }
                 })
