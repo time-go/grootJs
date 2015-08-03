@@ -708,7 +708,7 @@ var groot = (function ($) {
             function getElement(eles, selector, value) {
                 var retlist = [];
                 eles.each(function () {
-                    if ($(this).attr(selector) === value || ($(this).attr(selector) !== undefined && $(this).attr(selector).indexOf(value + "(") === 0)) {
+                    if ($(this).attr(selector) === value || (selector == PREFIX + "-ui" && $(this).attr(selector) !== undefined && $(this).attr(selector).indexOf(value + "(") === 0)) {
                         retlist.push(this);
                     }
                 })
