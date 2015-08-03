@@ -707,9 +707,8 @@ var groot = (function ($) {
             function getElement(eles, selector, value) {
                 var retlist = [];
                 eles.each(function () {
-                    if ($(this).attr(selector) === value) {
+                    if ($(this).attr(selector) !== undefined && $(this).attr(selector).indexOf(value) === 0) {
                         retlist.push(this);
-                        $(this).removeAttr(selector);
                     }
                 })
                 return $(retlist);
@@ -860,7 +859,6 @@ var groot = (function ($) {
 
         _arr.tmplshort = tmpl;
         function events(_e, _vm) {
-            console.log(pro);
             return function () {
                 var index = $(this).attr(PREFIX + "index");
                 _e.call(this, _vm[index]);
