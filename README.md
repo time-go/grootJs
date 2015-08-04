@@ -22,6 +22,4 @@ grootJs不同于其他mvvm的三大亮点：
 
 官网地址http://gt.fqphp.com/index.html
 
-grootjs最近进行了大量改版，欢迎试用拍砖
-
-2015-08-04  grootjs 第一个稳定版本1.0发布
+2015-08-04  grootjs 第一个稳定版本1.0发布，欢迎试用拍砖.
