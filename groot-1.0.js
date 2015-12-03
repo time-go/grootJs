@@ -1,4 +1,9 @@
 (function (w, $) {
+    /*
+    *verson:1.0;
+    *发布日期:2015-08-04;
+    *QQ群:330603020;
+    * */
     //---------------commonjs规范----------------//
     var tmpTag = document.location.protocol + "//";
     var _cssCache = {};
