@@ -193,14 +193,20 @@ var groot = (function ($) {
     }
 
     //---------------私有函数-----------------//
-    function _bindData(vm, element, ve) {
+    function _bindData(vm, element, ve, record) {
+        var record = record || {}
         vm.$$selector = element[0];
-        var _include = $("[" + PREFIX + "-include]", element);
-        _include.each(function () {
-            var _text = require($(this).attr(PREFIX + "-include") + "!text");
-            $(this).html(_text);
-            $(this).removeAttr(PREFIX + "-include");
-        });
+        if (!record["_include"]) {
+            var _include = $("[" + PREFIX + "-include]", element);
+            _include.each(function () {
+                var _text = require($(this).attr(PREFIX + "-include") + "!text");
+                $(this).html(_text);
+                $(this).removeAttr(PREFIX + "-include");
+            });
+            if (_include.length == 0) {
+                record["_include"] = true;
+            }
+        }
         var pvm = null;
         if (vm.hasOwnProperty("outerParent")) {
             pvm = vm.outerParent();
@@ -217,18 +223,26 @@ var groot = (function ($) {
             }
         }
         function findArr(p) {
-            var _eltArrs = $("[" + PREFIX + "-each='" + p + "']", element).first().removeAttr(PREFIX + "-each");
-            if (_eltArrs.length > 0) {
-                vm["$$arr" + pro] = {"element": _eltArrs, "tmpl": _eltArrs.html()};
-                _eltArrs.html("");
+            if (!record["_arr" + p]) {
+                var _eltArrs = $("[" + PREFIX + "-each='" + p + "']", element).first().removeAttr(PREFIX + "-each");
+                if (_eltArrs.length > 0) {
+                    vm["$$arr" + pro] = {"element": _eltArrs, "tmpl": _eltArrs.html()};
+                    _eltArrs.html("");
+                } else {
+                    record["_arr" + p] = true;
+                }
             }
         }
 
         function findObj(p) {
-            var _eltObjcts = $("[" + PREFIX + "-object='" + p + "']", element).first().removeAttr(PREFIX + "-object");
-            if (_eltObjcts.length > 0) {
-                vm["$$obj" + pro] = {"element": _eltObjcts, "tmpl": _eltObjcts.html()};
-                _eltObjcts.html("");
+            if (!record["_obj" + p]) {
+                var _eltObjcts = $("[" + PREFIX + "-object='" + p + "']", element).first().removeAttr(PREFIX + "-object");
+                if (_eltObjcts.length > 0) {
+                    vm["$$obj" + pro] = {"element": _eltObjcts, "tmpl": _eltObjcts.html()};
+                    _eltObjcts.html("");
+                } else {
+                    record["_obj" + p] = true;
+                }
             }
         }
 
@@ -250,480 +264,634 @@ var groot = (function ($) {
                 }
             }
         }
+
+        /*
+         @vm 绑定的数据模型
+         @textlsit 要绑定的属性数组
+         * */
+        function _bindText(element, vm, ve) {
+            ///text
+            var textlsit = [];
+            for (var pro in  vm) {
+                if (vm[pro] == null)vm[pro] = "";
+                if (!$.isFunction(vm[pro]) && pro.indexOf("$$") < 0) {
+                    if (!$.isArray(vm[pro]) && typeof vm[pro] != "object") {
+                        textlsit.push(pro);
+                    }
+                }
+            }
+            function _selecs(selector) {
+                var _ls = [];
+                if (element.attr(selector) != undefined) {
+                    _ls.push(element[0])
+                }
+                var _ele = $("[" + selector + "]", element);
+                if (_ele.length > 0) {
+                    _ele.each(function () {
+                        _ls.push(this)
+                    })
+                }
+                return $(_ls);
+            }
+
+            var _eltText = $([]);
+            var _expressionsText = [];
+            if (!record["_eltText"]) {
+                _eltText = _selecs(PREFIX + "-text");
+                _eltText.each(function () {
+                    var _expression = $(this).attr(PREFIX + "-text");
+                    _expressionsText.push({ele: this, expr: _expression});
+                });
+                _eltText.removeAttr(PREFIX + "-text");
+                if (_eltText.length == 0) {
+                    record["_eltText"] = true;
+                }
+            }
+            ///class
+            var _eltClass = $([]);
+            var _expressionsClass = [];
+            if (!record["_eltClass"]) {
+                _eltClass = _selecs(PREFIX + "-class");
+                _eltClass.each(function () {
+                    var _expression = $(this).attr(PREFIX + "-class");
+                    _expressionsClass.push({ele: this, expr: _expression});
+                });
+                _eltClass.removeAttr(PREFIX + "-class");
+                if (_eltClass.length == 0) {
+                    record["_eltClass"] = true;
+                }
+            }
+            ///css
+            var _eltCss = $([]);
+            var _expressionsCss = [];
+            if (!record["_eltCss"]) {
+                _eltCss = _selecs(PREFIX + "-css");
+                _eltCss.each(function () {
+                    var _expression = $(this).attr(PREFIX + "-css");
+                    _expressionsCss.push({ele: this, expr: _expression});
+                });
+                _eltCss.removeAttr(PREFIX + "-css");
+                if (_eltCss.length == 0) {
+                    record["_eltCss"] = true;
+                }
+            }
+            ///attr
+            var _eltAttr = $([]);
+            var _expressionsAttr = [];
+            if (!record["_eltAttr"]) {
+                _eltAttr = _selecs(PREFIX + "-attr");
+                _eltAttr.each(function () {
+                    var _expression = $(this).attr(PREFIX + "-attr");
+                    _expressionsAttr.push({ele: this, expr: _expression});
+                });
+                _eltAttr.removeAttr(PREFIX + "-attr");
+                if (_eltAttr.length == 0) {
+                    record["_eltAttr"] = true;
+                }
+            }
+            var _eltVisable = $([]);
+            var _expressionsVisible = [];
+            if (!record["_eltVisable"]) {
+                _eltVisable = _selecs(PREFIX + "-visible");
+                _eltVisable.each(function () {
+                    var _expression = $(this).attr(PREFIX + "-visible");
+                    _expressionsVisible.push({ele: this, expr: _expression});
+                });
+                _eltVisable.removeAttr(PREFIX + "-visible");
+                if (_eltVisable.length == 0) {
+                    record["_eltVisable"] = true;
+                }
+            }
+            function replaceAll(str, ostr, nstr) {
+                if (str.indexOf(ostr) > -1) {
+                    str = str.replace(ostr, nstr);
+                    return replaceAll(str, ostr, nstr);
+                } else {
+                    return str;
+                }
+            }
+
+            function renderText() {
+                for (var i = 0; i < _expressionsText.length; i++) {
+                    var _o = _expressionsText[i];
+                    var _expshow = _o.expr;
+                    for (var k = 0; k < textlsit.length; k++) {
+                        try {
+                            if (isNum(vm[textlsit[k]]) || typeof vm[textlsit[k]] == "boolean") {
+                                _expshow = replaceAll(_expshow, "{" + textlsit[k] + "}", vm[textlsit[k]]);
+                                _expshow = _expshow.replace(new RegExp("{" + textlsit[k].replace("$", "\\$") + "}", "g"), vm[textlsit[k]]);
+                            } else {
+                                _expshow = replaceAll(_expshow, "{" + textlsit[k] + "}", "\"" + vm[textlsit[k]].replace(/\"/g, "\\\"") + "\"");
+                            }
+                        } catch (e) {
+                            groot.log(textlsit[k]);
+                        }
+                    }
+                    _expshow = _expshow.replace(/(\n)|(\r\n)/g, "\\\r\\\n");
+                    try {
+                        eval("var myValue=" + _expshow);
+                        var t = typeof myValue;
+                        if (t == "string" || t == "number" || t == "boolean") {
+                            $(_o.ele).html(myValue);
+                        }
+
+                    } catch (e) {
+
+                    }
+                }
+            }
+
+            function renderCCA(expressions, callback) {//渲染 css class attr
+
+                for (var i = 0; i < expressions.length; i++) {
+                    var _o = expressions[i];
+                    var _arr = _o.expr.split(",");
+                    for (var m = 0; m < _arr.length; m++) {
+                        var index = _arr[m].indexOf(":");
+                        var _cname = _arr[m].substr(0, index);
+                        var _cexpress = _arr[m].substr(index + 1);
+                        for (var k = 0; k < textlsit.length; k++) {
+                            try {
+                                if (isNum(vm[textlsit[k]]) || typeof vm[textlsit[k]] == "boolean") {
+                                    _cexpress = replaceAll(_cexpress, "{" + textlsit[k] + "}", vm[textlsit[k]]);
+                                    _cexpress = _cexpress.replace(new RegExp("{" + textlsit[k].replace("$", "\\$") + "}", "g"), vm[textlsit[k]]);
+                                } else {
+                                    _cexpress = replaceAll(_cexpress, "{" + textlsit[k] + "}", "\"" + vm[textlsit[k]].replace(/\"/g, "\\\"") + "\"");
+                                }
+                            } catch (e) {
+                                groot.log(textlsit[k]);
+                            }
+                        }
+                        _cexpress = _cexpress.replace(/(\n)|(\r\n)/g, "\\\r\\\n");
+                        try {
+                            eval("var myValue = " + _cexpress);
+                            callback(_o, _cname, myValue);
+                        } catch (e) {
+
+                        }
+                    }
+                }
+            }
+
+            function renderClass() {
+                renderCCA(_expressionsClass, function (_o, _cname, myValue) {
+                    if (myValue === true) {
+                        $(_o.ele).addClass(_cname);
+                    } else if (myValue === false) {
+                        $(_o.ele).removeClass(_cname);
+                    }
+                });
+            }
+
+            function renderCss() {
+                //_expressionsCss
+                renderCCA(_expressionsCss, function (_o, _cname, myValue) {
+                    var t = typeof myValue;
+                    if (t === "string" || t === "number" || t === "boolean") {
+                        $(_o.ele).css(_cname, myValue);
+                    }
+                });
+            }
+
+            function renderAttr() {
+                //_expressionsAttr
+                renderCCA(_expressionsAttr, function (_o, _cname, myValue) {
+                    var t = typeof myValue;
+                    if (t === "string" || t === "number" || t === "boolean") {
+                        $(_o.ele).attr(_cname, myValue);
+                    }
+                })
+            }
+
+            function renderVisable() {
+                for (var i = 0; i < _expressionsVisible.length; i++) {
+                    var _o = _expressionsVisible[i];
+                    var _expshow = _o.expr;
+                    for (var k = 0; k < textlsit.length; k++) {
+                        try {
+                            if (isNum(vm[textlsit[k]]) || typeof vm[textlsit[k]] == "boolean") {
+                                _expshow = replaceAll(_expshow, "{" + textlsit[k] + "}", vm[textlsit[k]]);
+                                _expshow = _expshow.replace(new RegExp("{" + textlsit[k].replace("$", "\\$") + "}", "g"), vm[textlsit[k]]);
+                            } else {
+                                _expshow = replaceAll(_expshow, "{" + textlsit[k] + "}", "\"" + vm[textlsit[k]].replace(/\"/g, "\\\"") + "\"");
+                            }
+                        } catch (e) {
+                            groot.log(textlsit[k]);
+                        }
+                    }
+                    _expshow = _expshow.replace(/(\n)|(\r\n)/g, "\\\r\\\n");
+                    try {
+                        eval("var myValue=" + _expshow);
+                        var t = typeof myValue;
+                        if (myValue == true) {
+                            if (typeof _o.wrap != "undefined") {
+                                $(_o.ele).insertAfter($(_o.wrap));
+                                $(_o.wrap).remove();
+                                delete _o.wrap;
+                            }
+                        } else {
+                            if (typeof _o.wrap == "undefined") {
+                                _o.wrap = $("<!--占位符-->")[0];
+                                $(_o.wrap).insertAfter($(_o.ele));
+                                $(_o.ele).detach();
+                            }
+                        }
+
+                    } catch (e) {
+
+                    }
+                }
+            }
+
+            function _render() {
+                renderText();
+                renderClass();
+                renderCss();
+                renderAttr();
+                renderVisable();
+            };
+            //单属性绑定
+            (function () {
+                var _eltValue0 = $([]);
+                if (!record["_eltValue0"]) {
+                    _eltValue0 = _selecs(PREFIX + "-value");
+                    if (_eltValue0.length == 0) {
+                        record["_eltValue0"] = true;
+                    }
+                }
+                var _eltChange0 = $([]);
+                if (!record["_eltChange0"]) {
+                    _eltChange0 = _selecs(PREFIX + "-value-change");
+                    if (_eltChange0.length == 0) {
+                        record["_eltChange0"] = true;
+                    }
+                }
+                var _eltBlur0 = $([]);
+                if (!record["_eltBlur0"]) {
+                    _eltBlur0 = _selecs(PREFIX + "-value-blur");
+                    if (_eltBlur0.length == 0) {
+                        record["_eltBlur0"] = true;
+                    }
+                }
+                var _eltRadio0 = $([]);
+                if (!record["_eltRadio0"]) {
+                    _eltRadio0 = _selecs(PREFIX + "-radio");
+                    if (_eltRadio0.length == 0) {
+                        record["_eltRadio0"] = true;
+                    }
+                }
+                var _elSelect0 = $([]);
+                if (!record["_elSelect0"]) {
+                    _elSelect0 = _selecs(PREFIX + "-select");
+                    if (_elSelect0.length == 0) {
+                        record["_elSelect0"] = true;
+                    }
+                }
+                var _elCheck0 = $([]);
+                if (!record["_elCheck0"]) {
+                    _elCheck0 = _selecs(PREFIX + "-check");
+                    if (_elCheck0.length == 0) {
+                        record["_elCheck0"] = true;
+                    }
+                }
+                var _elUi0 = $([]);
+                if (!record["_elUi0"]) {
+                    _elUi0 = _selecs(PREFIX + "-ui")
+                    if (_elUi0.length == 0) {
+                        record["_elUi0"] = true;
+                    }
+                }
+
+                function bindSinle(vm, pro, ve) {
+                    var _eltValue = $([]);
+                    if (!record["_eltValue1" + pro]) {
+                        _eltValue = getElement(_eltValue0, PREFIX + "-value", pro);
+                        _eltValue.removeAttr(PREFIX + "-value");
+                        if (_eltValue.length == 0) {
+                            record["_eltValue1" + pro] = true;
+                        }
+                    }
+                    var _eltChange = $([]);
+                    if (!record["_eltChange1" + pro]) {
+                        _eltChange = getElement(_eltChange0, PREFIX + "-value-change", pro);
+                        _eltChange.removeAttr(PREFIX + "-value-change");
+                        if (_eltChange.length == 0) {
+                            record["_eltChange1" + pro] = true;
+                        }
+                    }
+                    var _eltBlur = $([]);
+                    if (!record["_eltBlur1" + pro]) {
+                        _eltBlur = getElement(_eltBlur0, PREFIX + "-value-blur", pro);
+                        _eltBlur.removeAttr(PREFIX + "-value-blur");
+                        if (_eltBlur.length == 0) {
+                            record["_eltBlur1" + pro] = true;
+                        }
+                    }
+                    var _eltRadio = $([]);
+                    if (!record["_eltRadio1" + pro]) {
+                        _eltRadio = getElement(_eltRadio0, PREFIX + "-radio", pro);
+                        _eltRadio.removeAttr(PREFIX + "-radio");
+                        if (_eltRadio.length == 0) {
+                            record["_eltRadio1" + pro] = true;
+                        }
+                    }
+                    var _elSelect = $([]);
+                    if (!record["_elSelect1" + pro]) {
+                        _elSelect = getElement(_elSelect0, PREFIX + "-select", pro);
+                        _elSelect.removeAttr(PREFIX + "-select");
+                        if (_elSelect.length == 0) {
+                            record["_elSelect1" + pro] = true;
+                        }
+                    }
+                    var _elCheck = $([]);
+                    if (!record["_elCheck1" + pro]) {
+                        _elCheck = getElement(_elCheck0, PREFIX + "-check", pro);
+                        _elCheck.removeAttr(PREFIX + "-check");
+                        if (_elCheck.length == 0) {
+                            record["_elCheck1" + pro] = true;
+                        }
+                    }
+                    var _elUi = $([]);
+                    if (!record["_elUi1" + pro]) {
+                        _elUi = getElement(_elUi0, PREFIX + "-ui", pro);
+                        _elUi.removeAttr(PREFIX + "-ui");
+                        if (_elUi.length == 0) {
+                            record["_elUi1" + pro] = true;
+                        }
+                    }
+                    var _objElements = {};
+                    if (_eltValue.length > 0) {
+                        _objElements._eltValue = _eltValue;
+                    }
+                    if (_eltChange.length > 0) {
+                        _objElements._eltValue = _eltChange;
+                    }
+                    if (_eltBlur.length > 0) {
+                        _objElements._eltValue = _eltBlur;
+                    }
+                    if (_eltRadio.length > 0) {
+                        _objElements._eltValue = _eltRadio;
+                    }
+                    if (_elSelect.length > 0) {
+                        _objElements._eltValue = _elSelect;
+                    }
+                    if (_elCheck.length > 0) {
+                        _objElements._eltValue = _elCheck;
+                    }
+                    if (_elUi.length > 0) {
+                        _objElements._eltValue = _elUi;
+                    }
+                    /*********************** watch  *******************************/
+                    for (var e in _objElements) {
+                        var _elmt = _objElements[e];
+                        if (typeof _elmt.attr(PREFIX + "-watch") != "undefined") {
+                            var _fun = _elmt.attr(PREFIX + "-watch");
+                            if ($.isFunction(ve[_fun])) {
+                                vm[pro + "watch"] = (function ($this, $ve) {
+                                    return function () {
+                                        var args = $.makeArray(arguments);
+                                        $ve.apply($this, args);
+                                    }
+                                })(_elmt[0], ve[_fun])
+                            }
+                            _elmt.removeAttr(PREFIX + "-watch");
+                        }
+                    }
+                    /*********************** ui控件开发扫描  *******************************/
+                    var _uiList = [];
+                    if (!record["_elUi1" + pro]) {
+                        _elUi.each(function () {
+                            var _uiname = $(this).attr(PREFIX + "-ui");
+                            _uiname = _uiname.substring(_uiname.indexOf("(") + 1, _uiname.lastIndexOf(")"));
+                            $(this).removeAttr(PREFIX + "-ui");
+                            var _data = null;
+                            if (typeof $(this).attr(PREFIX + "-ui-data") != "undefined") {
+                                var _default = $(this).attr(PREFIX + "-ui-data");
+                                if (_default.indexOf("uiInit") > -1) {
+                                    _default = _default.substring(_default.indexOf("[") + 1, _default.lastIndexOf("]"));
+                                    _data = groot.uiInit[_default];
+                                } else {
+                                    _data = eval("(" + _default + ")");
+                                }
+
+                                $(this).removeAttr(PREFIX + "-ui-data");
+                            }
+                            var _id = new Date() - 1;
+                            if (typeof $(this).attr(PREFIX + "-ui-id") != "undefined") {
+                                _id = $(this).attr(PREFIX + "-ui-id");
+                                $(this).removeAttr(PREFIX + "-ui-id");
+                            } else {
+                                _id = "ui" + _id;
+                            }
+                            _uiList.push(_id);
+                            groot.ui[_uiname]($(this), _id, _data, vm[pro], (function (_id) {
+                                return function () {
+                                    vm[pro] = groot.vms[_id].uivalue;
+                                    vm[pro + "Render"]();
+                                }
+                            })(_id));
+                        });
+                    }
+                    /*********************** checkbox  *******************************/
+                    if (_elCheck.length > 0) {
+                        _elCheck.removeAttr(PREFIX + "-check");
+                        if (vm[pro]) {
+                            _elCheck.attr("checked", "checked");//.is(":checked")
+                        } else {
+                            _elCheck.removeAttr("checked");
+                        }
+                        _elCheck.change(function () {
+                            if ($(this).is(":checked")) {
+                                vm[pro] = true;
+                                vm[pro + RENDER]();
+                            } else {
+                                vm[pro] = false;
+                                vm[pro + RENDER]();
+                            }
+                        });
+                    }
+                    /*********************** selectBox  *******************************/
+                    if (_elSelect.length > 0) {
+                        _elSelect.removeAttr(PREFIX + "-select");
+                        _elSelect.find("option[value='" + vm[pro] + "']").attr("selected", "selected");
+                        _elSelect.change(function () {
+                            vm[pro] = $(this).val();
+                            vm[pro + RENDER]();
+                        });
+                    }
+                    /*********************** Radio  *******************************/
+                    if (_eltRadio.length > 0) {
+                        _eltRadio.removeAttr(PREFIX + "-radio");
+                        _eltRadio.each(function () {
+                            if ($(this).val() == vm[pro]) {
+                                //$(this).attr("checked", "checked");元写法在火狐下有bug
+                                $(this).click();
+                            }
+                        });
+                        _eltRadio.change(function () {
+                            if ($(this).is(':checked')) {
+                                vm[pro] = $(this).val();
+                                vm[pro + RENDER]();
+                            }
+                        });
+                    }
+                    /*********************** value 文本  *******************************/
+                    if (_eltValue.length > 0) {
+                        var temp = $("<div>" + vm[pro] + "</div>");
+                        _eltValue.removeAttr(PREFIX + "-value").val(temp.text());
+                    }
+                    /*********************** 绑定扩展属性  *******************************/
+                    var _eblist = [];
+                    if (!record["_eblist" + pro]) {
+                        for (var i = 0; i < groot.bindingHandler.length; i++) {
+                            var _temp = groot.bindingHandler[i];
+                            var _elts = $("[" + PREFIX + "-" + _temp.Name + "='" + pro + "']", element).removeAttr(PREFIX + "-" + _temp.Name);
+                            if (_elts.length > 0) {
+                                _temp.Handler(_elts, vm[pro]);
+                                _eblist.push({element: _elts, fun: _temp.Handler});
+                            }
+                        }
+                        if (_eblist == 0) {
+                            record["_eblist" + pro] = true;
+                        }
+                    }
+                    /*********************** 绑定输入框值变化  *******************************/
+                    if (_eltChange.length > 0) {
+                        var temp = $("<div>" + vm[pro] + "</div>");
+                        _eltChange.removeAttr(PREFIX + "-value-change").val(temp.text());
+                        _eltChange.bind("input propertychange", function () {
+                            vm[pro] = $(this).val();
+                            vm[pro + RENDER]();
+
+                        });
+                    }
+                    /*********************** 绑定输入失去焦点 *******************************/
+                    if (_eltBlur.length > 0) {
+                        var temp = $("<div>" + vm[pro] + "</div>");
+                        _eltBlur.removeAttr(PREFIX + "-value-blur").val(temp.text());
+                        _eltBlur.change(function () {
+                            vm[pro] = $(this).val();
+                            vm[pro + RENDER]();
+                        });
+                    }
+
+                    vm[pro + RENDER] = function () {
+
+                        /*********************** 如果绑定父节点  *******************************/
+                        if (pro.indexOf("$p.") > -1) {
+                            if (vm.hasOwnProperty(pro + "#")) {
+                                delete vm[pro + "#"];
+                            } else {
+                                var arr = pro.split("$p.");
+                                var parent = vm;
+                                for (var i = 0; i < arr.length - 1; i++) {
+                                    if (parent.hasOwnProperty("outerParent") && typeof parent["outerParent"] == "function") {
+                                        parent = parent.outerParent();
+                                    } else {
+                                        parent = parent.parent();
+                                    }
+                                }
+                                parent[arr[arr.length - 1]] = vm[pro];
+                                parent[arr[arr.length - 1] + RENDER]();
+                                return;
+                            }
+                        }
+                        for (var p in  vm) {
+                            if (!$.isFunction(vm[p]) && p.indexOf("$$") < 0) {
+                                if ($.isArray(vm[p])) {
+                                    for (var i = 0; i < vm[p].length; i++) {
+                                        if (vm[p][i].hasOwnProperty("$p." + pro)) {
+                                            {
+                                                vm[p][i]["$p." + pro] = vm[pro];
+                                                vm[p][i]["$p." + pro + "#"] = "#"
+                                                vm[p][i]["$p." + pro + "Render"]();
+                                            }
+                                        }
+                                    }
+
+                                } else if (typeof vm[p] == "object") {
+                                    if (vm[p].hasOwnProperty("$p." + pro)) {
+                                        {
+                                            vm[p]["$p." + pro] = vm[pro];
+                                            vm[p]["$p." + pro + "#"] = "#"
+                                            vm[p]["$p." + pro + "Render"]();
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                        var value = vm[pro];
+                        /*********************** 渲染控件  *******************************/
+                        for (var i = 0; i < _uiList.length; i++) {
+                            groot.vms[_uiList[i]].uivalue = value;
+                            groot.vms[_uiList[i]].uivalueRender();
+                        }
+                        /*********************** 触发监控  *******************************/
+                        if ($.isFunction(vm[pro + "watch"])) {
+                            vm[pro + "watch"](vm, value);//调用监控函数
+                        }
+                        /*********************** checkBox  *******************************/
+                        if (vm[pro]) {
+                            _elCheck.attr("checked", "checked");//.is(":checked")
+                        } else {
+                            _elCheck.removeAttr("checked");
+                        }
+                        /*********************** selectBox  *******************************/
+                        _elSelect.find("option[value='" + vm[pro] + "']").attr("selected", "selected");
+                        /*********************** Radio  *******************************/
+                        _eltRadio.each(function () {
+                            if ($(this).val() == value) {
+                                $(this).attr("checked", "checked");
+                            } else {
+                                $(this).removeAttr("checked");
+                            }
+                        });
+                        /*********************** text 标签值  *******************************/
+                        _render();
+                        /*********************** value 文本  *******************************/
+                        _eltValue.val(vm[pro]);
+                        _eltChange.each(function () {
+                            if (!$(this).is(':focus')) {
+                                $(this).val(vm[pro])
+                            }
+
+                        });
+                        _eltBlur.val(vm[pro]);
+                        /*********************** style 式 刷新扩展属性  *******************************/
+                        for (var i = 0; i < _eblist.length; i++) {
+                            _eblist[i].fun(_eblist[i].element, value)
+                        }
+                    }
+
+                }
+
+                function getElement(eles, selector, value) {
+                    var retlist = [];
+                    eles.each(function () {
+                        if ($(this).attr(selector) === value || (selector == PREFIX + "-ui" && $(this).attr(selector) !== undefined && $(this).attr(selector).indexOf(value + "(") === 0)) {
+                            retlist.push(this);
+                        }
+                    })
+                    return $(retlist);
+                }
+
+                for (var i = 0; i < textlsit.length; i++) {
+                    (function (vm, pro, ve) {
+                        bindSinle(vm, pro, ve);
+                    })(vm, textlsit[i], ve)
+                }
+            })()
+            return _render;
+
+        }
+
         var _renderText = _bindText(element, vm, ve);//绑定text
         if (!vm.hasOwnProperty("outerParent")) {
             _sweepEvents(vm, element, ve);//绑定事件
         }
         _renderText();
         _collection();//回收垃圾
-    }
-
-    /*
-     @vm 绑定的数据模型
-     @textlsit 要绑定的属性数组
-     * */
-    function _bindText(element, vm, ve) {
-        ///text
-        var textlsit = [];
-        for (var pro in  vm) {
-            if (vm[pro] == null)vm[pro] = "";
-            if (!$.isFunction(vm[pro]) && pro.indexOf("$$") < 0) {
-                if (!$.isArray(vm[pro]) && typeof vm[pro] != "object") {
-                    textlsit.push(pro);
-                }
-            }
-        }
-        function _selecs(selector) {
-            var _ls = [];
-            if (element.attr(selector) != undefined) {
-                _ls.push(element[0])
-            }
-            var _ele = $("[" + selector + "]", element);
-            if (_ele.length > 0) {
-                _ele.each(function () {
-                    _ls.push(this)
-                })
-            }
-            return $(_ls);
-        }
-
-        var _eltText = _selecs(PREFIX + "-text");
-        var _expressionsText = [];
-        _eltText.each(function () {
-            var _expression = $(this).attr(PREFIX + "-text");
-            _expressionsText.push({ele: this, expr: _expression});
-        });
-        _eltText.removeAttr(PREFIX + "-text");
-        ///class
-        var _eltClass = _selecs(PREFIX + "-class");
-        var _expressionsClass = [];
-        _eltClass.each(function () {
-            var _expression = $(this).attr(PREFIX + "-class");
-            _expressionsClass.push({ele: this, expr: _expression});
-        });
-        _eltClass.removeAttr(PREFIX + "-class");
-        ///css
-        var _eltCss = _selecs(PREFIX + "-css");
-        var _expressionsCss = [];
-        _eltCss.each(function () {
-            var _expression = $(this).attr(PREFIX + "-css");
-            _expressionsCss.push({ele: this, expr: _expression});
-        });
-        _eltCss.removeAttr(PREFIX + "-css");
-        ///attr
-        var _eltAttr = _selecs(PREFIX + "-attr");
-        var _expressionsAttr = [];
-        _eltAttr.each(function () {
-            var _expression = $(this).attr(PREFIX + "-attr");
-            _expressionsAttr.push({ele: this, expr: _expression});
-        });
-        _eltAttr.removeAttr(PREFIX + "-attr");
-        var _eltVisable = _selecs(PREFIX + "-visible");
-        var _expressionsVisible = [];
-        _eltVisable.each(function () {
-            var _expression = $(this).attr(PREFIX + "-visible");
-            _expressionsVisible.push({ele: this, expr: _expression});
-        });
-        _eltVisable.removeAttr(PREFIX + "-visible");
-        function replaceAll(str, ostr, nstr) {
-            if (str.indexOf(ostr) > -1) {
-                str = str.replace(ostr, nstr);
-                return replaceAll(str, ostr, nstr);
-            } else {
-                return str;
-            }
-        }
-
-        function renderText() {
-            for (var i = 0; i < _expressionsText.length; i++) {
-                var _o = _expressionsText[i];
-                var _expshow = _o.expr;
-                for (var k = 0; k < textlsit.length; k++) {
-                    try {
-                        if (isNum(vm[textlsit[k]]) || typeof vm[textlsit[k]] == "boolean") {
-                            _expshow = replaceAll(_expshow, "{" + textlsit[k] + "}", vm[textlsit[k]]);
-                            _expshow = _expshow.replace(new RegExp("{" + textlsit[k].replace("$", "\\$") + "}", "g"), vm[textlsit[k]]);
-                        } else {
-                            _expshow = replaceAll(_expshow, "{" + textlsit[k] + "}", "\"" + vm[textlsit[k]].replace(/\"/g, "\\\"") + "\"");
-                        }
-                    } catch (e) {
-                        groot.log(textlsit[k]);
-                    }
-                }
-                _expshow = _expshow.replace(/(\n)|(\r\n)/g, "\\\r\\\n");
-                try {
-                    eval("var myValue=" + _expshow);
-                    var t = typeof myValue;
-                    if (t == "string" || t == "number" || t == "boolean") {
-                        $(_o.ele).html(myValue);
-                    }
-
-                } catch (e) {
-
-                }
-            }
-        }
-
-        function renderCCA(expressions, callback) {//渲染 css class attr
-
-            for (var i = 0; i < expressions.length; i++) {
-                var _o = expressions[i];
-                var _arr = _o.expr.split(",");
-                for (var m = 0; m < _arr.length; m++) {
-                    var index = _arr[m].indexOf(":");
-                    var _cname = _arr[m].substr(0, index);
-                    var _cexpress = _arr[m].substr(index + 1);
-                    for (var k = 0; k < textlsit.length; k++) {
-                        try {
-                            if (isNum(vm[textlsit[k]]) || typeof vm[textlsit[k]] == "boolean") {
-                                _cexpress = replaceAll(_cexpress, "{" + textlsit[k] + "}", vm[textlsit[k]]);
-                                _cexpress = _cexpress.replace(new RegExp("{" + textlsit[k].replace("$", "\\$") + "}", "g"), vm[textlsit[k]]);
-                            } else {
-                                _cexpress = replaceAll(_cexpress, "{" + textlsit[k] + "}", "\"" + vm[textlsit[k]].replace(/\"/g, "\\\"") + "\"");
-                            }
-                        } catch (e) {
-                            groot.log(textlsit[k]);
-                        }
-                    }
-                    _cexpress = _cexpress.replace(/(\n)|(\r\n)/g, "\\\r\\\n");
-                    try {
-                        eval("var myValue = " + _cexpress);
-                        callback(_o, _cname, myValue);
-                    } catch (e) {
-
-                    }
-                }
-            }
-        }
-
-        function renderClass() {
-            renderCCA(_expressionsClass, function (_o, _cname, myValue) {
-                if (myValue === true) {
-                    $(_o.ele).addClass(_cname);
-                } else if (myValue === false) {
-                    $(_o.ele).removeClass(_cname);
-                }
-            });
-        }
-
-        function renderCss() {
-            //_expressionsCss
-            renderCCA(_expressionsCss, function (_o, _cname, myValue) {
-                var t = typeof myValue;
-                if (t === "string" || t === "number" || t === "boolean") {
-                    $(_o.ele).css(_cname, myValue);
-                }
-            });
-        }
-
-        function renderAttr() {
-            //_expressionsAttr
-            renderCCA(_expressionsAttr, function (_o, _cname, myValue) {
-                var t = typeof myValue;
-                if (t === "string" || t === "number" || t === "boolean") {
-                    $(_o.ele).attr(_cname, myValue);
-                }
-            })
-        }
-
-        function renderVisable() {
-            for (var i = 0; i < _expressionsVisible.length; i++) {
-                var _o = _expressionsVisible[i];
-                var _expshow = _o.expr;
-                for (var k = 0; k < textlsit.length; k++) {
-                    try {
-                        if (isNum(vm[textlsit[k]]) || typeof vm[textlsit[k]] == "boolean") {
-                            _expshow = replaceAll(_expshow, "{" + textlsit[k] + "}", vm[textlsit[k]]);
-                            _expshow = _expshow.replace(new RegExp("{" + textlsit[k].replace("$", "\\$") + "}", "g"), vm[textlsit[k]]);
-                        } else {
-                            _expshow = replaceAll(_expshow, "{" + textlsit[k] + "}", "\"" + vm[textlsit[k]].replace(/\"/g, "\\\"") + "\"");
-                        }
-                    } catch (e) {
-                        groot.log(textlsit[k]);
-                    }
-                }
-                _expshow = _expshow.replace(/(\n)|(\r\n)/g, "\\\r\\\n");
-                try {
-                    eval("var myValue=" + _expshow);
-                    var t = typeof myValue;
-                    if (myValue == true) {
-                        if (typeof _o.wrap != "undefined") {
-                            $(_o.ele).insertAfter($(_o.wrap));
-                            $(_o.wrap).remove();
-                            delete _o.wrap;
-                        }
-                    } else {
-                        if (typeof _o.wrap == "undefined") {
-                            _o.wrap = $("<!--占位符-->")[0];
-                            $(_o.wrap).insertAfter($(_o.ele));
-                            $(_o.ele).detach();
-                        }
-                    }
-
-                } catch (e) {
-
-                }
-            }
-        }
-
-        function _render() {
-            renderText();
-            renderClass();
-            renderCss();
-            renderAttr();
-            renderVisable();
-        }
-
-        vm.$$renderText = _render;
-        //单属性绑定
-        (function () {
-            var _eltValue0 = _selecs(PREFIX + "-value");
-            var _eltChange0 = _selecs(PREFIX + "-value-change");
-            var _eltBlur0 = _selecs(PREFIX + "-value-blur");
-            var _eltRadio0 = _selecs(PREFIX + "-radio");
-            var _elSelect0 = _selecs(PREFIX + "-select");
-            var _elCheck0 = _selecs(PREFIX + "-check");
-            var _elUi0 = _selecs(PREFIX + "-ui");
-
-            function bindSinle(vm, pro, ve) {
-                var _eltValue = getElement(_eltValue0, PREFIX + "-value", pro);
-                var _eltChange = getElement(_eltChange0, PREFIX + "-value-change", pro);
-                var _eltBlur = getElement(_eltBlur0, PREFIX + "-value-blur", pro);
-                var _eltRadio = getElement(_eltRadio0, PREFIX + "-radio", pro);
-                var _elSelect = getElement(_elSelect0, PREFIX + "-select", pro);
-                var _elCheck = getElement(_elCheck0, PREFIX + "-check", pro);
-                var _elUi = getElement(_elUi0, PREFIX + "-ui", pro);
-                var _objElements = {
-                    "_eltValue": _eltValue,
-                    "_eltChange": _eltChange,
-                    "_eltBlur": _eltBlur,
-                    "_eltRadio": _eltRadio,
-                    "_elSelect": _elSelect,
-                    "_elCheck": _elCheck,
-                    "_elUi": _elUi
-                };
-                /*********************** watch  *******************************/
-                for (var e in _objElements) {
-                    var _elmt = _objElements[e];
-                    if (typeof _elmt.attr(PREFIX + "-watch") != "undefined") {
-                        var _fun = _elmt.attr(PREFIX + "-watch");
-                        if ($.isFunction(ve[_fun])) {
-                            vm[pro + "watch"] = (function ($this, $ve) {
-                                return function () {
-                                    var args = $.makeArray(arguments);
-                                    $ve.apply($this, args);
-                                }
-                            })(_elmt[0], ve[_fun])
-                        }
-                        _elmt.removeAttr(PREFIX + "-watch");
-                    }
-                }
-                /*********************** ui控件开发扫描  *******************************/
-                var _uiList = [];
-                _elUi.each(function () {
-                    var _uiname = $(this).attr(PREFIX + "-ui");
-                    _uiname = _uiname.substring(_uiname.indexOf("(") + 1, _uiname.lastIndexOf(")"));
-                    $(this).removeAttr(PREFIX + "-ui");
-                    var _data = null;
-                    if (typeof $(this).attr(PREFIX + "-ui-data") != "undefined") {
-                        var _default = $(this).attr(PREFIX + "-ui-data");
-                        if (_default.indexOf("uiInit") > -1) {
-                            _default = _default.substring(_default.indexOf("[") + 1, _default.lastIndexOf("]"));
-                            _data = groot.uiInit[_default];
-                        } else {
-                            _data = eval("(" + _default + ")");
-                        }
-
-                        $(this).removeAttr(PREFIX + "-ui-data");
-                    }
-                    var _id = new Date() - 1;
-                    if (typeof $(this).attr(PREFIX + "-ui-id") != "undefined") {
-                        _id = $(this).attr(PREFIX + "-ui-id");
-                        $(this).removeAttr(PREFIX + "-ui-id");
-                    } else {
-                        _id = "ui" + _id;
-                    }
-                    _uiList.push(_id);
-                    groot.ui[_uiname]($(this), _id, _data, vm[pro], (function (_id) {
-                        return function () {
-                            vm[pro] = groot.vms[_id].uivalue;
-                            vm[pro + "Render"]();
-                        }
-                    })(_id));
-                });
-                /*********************** checkbox  *******************************/
-                _elCheck.removeAttr(PREFIX + "-check");
-                if (vm[pro]) {
-                    _elCheck.attr("checked", "checked");//.is(":checked")
-                } else {
-                    _elCheck.removeAttr("checked");
-                }
-                _elCheck.change(function () {
-                    if ($(this).is(":checked")) {
-                        vm[pro] = true;
-                        vm[pro + RENDER]();
-                    } else {
-                        vm[pro] = false;
-                        vm[pro + RENDER]();
-                    }
-                });
-                /*********************** selectBox  *******************************/
-                _elSelect.removeAttr(PREFIX + "-select");
-                _elSelect.find("option[value='" + vm[pro] + "']").attr("selected", "selected");
-                _elSelect.change(function () {
-                    vm[pro] = $(this).val();
-                    vm[pro + RENDER]();
-                });
-                /*********************** Radio  *******************************/
-                _eltRadio.removeAttr(PREFIX + "-radio");
-                _eltRadio.each(function () {
-                    if ($(this).val() == vm[pro]) {
-                        //$(this).attr("checked", "checked");元写法在火狐下有bug
-                        $(this).click();
-                    }
-                });
-                _eltRadio.change(function () {
-                    if ($(this).is(':checked')) {
-                        vm[pro] = $(this).val();
-                        vm[pro + RENDER]();
-                    }
-                });
-                /*********************** value 文本  *******************************/
-                var temp = $("<div>" + vm[pro] + "</div>");
-                _eltValue.removeAttr(PREFIX + "-value").val(temp.text());
-                /*********************** 绑定扩展属性  *******************************/
-                var _eblist = [];
-                for (var i = 0; i < groot.bindingHandler.length; i++) {
-                    var _temp = groot.bindingHandler[i];
-                    var _elts = $("[" + PREFIX + "-" + _temp.Name + "='" + pro + "']", element).removeAttr(PREFIX + "-" + _temp.Name);
-                    _temp.Handler(_elts, vm[pro]);
-                    _eblist.push(_elts);
-                }
-                /*********************** 绑定输入框值变化  *******************************/
-
-                var temp = $("<div>" + vm[pro] + "</div>");
-                _eltChange.removeAttr(PREFIX + "-value-change").val(temp.text());
-                _eltChange.bind("input propertychange", function () {
-                    vm[pro] = $(this).val();
-                    vm[pro + RENDER]();
-
-                });
-                /*********************** 绑定输入失去焦点 *******************************/
-                var temp = $("<div>" + vm[pro] + "</div>");
-                _eltBlur.removeAttr(PREFIX + "-value-blur").val(temp.text());
-                _eltBlur.change(function () {
-                    vm[pro] = $(this).val();
-                    vm[pro + RENDER]();
-                });
-                vm[pro + RENDER] = function () {
-
-                    /*********************** 如果绑定父节点  *******************************/
-                    if (pro.indexOf("$p.") > -1) {
-                        if (vm.hasOwnProperty(pro + "#")) {
-                            delete vm[pro + "#"];
-                        } else {
-                            var arr = pro.split("$p.");
-                            var parent = vm;
-                            for (var i = 0; i < arr.length - 1; i++) {
-                                if (parent.hasOwnProperty("outerParent") && typeof parent["outerParent"] == "function") {
-                                    parent = parent.outerParent();
-                                } else {
-                                    parent = parent.parent();
-                                }
-                            }
-                            parent[arr[arr.length - 1]] = vm[pro];
-                            parent[arr[arr.length - 1] + RENDER]();
-                            return;
-                        }
-                    }
-                    for (var p in  vm) {
-                        if (!$.isFunction(vm[p]) && p.indexOf("$$") < 0) {
-                            if ($.isArray(vm[p])) {
-                                for (var i = 0; i < vm[p].length; i++) {
-                                    if (vm[p][i].hasOwnProperty("$p." + pro)) {
-                                        {
-                                            vm[p][i]["$p." + pro] = vm[pro];
-                                            vm[p][i]["$p." + pro + "#"] = "#"
-                                            vm[p][i]["$p." + pro + "Render"]();
-                                        }
-                                    }
-                                }
-
-                            } else if (typeof vm[p] == "object") {
-                                if (vm[p].hasOwnProperty("$p." + pro)) {
-                                    {
-                                        vm[p]["$p." + pro] = vm[pro];
-                                        vm[p]["$p." + pro + "#"] = "#"
-                                        vm[p]["$p." + pro + "Render"]();
-                                    }
-                                }
-                            }
-                        }
-                    }
-                    var value = vm[pro];
-                    /*********************** 渲染控件  *******************************/
-                    for (var i = 0; i < _uiList.length; i++) {
-                        groot.vms[_uiList[i]].uivalue = value;
-                        groot.vms[_uiList[i]].uivalueRender();
-                    }
-                    /*********************** 触发监控  *******************************/
-                    if ($.isFunction(vm[pro + "watch"])) {
-                        vm[pro + "watch"](vm, value);//调用监控函数
-                    }
-                    /*********************** checkBox  *******************************/
-                    if (vm[pro]) {
-                        _elCheck.attr("checked", "checked");//.is(":checked")
-                    } else {
-                        _elCheck.removeAttr("checked");
-                    }
-                    /*********************** selectBox  *******************************/
-                    _elSelect.find("option[value='" + vm[pro] + "']").attr("selected", "selected");
-                    /*********************** Radio  *******************************/
-                    _eltRadio.each(function () {
-                        if ($(this).val() == value) {
-                            $(this).attr("checked", "checked");
-                        } else {
-                            $(this).removeAttr("checked");
-                        }
-                    });
-                    /*********************** text 标签值  *******************************/
-                    vm.$$renderText();
-                    /*********************** value 文本  *******************************/
-                    _eltValue.val(vm[pro]);
-                    _eltChange.each(function () {
-                        if (!$(this).is(':focus')) {
-                            $(this).val(vm[pro])
-                        }
-
-                    });
-                    _eltBlur.val(vm[pro]);
-                    /*********************** style 式 刷新扩展属性  *******************************/
-                    for (var i = 0; i < groot.bindingHandler.length; i++) {
-                        var _temp = groot.bindingHandler[i];
-                        _temp.Handler(_eblist[i], value);
-                    }
-                }
-            }
-
-            function getElement(eles, selector, value) {
-                var retlist = [];
-                eles.each(function () {
-                    if ($(this).attr(selector) === value || (selector == PREFIX + "-ui" && $(this).attr(selector) !== undefined && $(this).attr(selector).indexOf(value + "(") === 0)) {
-                        retlist.push(this);
-                    }
-                })
-                return $(retlist);
-            }
-
-            for (var i = 0; i < textlsit.length; i++) {
-                (function (vm, pro, ve) {
-                    bindSinle(vm, pro, ve);
-                })(vm, textlsit[i], ve)
-
-            }
-        })()
-        return _render;
-
+        return record;
     }
 
     function _creatArrProperty(opvm, pvm, vm) {//创建数组的层次关系
@@ -858,7 +1026,6 @@ var groot = (function ($) {
         }
         var tmpl = $("<div>").append(element.clone()).remove().html();
 
-        _arr.tmplshort = tmpl;
         function events(_e, _vm) {
             return function () {
                 var index = $(this).attr(PREFIX + "index");
@@ -871,13 +1038,17 @@ var groot = (function ($) {
             _arr.element.on(ves[e]["bname"], "[" + PREFIX + "event='" + ves[e]["bclass"] + "']", events(ves[e]["bevent"], vm[pro]));
         }
 
-
+        var _record = null;
         for (var i = 0; i < vm[pro].length; i++) {
             if (!$.isFunction(vm[pro]) && pro.indexOf("$$") < 0) {
                 var _child = $(tmpl);
                 frag.appendChild(_child[0]);
-                _creatArrProperty(vm, vm[pro], vm[pro][i])
-                _bindData(vm[pro][i], _child, ve);
+                _creatArrProperty(vm, vm[pro], vm[pro][i]);
+                if (_record == null) {
+                    _record = _bindData(vm[pro][i], _child, ve);
+                } else {
+                    _bindData(vm[pro][i], _child, ve, _record);
+                }
                 vm["$$child" + pro].push(_child);
             }
         }
@@ -885,7 +1056,7 @@ var groot = (function ($) {
         vm[pro + "push"] = function (value) {
             vm[pro].push(value);
             _IndexInit(vm[pro]);
-            var _child = $(_arr.tmplshort);
+            var _child = $(tmpl);
             _arr.element.append(_child);
             _creatArrProperty(vm, vm[pro], value);
             _bindData(value, _child, ve);
@@ -906,7 +1077,7 @@ var groot = (function ($) {
         vm[pro + "unshift"] = function (value) {
             vm[pro].unshift(value);
             _IndexInit(vm[pro]);
-            var _child = $(_arr.tmplshort);
+            var _child = $(tmpl);
             _arr.element.prepend(_child);
             _creatArrProperty(vm, vm[pro], value);
             _bindData(value, _child, ve);
@@ -1009,9 +1180,9 @@ var groot = (function ($) {
             "Name": "show",
             "Handler": function (elment, value) {
                 if (value == true) {
-                    elment.show();
+                    $(elment).show();
                 } else {
-                    elment.hide();
+                    $(elment).hide();
                 }
             }
         }
@@ -1019,14 +1190,14 @@ var groot = (function ($) {
         {
             "Name": "height",
             "Handler": function (elment, value) {
-                elment.height(value);
+                $(elment).height(value);
             }
         }
         ,
         {
             "Name": "width",
             "Handler": function (elment, value) {
-                elment.width(value);
+                $(elment).width(value);
             }
         }
         ,
@@ -1034,9 +1205,9 @@ var groot = (function ($) {
             "Name": "readonly",
             "Handler": function (elment, value) {
                 if (value == false) {
-                    elment.attr("readonly", "readonly");
+                    $(elment).attr("readonly", "readonly");
                 } else {
-                    elment.removeAttr("readonly");
+                    $(elment).removeAttr("readonly");
                 }
             }
         }
@@ -1045,9 +1216,9 @@ var groot = (function ($) {
             "Name": "disabled",
             "Handler": function (elment, value) {
                 if (value == false) {
-                    elment.attr("disabled", "disabled");
+                    $(elment).attr("disabled", "disabled");
                 } else {
-                    elment.removeAttr("disabled");
+                    $(elment).removeAttr("disabled");
                 }
             }
         },
@@ -1055,7 +1226,7 @@ var groot = (function ($) {
             "Name": "focus",
             "Handler": function (elment, value) {
                 if (value) {
-                    elment.focus()
+                    $(elment).focus()
                 }
             }
         }
