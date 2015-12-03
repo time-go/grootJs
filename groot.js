@@ -93,7 +93,7 @@ var groot = (function ($) {
     //---------------qq:289880020---------------//
     //---------------系统常量----------------//
     var PREFIX = "gt";
-    var RENDEAR = "Render";
+    var RENDER = "Render";
     //---------------初始化对象----------------//
     function isNum(value) {
         return typeof value == "number";
@@ -561,10 +561,10 @@ var groot = (function ($) {
                 _elCheck.change(function () {
                     if ($(this).is(":checked")) {
                         vm[pro] = true;
-                        vm[pro + RENDEAR]();
+                        vm[pro + RENDER]();
                     } else {
                         vm[pro] = false;
-                        vm[pro + RENDEAR]();
+                        vm[pro + RENDER]();
                     }
                 });
                 /*********************** selectBox  *******************************/
@@ -572,7 +572,7 @@ var groot = (function ($) {
                 _elSelect.find("option[value='" + vm[pro] + "']").attr("selected", "selected");
                 _elSelect.change(function () {
                     vm[pro] = $(this).val();
-                    vm[pro + RENDEAR]();
+                    vm[pro + RENDER]();
                 });
                 /*********************** Radio  *******************************/
                 _eltRadio.removeAttr(PREFIX + "-radio");
@@ -585,7 +585,7 @@ var groot = (function ($) {
                 _eltRadio.change(function () {
                     if ($(this).is(':checked')) {
                         vm[pro] = $(this).val();
-                        vm[pro + RENDEAR]();
+                        vm[pro + RENDER]();
                     }
                 });
                 /*********************** value 文本  *******************************/
@@ -605,7 +605,7 @@ var groot = (function ($) {
                 _eltChange.removeAttr(PREFIX + "-value-change").val(temp.text());
                 _eltChange.bind("input propertychange", function () {
                     vm[pro] = $(this).val();
-                    vm[pro + RENDEAR]();
+                    vm[pro + RENDER]();
 
                 });
                 /*********************** 绑定输入失去焦点 *******************************/
@@ -613,9 +613,9 @@ var groot = (function ($) {
                 _eltBlur.removeAttr(PREFIX + "-value-blur").val(temp.text());
                 _eltBlur.change(function () {
                     vm[pro] = $(this).val();
-                    vm[pro + RENDEAR]();
+                    vm[pro + RENDER]();
                 });
-                vm[pro + RENDEAR] = function () {
+                vm[pro + RENDER] = function () {
 
                     /*********************** 如果绑定父节点  *******************************/
                     if (pro.indexOf("$p.") > -1) {
@@ -632,7 +632,7 @@ var groot = (function ($) {
                                 }
                             }
                             parent[arr[arr.length - 1]] = vm[pro];
-                            parent[arr[arr.length - 1] + RENDEAR]();
+                            parent[arr[arr.length - 1] + RENDER]();
                             return;
                         }
                     }
@@ -746,7 +746,7 @@ var groot = (function ($) {
             return vm;
         }
         _bindData(vm[pro], _obj.element, ve);
-        vm[pro + RENDEAR] = function () {
+        vm[pro + RENDER] = function () {
             var _obj = vm["$$obj" + pro];
             _obj.element.html(_obj.tmpl);
             vm[pro].parent = function () {
@@ -763,7 +763,7 @@ var groot = (function ($) {
      * */
     function _bindingArry(vm, pro, ve) {
         _initArry(vm, pro, ve);
-        vm[pro + RENDEAR] = function () {
+        vm[pro + RENDER] = function () {
             if (arguments.length > 0) {
                 var _child = vm["$$child" + pro][arguments[0]];
                 var _temp = $(vm["$$arr" + pro].tmpl).insertBefore(_child);
