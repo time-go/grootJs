@@ -1,5 +1,5 @@
 (function (w, $) {
-    //å†…éƒ¨ç”Ÿæˆä¸é‡å¤æ•°å­—å‡½æ•°
+    //ÄÚ²¿Éú³É²»ÖØ¸´Êı×Öº¯Êı
     var random = new Date().getTime();
 
     function getRandom() {
@@ -7,7 +7,7 @@
         return random;
     }
 
-    //---------------commonjsè§„èŒƒ----------------//
+    //---------------commonjs¹æ·¶----------------//
     var tmpTag = document.location.protocol + "//";
     var _cssCache = {};
     var _absUrl = (function () {
@@ -69,7 +69,7 @@
             "cache": true,
             "dataType": "text",
             "error": function () {
-                groot.log(_myUrl + "åŠ è½½å¤±è´¥");
+                groot.log(_myUrl + "¼ÓÔØÊ§°Ü");
             },
             "async": false,
             "success": function (data) {
@@ -77,7 +77,7 @@
             }
         });
 
-        if (_type == "js") { //jsé¢„ç¼–è¯‘
+        if (_type == "js") { //jsÔ¤±àÒë
             var _script = "_define(function(exports,module){\n";
             _script += "var $parent = \"" + _basePath + "\";\n";
             _script += _moudle.replace(/require\(/g, "_require($parent,");
@@ -97,13 +97,13 @@
     };
 })(window, jQuery);
 var groot = (function ($) {
-    //---------------ä½œè€…:å¤§ç›—ä¹”ä¸‰---------------//
+    //---------------×÷Õß:´óµÁÇÇÈı---------------//
     //---------------qq:289880020---------------//
-    //---------------ç³»ç»Ÿå¸¸é‡----------------//
+    //---------------ÏµÍ³³£Á¿----------------//
     var PREFIX = "gt";
     var RENDER = "Render";
-    //---------------åˆå§‹åŒ–å¯¹è±¡----------------//
-    //å†…éƒ¨ç”Ÿæˆä¸é‡å¤æ•°å­—å‡½æ•°
+    //---------------³õÊ¼»¯¶ÔÏó----------------//
+    //ÄÚ²¿Éú³É²»ÖØ¸´Êı×Öº¯Êı
     var random = new Date().getTime();
 
     function getRandom() {
@@ -115,7 +115,7 @@ var groot = (function ($) {
     }
 
     var groot = {};
-    groot.ui = {};//uiæ§ä»¶å¼€å‘æ¥å£
+    groot.ui = {};//ui¿Ø¼ş¿ª·¢½Ó¿Ú
     groot.bindingHandler = [];
     groot.bindExtend = function () {
         for (var i = 0; i < arguments.length; i++) {
@@ -128,33 +128,33 @@ var groot = (function ($) {
             groot.filter = $.extend(_, arguments[i]);
         }
     }
-    groot.vms = {};//å‚¨å­˜vmæ‰€æœ‰å¯¹è±¡
-    groot.uiInit = {};//å­˜æ”¾æ§ä»¶åˆå§‹åŒ–æ•°æ®
-    groot.control = function (name, factory) {//åˆå§‹åŒ–view
+    groot.vms = {};//´¢´ævmËùÓĞ¶ÔÏó
+    groot.uiInit = {};//´æ·Å¿Ø¼ş³õÊ¼»¯Êı¾İ
+    groot.control = function (name, factory) {//³õÊ¼»¯view
         groot.vms[name] = {};
         groot.vms[name].$$ve = {};
-        factory(groot.vms[name], groot.vms[name].$$ve);//vmå¯¹è±¡
+        factory(groot.vms[name], groot.vms[name].$$ve);//vm¶ÔÏó
         var htmlElment = $("[" + PREFIX + "-view='" + name + "']").removeAttr(PREFIX + "-view");
         return groot.vms[name];
     }
-    groot.view = function (name, factory) {//åˆå§‹åŒ–viewå¹¶æ‰«æ
+    groot.view = function (name, factory) {//³õÊ¼»¯view²¢É¨Ãè
         groot.vms[name] = {};
         groot.vms[name].$$ve = {};
-        factory(groot.vms[name], groot.vms[name].$$ve);//vmå¯¹è±¡
+        factory(groot.vms[name], groot.vms[name].$$ve);//vm¶ÔÏó
         var htmlElment = $("[" + PREFIX + "-view='" + name + "']").removeAttr(PREFIX + "-view");
         groot.sweep(groot.vms[name], htmlElment);
         return groot.vms[name];
     }
-    //ç»‘å®šäº‹ä»¶
+    //°ó¶¨ÊÂ¼ş
     var _bindEvents = [
         "click", "abort", "blur", "change", "dblclick", "error", "focus", "keydown", "keypress", "keyup", "unload",
         "load", "mousedown", "mousemove", "mouseout", "mouseover", "mouseup", "reset", "resize", "submit"
     ]
-    //åƒåœ¾å›æ”¶ç®—æ³•
+    //À¬»ø»ØÊÕËã·¨
     var _collect = true;
     var _dynVMS = {};
 
-    function _collection() {//åƒåœ¾å›æ”¶
+    function _collection() {//À¬»ø»ØÊÕ
         if (_collect) {
             _collect = false;
             groot.asyn(function () {
@@ -169,8 +169,8 @@ var groot = (function ($) {
         }
     }
 
-    //---------------æ‰«æäº‹ä»¶----------------//
-    // æ²¡æœ‰å‚æ•°æ‰«ææ‰€æœ‰ï¼Œ2ä¸ªå‚æ•° æ‰«é¢æŒ‡å®šçš„ vn å’Œ htmlç‰‡æ®µ//
+    //---------------É¨ÃèÊÂ¼ş----------------//
+    // Ã»ÓĞ²ÎÊıÉ¨ÃèËùÓĞ£¬2¸ö²ÎÊı É¨ÃæÖ¸¶¨µÄ vn ºÍ htmlÆ¬¶Î//
     //-------------------------------//
     groot.sweep = function (vm, element) {
         var ars = arguments;
@@ -185,7 +185,7 @@ var groot = (function ($) {
     }
     groot.collection = _collection;
     function _sweepEvents(vm, element, ve) {
-        for (var e in ve) {//ç»‘å®šäº‹ä»¶
+        for (var e in ve) {//°ó¶¨ÊÂ¼ş
             for (var i = 0; i < _bindEvents.length; i++) {
                 if (element.attr(PREFIX + "-" + _bindEvents[i]) === e) {
                     element
@@ -207,7 +207,7 @@ var groot = (function ($) {
         }
     }
 
-    //---------------ç§æœ‰å‡½æ•°-----------------//
+    //---------------Ë½ÓĞº¯Êı-----------------//
     function _bindData(vm, element, ve, record) {
         var record = record || {}
         vm.$$selector = element[0];
@@ -261,28 +261,28 @@ var groot = (function ($) {
             }
         }
 
-        for (var pro in  vm) {//ä¿å­˜æ•°ç»„å¯¹è±¡æ¨¡æ¿
+        for (var pro in  vm) {//±£´æÊı×é¶ÔÏóÄ£°å
             if (!$.isFunction(vm[pro]) && pro.indexOf("$$") < 0) {
-                if ($.isArray(vm[pro])) {//æ•°ç»„
+                if ($.isArray(vm[pro])) {//Êı×é
                     findArr(pro);
-                } else if (typeof vm[pro] == "object") {//å¯¹è±¡
+                } else if (typeof vm[pro] == "object") {//¶ÔÏó
                     findObj(pro);
                 }
             }
         }
-        for (var pro in  vm) {//åˆå§‹åŒ–å¯¹è±¡
+        for (var pro in  vm) {//³õÊ¼»¯¶ÔÏó
             if (!$.isFunction(vm[pro]) && pro.indexOf("$$") < 0) {
-                if ($.isArray(vm[pro]) && vm.hasOwnProperty("$$arr" + pro)) {//ç»‘å®šæ•°ç»„
+                if ($.isArray(vm[pro]) && vm.hasOwnProperty("$$arr" + pro)) {//°ó¶¨Êı×é
                     _bindingArry(vm, pro, ve);
                 } else if (typeof vm[pro] == "object" && vm.hasOwnProperty("$$obj" + pro)) {
-                    _bindingObject(vm, pro, ve);//ç»‘å®šå¯¹è±¡
+                    _bindingObject(vm, pro, ve);//°ó¶¨¶ÔÏó
                 }
             }
         }
 
         /*
-         @vm ç»‘å®šçš„æ•°æ®æ¨¡å‹
-         @textlsit è¦ç»‘å®šçš„å±æ€§æ•°ç»„
+         @vm °ó¶¨µÄÊı¾İÄ£ĞÍ
+         @textlsit Òª°ó¶¨µÄÊôĞÔÊı×é
          * */
         function _bindText(element, vm, ve) {
             ///text
@@ -416,7 +416,7 @@ var groot = (function ($) {
                 }
             }
 
-            function renderCCA(expressions, callback) {//æ¸²æŸ“ css class attr
+            function renderCCA(expressions, callback) {//äÖÈ¾ css class attr
 
                 for (var i = 0; i < expressions.length; i++) {
                     var _o = expressions[i];
@@ -506,7 +506,7 @@ var groot = (function ($) {
                             }
                         } else {
                             if (typeof _o.wrap == "undefined") {
-                                _o.wrap = $("<!--å ä½ç¬¦-->")[0];
+                                _o.wrap = $("<!--Õ¼Î»·û-->")[0];
                                 $(_o.wrap).insertAfter($(_o.ele));
                                 $(_o.ele).detach();
                             }
@@ -525,7 +525,7 @@ var groot = (function ($) {
                 renderAttr();
                 renderVisable();
             };
-            //å•å±æ€§ç»‘å®š
+            //µ¥ÊôĞÔ°ó¶¨
             (function () {
                 var _eltValue0 = $([]);
                 if (!record["_eltValue0"]) {
@@ -672,7 +672,7 @@ var groot = (function ($) {
                             _elmt.removeAttr(PREFIX + "-watch");
                         }
                     }
-                    /*********************** uiæ§ä»¶å¼€å‘æ‰«æ  *******************************/
+                    /*********************** ui¿Ø¼ş¿ª·¢É¨Ãè  *******************************/
                     var _uiList = [];
                     if (!record["_elUi1" + pro]) {
                         _elUi.each(function () {
@@ -739,7 +739,7 @@ var groot = (function ($) {
                         _eltRadio.removeAttr(PREFIX + "-radio");
                         _eltRadio.each(function () {
                             if ($(this).val() == vm[pro]) {
-                                //$(this).attr("checked", "checked");å…ƒå†™æ³•åœ¨ç«ç‹ä¸‹æœ‰bug
+                                //$(this).attr("checked", "checked");ÔªĞ´·¨ÔÚ»ğºüÏÂÓĞbug
                                 $(this).click();
                             }
                         });
@@ -750,12 +750,12 @@ var groot = (function ($) {
                             }
                         });
                     }
-                    /*********************** value æ–‡æœ¬  *******************************/
+                    /*********************** value ÎÄ±¾  *******************************/
                     if (_eltValue.length > 0) {
                         var temp = $("<div>" + vm[pro] + "</div>");
                         _eltValue.removeAttr(PREFIX + "-value").val(temp.text());
                     }
-                    /*********************** ç»‘å®šæ‰©å±•å±æ€§  *******************************/
+                    /*********************** °ó¶¨À©Õ¹ÊôĞÔ  *******************************/
                     var _eblist = [];
                     if (!record["_eblist" + pro]) {
                         for (var i = 0; i < groot.bindingHandler.length; i++) {
@@ -770,7 +770,7 @@ var groot = (function ($) {
                             record["_eblist" + pro] = true;
                         }
                     }
-                    /*********************** ç»‘å®šè¾“å…¥æ¡†å€¼å˜åŒ–  *******************************/
+                    /*********************** °ó¶¨ÊäÈë¿òÖµ±ä»¯  *******************************/
                     if (_eltChange.length > 0) {
                         var temp = $("<div>" + vm[pro] + "</div>");
                         _eltChange.removeAttr(PREFIX + "-value-change").val(temp.text());
@@ -780,7 +780,7 @@ var groot = (function ($) {
 
                         });
                     }
-                    /*********************** ç»‘å®šè¾“å…¥å¤±å»ç„¦ç‚¹ *******************************/
+                    /*********************** °ó¶¨ÊäÈëÊ§È¥½¹µã *******************************/
                     if (_eltBlur.length > 0) {
                         var temp = $("<div>" + vm[pro] + "</div>");
                         _eltBlur.removeAttr(PREFIX + "-value-blur").val(temp.text());
@@ -792,7 +792,7 @@ var groot = (function ($) {
 
                     vm[pro + RENDER] = function () {
 
-                        /*********************** å¦‚æœç»‘å®šçˆ¶èŠ‚ç‚¹  *******************************/
+                        /*********************** Èç¹û°ó¶¨¸¸½Úµã  *******************************/
                         if (pro.indexOf("$p.") > -1) {
                             if (vm.hasOwnProperty(pro + "#")) {
                                 delete vm[pro + "#"];
@@ -836,14 +836,14 @@ var groot = (function ($) {
                             }
                         }
                         var value = vm[pro];
-                        /*********************** æ¸²æŸ“æ§ä»¶  *******************************/
+                        /*********************** äÖÈ¾¿Ø¼ş  *******************************/
                         for (var i = 0; i < _uiList.length; i++) {
                             groot.vms[_uiList[i]].uivalue = value;
                             groot.vms[_uiList[i]].uivalueRender();
                         }
-                        /*********************** è§¦å‘ç›‘æ§  *******************************/
+                        /*********************** ´¥·¢¼à¿Ø  *******************************/
                         if ($.isFunction(vm[pro + "watch"])) {
-                            vm[pro + "watch"](vm, value);//è°ƒç”¨ç›‘æ§å‡½æ•°
+                            vm[pro + "watch"](vm, value);//µ÷ÓÃ¼à¿Øº¯Êı
                         }
                         /*********************** checkBox  *******************************/
                         if (vm[pro]) {
@@ -861,9 +861,9 @@ var groot = (function ($) {
                                 $(this).removeAttr("checked");
                             }
                         });
-                        /*********************** text æ ‡ç­¾å€¼  *******************************/
+                        /*********************** text ±êÇ©Öµ  *******************************/
                         _render();
-                        /*********************** value æ–‡æœ¬  *******************************/
+                        /*********************** value ÎÄ±¾  *******************************/
                         _eltValue.val(vm[pro]);
                         _eltChange.each(function () {
                             if (!$(this).is(':focus')) {
@@ -872,7 +872,7 @@ var groot = (function ($) {
 
                         });
                         _eltBlur.val(vm[pro]);
-                        /*********************** style å¼ åˆ·æ–°æ‰©å±•å±æ€§  *******************************/
+                        /*********************** style Ê½ Ë¢ĞÂÀ©Õ¹ÊôĞÔ  *******************************/
                         for (var i = 0; i < _eblist.length; i++) {
                             _eblist[i].fun(_eblist[i].element, value)
                         }
@@ -900,16 +900,16 @@ var groot = (function ($) {
 
         }
 
-        var _renderText = _bindText(element, vm, ve);//ç»‘å®štext
+        var _renderText = _bindText(element, vm, ve);//°ó¶¨text
         if (!vm.hasOwnProperty("outerParent")) {
-            _sweepEvents(vm, element, ve);//ç»‘å®šäº‹ä»¶
+            _sweepEvents(vm, element, ve);//°ó¶¨ÊÂ¼ş
         }
         _renderText();
-        _collection();//å›æ”¶åƒåœ¾
+        _collection();//»ØÊÕÀ¬»ø
         return record;
     }
 
-    function _creatArrProperty(opvm, pvm, vm) {//åˆ›å»ºæ•°ç»„çš„å±‚æ¬¡å…³ç³»
+    function _creatArrProperty(opvm, pvm, vm) {//´´½¨Êı×éµÄ²ã´Î¹ØÏµ
         vm.parent = function () {
             return pvm;
         }
@@ -919,8 +919,8 @@ var groot = (function ($) {
     }
 
     /*
-     @vm ç»‘å®šçš„æ•°æ®æ¨¡å‹
-     @pro è¦ç»‘å®šçš„å±æ€§
+     @vm °ó¶¨µÄÊı¾İÄ£ĞÍ
+     @pro Òª°ó¶¨µÄÊôĞÔ
      * */
     function _bindingObject(vm, pro, ve) {
         var _obj = vm["$$obj" + pro];
@@ -939,10 +939,10 @@ var groot = (function ($) {
         };
     }
 
-    /*ç»‘å®šæ•°ç»„
-     @element htmlå…ƒç´ 
-     @vm ç»‘å®šçš„æ•°æ®æ¨¡å‹
-     @pro è¦ç»‘å®šçš„å±æ€§
+    /*°ó¶¨Êı×é
+     @element htmlÔªËØ
+     @vm °ó¶¨µÄÊı¾İÄ£ĞÍ
+     @pro Òª°ó¶¨µÄÊôĞÔ
      * */
     function _bindingArry(vm, pro, ve) {
         _initArry(vm, pro, ve);
@@ -982,14 +982,14 @@ var groot = (function ($) {
 
     function _initArry(vm, pro, ve) {
         _IndexInit(vm[pro]);
-        var frag = document.createDocumentFragment(); // åˆ›å»ºæ–‡æ¡£ç¢ç‰‡
+        var frag = document.createDocumentFragment(); // ´´½¨ÎÄµµËéÆ¬
         vm["$$child" + pro] = [];
         var _arr = vm["$$arr" + pro];
         _arr.element.html("");
         /**/
         var element = $(_arr.tmpl);
         var ves = {};
-        for (var e in ve) {//ç»‘å®šäº‹ä»¶
+        for (var e in ve) {//°ó¶¨ÊÂ¼ş
             for (var i = 0; i < _bindEvents.length; i++) {
                 if (element.attr(PREFIX + "-" + _bindEvents[i]) === e) {
                     if (!ves.hasOwnProperty(_bindEvents[i] + "-" + e)) {
@@ -1067,7 +1067,7 @@ var groot = (function ($) {
                 vm["$$child" + pro].push(_child);
             }
         }
-        _arr.element.append(frag);//æ·»åŠ æ•°ç»„åˆ°æ–‡æ¡£
+        _arr.element.append(frag);//Ìí¼ÓÊı×éµ½ÎÄµµ
         vm[pro + "push"] = function (value) {
             vm[pro].push(value);
             _IndexInit(vm[pro]);
@@ -1134,7 +1134,7 @@ var groot = (function ($) {
         }
     }
 
-//è·å–modelå¯¹è±¡
+//»ñÈ¡model¶ÔÏó
     groot.model = function (o) {
         var _o;
         if ($.isArray(o)) {
@@ -1171,10 +1171,10 @@ var groot = (function ($) {
         return _o;
     }
 //---------------groot API---------------//
-    groot.log = function (a) {//è¾“å‡ºåˆ°æ§åˆ¶å°
+    groot.log = function (a) {//Êä³öµ½¿ØÖÆÌ¨
         window.console && console.log && console.log(a);
     }
-    groot.asyn = function (foo) {//å¼‚æ­¥å‡½æ•°
+    groot.asyn = function (foo) {//Òì²½º¯Êı
         setTimeout(foo, 10);
     }
     groot.createElement = function (html, id, element) {
@@ -1184,11 +1184,11 @@ var groot = (function ($) {
         _dynVMS[id] = id;
         return element;
     }
-//groot.absUrl = _absUrl;//æ ¹ç»ç›¸å¯¹è·¯å¾„è·å–ç»å¯¹è·¯å¾„
+//groot.absUrl = _absUrl;//¸ù¾øÏà¶ÔÂ·¾¶»ñÈ¡¾ø¶ÔÂ·¾¶
     return groot;
 })
 (jQuery);
-///bindExtend,è‡ªå®šä¹‰å±æ€§,è‡ªå®šä¹‰å±æ€§ gt-width="w"
+///bindExtend,×Ô¶¨ÒåÊôĞÔ,×Ô¶¨ÒåÊôĞÔ gt-width="w"
 (function ($, groot) {
     groot.bindExtend(
         {
