@@ -1,0 +1,43 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>GrootJs双向绑定实现</title>
+    <script src="jquery-1.11.2.min.js"></script>
+    <script src="groot.js"></script>
+</head>
+<body gt-view="hello">
+<button id="update0">修改对向属性</button>
+<button id="update1">修改对向</button>
+<div gt-object="data">
+    <span gt-text="name"></span>
+    <span gt-text="sex"></span>
+    <span gt-text="age"></span>
+    <span gt-text="info"></span>
+    <input type="text" gt-value-change="info">
+</div>
+</body>
+</html>
+<script>
+    var l = groot.view("hello", function (vm) {
+        vm.data = {
+            name: "达芬奇",
+            sex: "男",
+            age: 50,
+            info: "画家科学家"
+        }
+    })
+    $("#update1").on("click", function () {
+        l.data = {
+            name: "达芬奇0000",
+            sex: "男",
+            age: 50,
+            info: "画家科学家00000"
+        }
+        l.dataRender();
+    })
+    $("#update0").on("click", function () {
+        l.data.name = "达芬奇0";
+        l.data.nameRender();
+    })
+</script>

@@ -1,0 +1,22 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>GrootJs双向绑定实现</title>
+    <script src="jquery-1.11.2.min.js"></script>
+    <script src="groot.js"></script>
+</head>
+<body gt-view="hello">
+<button id="update">修改</button>
+<input type="text" gt-value-change="name"/><span gt-text="name"></span>
+</body>
+</html>
+<script>
+    var h = groot.view("hello", function (vm) {
+        vm.name = "hello word";
+    })
+    $("#update").on("click", function () {
+        h.name="I'm ready now";
+        h.nameRender();
+    })
+</script>

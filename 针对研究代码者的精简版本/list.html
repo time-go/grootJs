@@ -1,0 +1,54 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>GrootJs双向绑定实现</title>
+    <script src="jquery-1.11.2.min.js"></script>
+    <script src="groot.js"></script>
+</head>
+<body gt-view="hello">
+<button id="add">增加</button>
+<button id="update">修改</button>
+<button id="remove">删除第二行</button>
+<div gt-each="list">
+    <div>
+        <span gt-text="name"></span>
+        <span gt-text="sex"></span>
+        <span gt-text="age"></span>
+        <span gt-text="info"></span>
+        <input type="text" gt-value-change="info">
+    </div>
+</div>
+</body>
+</html>
+<script>
+    var l = groot.view("hello", function (vm) {
+        vm.list = [{
+            name: "达芬奇",
+            sex: "男",
+            age: 50,
+            info: "画家科学家"
+        }]
+    })
+    $("#add").on("click", function () {
+        l.listpush({
+            name: "达芬奇00",
+            sex: "男",
+            age: 50,
+            info: "画家科学家"
+        })
+    })
+    $("#update").on("click", function () {
+        l.list[1] = {
+            name: "达芬奇0000",
+            sex: "男",
+            age: 50,
+            info: "画家科学家00000"
+        }
+        l.listRender(1);
+    })
+    $("#remove").on("click", function () {
+        l.list.splice(1,1)
+        l.listRender();
+    })
+</script>
