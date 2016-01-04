@@ -110,6 +110,7 @@ var groot = (function ($) {
         random++;
         return random;
     }
+
     function isNum(value) {
         return typeof value == "number";
     }
@@ -336,6 +337,20 @@ var groot = (function ($) {
                     record["_eltClass"] = true;
                 }
             }
+            ///Prop
+            var _eltProp = $([]);
+            var _expressionsProp = [];
+            if (!record["_eltProp"]) {
+                _eltProp = _selecs(PREFIX + "-prop");
+                _eltProp.each(function () {
+                    var _expression = $(this).attr(PREFIX + "-prop");
+                    _expressionsProp.push({ele: this, expr: _expression});
+                });
+                _eltProp.removeAttr(PREFIX + "-prop");
+                if (_eltProp.length == 0) {
+                    record["_eltProp"] = true;
+                }
+            }
             ///css
             var _eltCss = $([]);
             var _expressionsCss = [];
@@ -403,6 +418,7 @@ var groot = (function ($) {
                         }
                     }
                     _expshow = _expshow.replace(/(\n)|(\r\n)/g, "\\\r\\\n");
+                    _expshow = _expshow.replace(/\\0/g, "\\\\0");
                     try {
                         eval("var myValue=" + _expshow);
                         var t = typeof myValue;
@@ -454,6 +470,16 @@ var groot = (function ($) {
                         $(_o.ele).addClass(_cname);
                     } else if (myValue === false) {
                         $(_o.ele).removeClass(_cname);
+                    }
+                });
+            }
+
+            function renderProp() {
+                renderCCA(_expressionsProp, function (_o, _cname, myValue) {
+                    if (myValue === true) {
+                        $(_o.ele).prop(_cname, true);
+                    } else if (myValue === false) {
+                        $(_o.ele).removeProp(_cname);
                     }
                 });
             }
@@ -521,6 +547,7 @@ var groot = (function ($) {
             function _render() {
                 renderText();
                 renderClass();
+                renderProp();
                 renderCss();
                 renderAttr();
                 renderVisable();
@@ -847,18 +874,18 @@ var groot = (function ($) {
                         }
                         /*********************** checkBox  *******************************/
                         if (vm[pro]) {
-                            _elCheck.attr("checked", "checked");//.is(":checked")
+                            _elCheck.prop("checked", true);//.is(":checked")
                         } else {
-                            _elCheck.removeAttr("checked");
+                            _elCheck.removeProp("checked");
                         }
                         /*********************** selectBox  *******************************/
                         _elSelect.find("option[value='" + vm[pro] + "']").attr("selected", "selected");
                         /*********************** Radio  *******************************/
                         _eltRadio.each(function () {
                             if ($(this).val() == value) {
-                                $(this).attr("checked", "checked");
+                                $(this).prop("checked", true);
                             } else {
-                                $(this).removeAttr("checked");
+                                $(this).removeProp("checked");
                             }
                         });
                         /*********************** text ±Í«©÷µ  *******************************/
@@ -1216,27 +1243,6 @@ var groot = (function ($) {
             }
         }
         ,
-        {
-            "Name": "readonly",
-            "Handler": function (elment, value) {
-                if (value == false) {
-                    $(elment).attr("readonly", "readonly");
-                } else {
-                    $(elment).removeAttr("readonly");
-                }
-            }
-        }
-        ,
-        {
-            "Name": "disabled",
-            "Handler": function (elment, value) {
-                if (value == false) {
-                    $(elment).attr("disabled", "disabled");
-                } else {
-                    $(elment).removeAttr("disabled");
-                }
-            }
-        },
         {
             "Name": "focus",
             "Handler": function (elment, value) {
