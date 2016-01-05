@@ -1,6 +1,6 @@
 说明
 =======
-里面包含了一些grootjs的应用个最新的一些实验性质的东西
+里面包含了一些grootjs的应用个最新的一些实验性质的东西;需放在服务器上预览
   
 + 1.list.htm 里面包含了最新groot.UIComponent的用法;UIComponenternt文件夹里放置了模块实现代码
 + 2.sample.html文件里面包含了groot.imcrop的运用，一个图片才裁剪的demo
