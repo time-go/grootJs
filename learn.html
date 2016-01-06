@@ -1,0 +1,90 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>GrootJs官网-简明教程</title>
+    <link rel="stylesheet" href="css/bootstrap.min.css">
+    <link rel="stylesheet" href="css/base.css">
+    <script src="js/jquery-1.11.2.min.js"></script>
+    <script src="js/bootstrap.min.js"></script>
+    <script src="js/groot.js"></script>
+</head>
+<body>
+<nav class="navbar navbar-inverse">
+    <div class="container">
+        <div class="navbar-header">
+            <a class="navbar-brand" href="/">GrootJs</a>
+        </div>
+        <ul class="nav navbar-nav">
+            <li><a href="index.html">首页</a></li>
+            <li class="active"><a>简明教程</a></li>
+            <li><a href="api.html">API文档</a></li>
+            <li><a href="support.html">技术支持</a></li>
+        </ul>
+    </div>
+</nav>
+<div class="container">
+    <div class="row">
+        <div class="col-sm-3">
+            <ul id="learn-sider" class="list-group">
+                <li data-index="hello" class="list-group-item active">hello word!<i
+                        class="glyphicon glyphicon-chevron-right"></i></li>
+                <li data-index="bdsj" class="list-group-item">绑定事件<i class="glyphicon glyphicon-chevron-right"></i></li>
+                <li data-index="bddx" class="list-group-item">绑定对象<i class="glyphicon glyphicon-chevron-right"></i></li>
+                <li data-index="bdsz" class="list-group-item">绑定数组<i class="glyphicon glyphicon-chevron-right"></i></li>
+                <li data-index="jgzycs" class="list-group-item">几个重要参数<i class="glyphicon glyphicon-chevron-right"></i>
+                </li>
+                <li data-index="sxbdzl" class="list-group-item">属性绑定指令<i class="glyphicon glyphicon-chevron-right"></i>
+                </li>
+                <li data-index="bljk" class="list-group-item">变量监控<i class="glyphicon glyphicon-chevron-right"></i></li>
+                <li data-index="sxglq" class="list-group-item">属性过滤器<i class="glyphicon glyphicon-chevron-right"></i>
+                </li>
+                <li data-index="crs" class="list-group-item">checkbox radio select<i
+                        class="glyphicon glyphicon-chevron-right"></i></li>
+            </ul>
+        </div>
+        <div class="col-sm-9">
+            <div class="row">
+                <div class="panel panel-default">
+                    <div class="panel-heading">
+                        <h3 class="panel-title">
+                            示例
+                        </h3>
+                    </div>
+                    <div class="panel-body">
+                        <pre id="txt-code" style="background:#ffffff"></pre>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+</div>
+</body>
+</html>
+<script>
+    (function () {
+        function htmlEncode(value){
+            return $('<div/>').text(value).html();
+        }
+        function htmlDecode(value){
+            return $('<div/>').html(value).text();
+        }
+        function init(fname) {
+            var _intTxt = require("./code/" + fname + ".html!text");
+            $("#txt-code").html(htmlEncode(_intTxt));
+        }
+
+        init("hello");//初始化;
+        $("#learn-sider").on("click", ">li", function () {
+            if (!$(this).hasClass("active")) {
+                $("#learn-sider").find(">li").removeClass("active");
+                $(this).addClass("active");
+                init($(this).attr("data-index"))
+            }
+        });
+    })()
+
+</script>
