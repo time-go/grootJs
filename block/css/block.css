@@ -1,0 +1,118 @@
+body {
+    color: #333333;
+}
+
+.block {
+    width: 600px;
+    height: 600px;
+    border: 1px solid #d9d9d9;
+    position: relative;
+    background-color: #f4f4f4;
+    box-shadow: 2px 2px 5px #d1d1d1;
+    margin: 0 0 15px 30px;
+}
+
+.middle {
+    position: relative;
+    width: 1024px;
+    margin: 0 auto;
+}
+
+.middle .rule {
+    position: absolute;
+    width: 30px;
+    left: 0;
+    font-weight: bold;
+    text-align: left;
+}
+
+.middle .top {
+    top: -8px;
+}
+
+.middle .center {
+    top: 290px;
+}
+
+.middle .bottom {
+    bottom: -7px;
+}
+
+.input-top {
+    position: absolute;
+    left: 730px;
+    top: 50px;
+}
+
+.input-bottom {
+    position: absolute;
+    left: 730px;
+    top: 100px;
+}
+
+.block > div {
+    position: absolute;
+    background: #0ae;
+    box-sizing: border-box;
+    border: 1px solid white;
+}
+
+input {
+    border-radius: 2px;
+    border: 1px solid #cdcdcd;
+    height: 26px;
+    line-height: 26px;
+    padding: 0 5px;
+}
+
+.button {
+    position: absolute;
+    left: 730px;
+    top: 150px;
+    width: 260px;
+    height: 50px;
+    line-height: 50px;
+    color: white;
+    text-align: center;
+    border-radius: 7px;
+    background: #0ae;
+    cursor: pointer;
+    font-size: 30px;
+}
+
+.info {
+    position: absolute;
+    left: 730px;
+    top: 300px;
+    line-height: 1.7;
+    text-indent: 2em;
+    background-color: antiquewhite;
+    border: 1px solid #d9d9d9;
+    border-radius: 4px;
+    color: #666;
+    padding: 7px 5px;
+}
+
+.button:hover {
+    background: #00b5fd;
+}
+
+.block > div:hover {
+    background: #00b5fd;
+}
+
+.head {
+    padding-bottom: 20px;
+    height: 50px;
+    line-height: 50px;
+    text-align: center;
+    font-size: 18px;
+    font-weight: bold;
+}
+.sign{
+    padding-top: 15px;
+    text-align: right;
+}
+.active{
+    background-color: crimson!important;
+}

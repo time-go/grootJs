@@ -1,0 +1,67 @@
+<!DOCTYPE html>
+<html>
+<head lang="zh">
+    <meta charset="UTF-8">
+    <title>扔格子</title>
+    <link href="css/block.css" rel="stylesheet" type="text/css">
+    <script src="js/jquery-1.11.2.min.js"></script>
+    <script src="js/block.js"></script>
+</head>
+<body>
+<div class="head">扔格子游戏</div>
+<div class="middle">
+    <div class="rule top">
+        600
+    </div>
+    <div class="rule center">
+        300
+    </div>
+    <div class="rule bottom">
+        0
+    </div>
+    <div id="block" class="block">
+    </div>
+    <div class="input-top">头部位置:<input id="top" placeholder="输入数字" type="text"></div>
+    <div class="input-bottom">底部位置:<input id="bottom" placeholder="输入数字" type="text"></div>
+    <div id="button" class="button">扔</div>
+    <div class="info">
+        说明：玩家在输入框中输正确的数字，让后点击按钮，观察左边格子的变化，格子是按照outlook日程排列的方式进行排列的
+        <div class="sign">——大盗乔三</div>
+    </div>
+
+</div>
+</body>
+</html>
+<script>
+    var list = []
+    var block = block($("#block"));
+    $("#button").click(function () {
+        try {
+            var top = parseInt($("#top").val() * 1);
+            var bottom = parseInt($("#bottom").val() * 1);
+            if (top > 600) {
+                alert("头部位置不能超过600")
+            } else if (bottom < 0) {
+                alert("底部位置不能小于0");
+            } else if (top <= bottom) {
+                alert("头部必须大于底部")
+            } else {
+                var id = new Date().getTime();
+                list.push({top: top, bottom: bottom, id: id});
+                block.render(list);
+                var element = $("#" + id);
+                var i = 0;
+                var timer = setInterval(function () {
+                    i++;
+                    element.toggleClass("active");
+                    if (i >= 6) {
+                        clearInterval(timer);
+                    }
+                }, 300)
+
+            }
+        } catch (e) {
+            alert("请输入数字")
+        }
+    });
+</script>
