@@ -1,0 +1,49 @@
+<!DOCTYPE html>
+<html>
+<head lang="zh">
+    <meta charset="UTF-8">
+    <title>属性绑定指令</title>
+    <script src="js/jquery-1.7.2.min.js"></script>
+    <script src="js/groot.js"></script>
+    <style>
+        .back0 {
+            background-color: coral;
+        }
+
+        .back1 {
+            background-color: forestgreen;
+        }
+    </style>
+</head>
+<body>
+<div gt-view="myview">
+    <div gt-css="color:{c}">你好</div>
+    <input gt-attr="id:'view'+{uid}" type="text" gt-value-change="say">
+    <span gt-text="{uid}+':说'+{say}"></span>
+
+    <div>
+        <ul gt-each="list">
+            <li gt-class="back0:{$index} % 2 ==0,back1:{$index} % 2==1">
+                <span gt-text="{$index}+1"></span>
+                <span>姓名:</span><span gt-text="{name}"></span>---
+                <span>性别:</span><span gt-text="{sex}"></span>
+            </li>
+        </ul>
+    </div>
+</div>
+</body>
+</html>
+<script>
+    groot.view("myview", function (vm, ve) {
+        vm.list = [
+            {"name": "张三", "sex": "男"}
+            ,
+            {"name": "李四", "sex": "男"}
+            ,
+            {"name": "王五", "sex": "男"}
+        ];
+        vm.uid = "123";
+        vm.say = "word";
+        vm.c = "red"
+    })
+</script>

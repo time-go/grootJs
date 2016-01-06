@@ -1,0 +1,25 @@
+<!DOCTYPE html>
+<html>
+<head lang="zh">
+    <meta charset="UTF-8">
+    <title>绑定事件</title>
+    <script src="js/jquery-1.7.2.min.js"></script>
+    <script src="js/groot.js"></script>
+</head>
+<body>
+<div gt-view="myview">
+    <input type="text" gt-value-change="say">
+    <span gt-text="{say}"></span>
+    <input value="还原" type="button" gt-click="reset">
+</div>
+</body>
+</html>
+<script>
+    groot.view("myview", function (vm, ve) {
+        vm.say = "hello word!";
+        ve.reset=function(){
+            vm.say = "hello word!";
+            vm.sayRender();
+        }
+    })
+</script>

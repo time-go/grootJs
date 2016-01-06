@@ -1,0 +1,54 @@
+<!DOCTYPE html>
+<html>
+<head lang="zh">
+    <meta charset="UTF-8">
+    <title>hello word</title>
+    <script src="js/jquery-1.7.2.min.js"></script>
+    <script src="js/groot.js"></script>
+</head>
+<body>
+<div gt-view="myview">
+    <span gt-text="{name}"></span>
+    <select gt-select="name">
+        <option value="李四">李四</option>
+        <option value="张三">张三</option>
+    </select>
+
+    <br>
+    <br>
+
+    <div>
+        <div gt-text="{s}"></div>
+        <input gt-radio="s" type="radio" value="清华" name="school">清华
+        <input gt-radio="s" type="radio" value="北大" name="school">北大
+        <input gt-radio="s" type="radio" value="复旦" name="school">复旦
+    </div>
+    <br>
+    <br>
+    <div gt-each="l">
+        <span gt-text="{name}"></span>
+    </div>
+    <div gt-each="c">
+        <span><input type="checkbox" gt-check="s" gt-watch="watch"><span gt-text="{name}"></span></span>
+    </div>
+</div>
+</body>
+</html>
+<script>
+    var view = groot.view("myview", function (vm, ve) {
+        vm.name = "张三"
+        vm.s = "北大";
+        vm.l=[];
+        vm.c = [{"name": "张三", s: false}, {"name": "李四", s: false}, {"name": "王五", s: false}];
+        ve.watch=function(){
+            var arr=[];
+            for(var i=0;i<vm.c.length;i++){
+                if(vm.c[i].s){
+                    arr.push({name:vm.c[i].name})
+                }
+            }
+            vm.l=arr;
+            vm.lRender()
+        }
+    });
+</script>

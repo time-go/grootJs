@@ -1,0 +1,33 @@
+<!DOCTYPE html>
+<html>
+<head lang="zh">
+    <meta charset="UTF-8">
+    <title>绑定对象</title>
+    <script src="js/jquery-1.7.2.min.js"></script>
+    <script src="js/groot.js"></script>
+</head>
+<body>
+<div gt-view="myview">
+    <div gt-object="data">
+        姓名:<span gt-text="{name}"></span>--
+        性别:<span gt-text="{sex}"></span>
+        <input gt-click="hello" type="button" value="变名称">
+    </div>
+</div>
+</body>
+</html>
+<script>
+    groot.view("myview", function (vm, ve) {
+        vm.data = {
+            "name": "张三", "sex": "男"
+        }
+        ve.hello = function () {
+            if (vm.data.name == "张三") {
+                vm.data.name = "李四"
+            } else {
+                vm.data.name = "张三"
+            }
+            vm.data.nameRender();
+        }
+    })
+</script>
