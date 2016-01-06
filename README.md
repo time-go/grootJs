@@ -37,3 +37,13 @@ GrootJs 前端mvvm框架
 + 2.增加groot.UIComponent 更方便的进行组件化开发
 + 3.gt-ui 改为gt-widget
 + 4.在官网的在线示例里封装iframe的用法http://time-go.github.io/grootJs/Demo/
+
+### iframe弹窗函数groot.page(title,url,callback),四个辅助函数
++ groot.msg.render();重新计算弹窗的大小
++ groot.msg.show()
++ groot.msg.close()关闭窗体
++ groot.msg.send(); 向父窗口发送消息，groot.page的回调函数里接受到发来的消息
+
+### groot.page特点
++ 可以和子窗口互动
++ 弹窗里面嵌套弹窗不会有子弹窗卡在父弹窗出不来的问题
