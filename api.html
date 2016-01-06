@@ -58,7 +58,9 @@
                 </li>
                 <li data-index="li13" class="list-group-item">UI控件定义<i class="glyphicon glyphicon-chevron-right"></i>
                 </li>
-                <li data-index="li14" class="list-group-item">系统常用API<i class="glyphicon glyphicon-chevron-right"></i>
+                <li data-index="li14" class="list-group-item">UIComponent(<span class="kword">2.0新增</span>)<i class="glyphicon glyphicon-chevron-right"></i>
+                </li>
+                <li data-index="li15" class="list-group-item">系统常用API<i class="glyphicon glyphicon-chevron-right"></i>
                 </li>
             </ul>
         </div>
@@ -162,6 +164,14 @@
                     <td>格式{属性名};也可以是表达式如：{属性名1}+{属性名2} 表达式为true 显示，为false 移除</td>
                 </tr>
                 <tr>
+                    <td>gt-prop<span class="kword">(2.0新增)</span></td>
+                    <td>
+                        gt-prop="名称:{属性名1}+{属性名2},名称:{属性名1}+{属性名2},名称:{属性名1}+{属性名2}..."<br>
+                        value表达式为true 就绑定对应的属性 为false 就不绑定对应的属性<br>
+                        例如:gt-prop="readonley:{xx}"
+                    </td>
+                </tr>
+                <tr>
                     <td>$p.属性名</td>
                     <td>绑定父元素属性，如gt-text={$p.name},同理，绑定父元素的父元素属性gt-text={$p.$p.name}以此类推</td>
                 </tr>
@@ -184,7 +194,7 @@
                     <td>gt-class</td>
                     <td>
                         gt-class="class名称:{属性名1}+{属性名2},class名称:{属性名1}+{属性名2},class名称:{属性名1}+{属性名2}..."<br>
-                        value表达式为true 就绑定对应的属性 为fale 就不绑定对应的属性<a href="learn.html" target="_blank">详见简明教程属性绑定</a>
+                        value表达式为true 就绑定对应的属性 为false 就不绑定对应的属性<a href="learn.html" target="_blank">详见简明教程属性绑定</a>
                     </td>
                 </tr>
                 <tr>
@@ -217,6 +227,22 @@
                     <td>
                         gt-check="属性名称" 用于checkbox的绑定,属性为true时选中，为false是不选中<br>
                         <a href="learn.html" target="_blank">详见简明教程checkbox radio select</a>
+                    </td>
+                </tr>
+                <tr>
+                    <td>gt-ui</td>
+                    <td>
+                        gt-ui="属性名称(控件名称)" 用于绑定控件;控件名称在控件文件里定义<code>groot.ui[控件名称]</code><br>
+                        控件需要用<code>require("./路径");</code>引用进来
+                        <a href="learn.html" target="_blank">详见示例11</a>
+                    </td>
+                </tr>
+                <tr>
+                    <td>gt-widget<span class="kword">(2.0改为)</span></td>
+                    <td>
+                        gt-widget="属性名称:控件名称" 用于绑定控件;控件名称在控件文件里定义<code>groot.widget[控件名称]</code><br>
+                        控件需要用<code>require("./路径");</code>引用进来
+                        <a href="learn.html" target="_blank">详见示例11</a>
                     </td>
                 </tr>
                 <tr>
@@ -522,7 +548,98 @@
                 </tr>
                 </tbody>
             </table>
-            <h3 id="li13">UI控件定义</h3>
+            <h3 id="li13">UI控件定义<span class="kword">(2.0改为)</h3>
+            <table class="table">
+                <caption>函数<code>groot.widget[控件名] = function (element, id, data, value, upParent)</code></caption>
+                <thead>
+                <tr>
+                    <th width="20%">参数</th>
+                    <th width="80%">用法</th>
+                </tr>
+                </thead>
+                <tbody>
+                <tr>
+                    <td>element</td>
+                    <td>
+                        控件所在的html容器 即<code>&lt;span gt-widget="name(mywidget)"&gt;&lt;/span&gt;</code>
+                    </td>
+                </tr>
+                <tr>
+                    <td>id</td>
+                    <td>
+                        系统为控件生成的唯一id
+                    </td>
+                </tr>
+                <tr>
+                    <td>upParent</td>
+                    <td>
+                        同步父vm得值函数
+                    </td>
+                </tr>
+                <tr>
+                    <td>data</td>
+                    <td>
+                        初始化控件所用值;如果需要初始化数据<br>
+                        <code>&lt;span gt-widget="name(mywidget)" gt-widget-data="{key:'张三'}"&gt;</code> data就会接受到，并自动转为json对象<br>
+                        也可以这样初始化<br>
+                        <code>groot.widgetInit["test"]={"key":"GUJ778-090909"}</code><br>
+                        <code>&lt;span gt-widget="name(mywidget)" gt-widget-data="widgetInit[test]"&gt;</span></code>
+                    </td>
+                </tr>
+                </tbody>
+            </table>
+            <table class="table">
+                <caption>UI控件定义相关</span></caption>
+                <thead>
+                <tr>
+                    <th width="20%">名称</th>
+                    <th width="80%">用法</th>
+                </tr>
+                </thead>
+                <tbody>
+                <tr>
+                    <td>widgetvalue</td>
+                    <td>
+                        当改变父vm的属性值的时候的值的时候，程序是通过 控件的widgetvalue 来更新控件的值的，所有每个控件必须有widgetvalue属性
+                    </td>
+                </tr>
+                <tr>
+                    <td>gt-widget-id</td>
+                    <td>
+                        控件id，如果不设置 系统生成默认值 如果设置 groot.vms[id],即控件 通过操作可以操作控件groot.vms[id]
+                    </td>
+                </tr>
+                <tr>
+                    <td>gt-widget-data</td>
+                    <td>
+                        初始化控件所用值
+                    </td>
+                </tr>
+                <tr>
+                    <td>groot.createElement(html片段,id,element)</td>
+                    <td>
+                        把html加入element; 只有用groot.creatElement函数 控件才会被系统的垃圾回收机制回收
+                    </td>
+                </tr>
+                </tbody>
+            </table>
+            <h4>代码示例
+                <small>(示例widget.js)</small>
+            </h4>
+            <pre>
+   groot.widget["mywidget"] = <span class="kword">function</span> (element, id, data, value, upParent) {
+        groot.createElement(<span class="str">"&lt;span gt-text=\"{widgetvalue}\" style='color: red'&gt;&lt;/span&gt;&lt;input gt-click=\"change\" type='button' value='控件'&gt;"</span>, id,element);
+        var moudle = groot.view(id, function (vm, ve) {
+            vm.widgetvalue = value;
+            ve.change = <span class="kword">function</span> () {
+                vm.widgetvalue = "李四";
+                vm.widgetvalueRender();
+                upParent();
+            }
+        });
+    }
+            </pre>
+            <h3>UI控件定义</h3>
             <table class="table">
                 <caption>函数<code>groot.ui[控件名] = function (element, id, data, value, upParent)</code></caption>
                 <thead>
@@ -613,7 +730,55 @@
         });
     }
             </pre>
-            <h3 id="li14">系统API</h3>
+            <h3 id="li14">groot.UIComponent<span class="kword">(2.0新增)</span></h3>
+            <table class="table">
+                <caption>groot.UIComponent</caption>
+                <thead>
+                <tr>
+                    <th width="20%">名称</th>
+                    <th width="80%">用途</th>
+                </tr>
+                </thead>
+                <tbody>
+                <tr>
+                    <td>groot.UIComponent(config)</td>
+                    <td>
+                        组件化开发,config为对象参数</td>
+                </tr>
+                <tr>
+                    <td>config.urll</td>
+                    <td>
+                        组件路径
+                    </td>
+                </tr>
+                <tr>
+                    <td>config.id</td>
+                    <td>
+                        容器id
+                    </td>
+                </tr>
+                <tr>
+                    <td>config.data</td>
+                    <td>
+                        初始化数据<a href="demo/list.html" target="_blank">示例</a>
+                    </td>
+                </tr>
+                </tbody>
+            </table>
+                 <pre>
+     var UIC = groot.UIComponent({
+        url: "UIComponent/list",
+        id: "list",
+        data: [{//初始化数据
+            img: "images/peter-avatar.jpg",
+            sex: "0",
+            sexState: false,
+            info: "继Kim Yeo-hui走红网络之后，一名利用谷歌Android手机伴奏，展示一流唱功",
+            infoState: false
+        }]
+    })
+            </pre>
+            <h3 id="li15">系统API</h3>
             <table class="table">
                 <caption>GrootJs 系统常用API</caption>
                 <thead>

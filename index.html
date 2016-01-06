@@ -48,10 +48,26 @@
         <li><p>全新的ui控件开发接口:是控件的值和页面页面模型的值实现同步，操作开发的控件时 就像操作html内置控件一样</p></li>
         <li><p>项目地址 https://github.com/time-go/grootJs</p></li>
     </ol>
-     <h3>发布历史</h3>
-        <li><p>2015-08-04 grootjs 第一个稳定版本1.0发布</p></li>
+    <h3>发布历史</h3>
+    <li><p>2015-08-04 grootjs 第一个稳定版本1.0发布</p></li>
 
-        <li><p>2015-12-21 grootjs 1.1版本发布（此版本在原来的基础上进一步对框架性能做了优化）</p></li>
+    <li><p>2015-12-21 grootjs 1.1版本发布（此版本在原来的基础上进一步对框架性能做了优化）</p></li>
+
+    <li><p>2015-01-06 grootjs 2.0版本发布</p></li>
+    <h3>2.0新增功能</h3>
+    <li><p>1.增加gt-prop指令，用于绑定readonly等类似属性</p></li>
+    <li><p>2.增加groot.UIComponent 更方便的进行组件化开发</p></li>
+    <li><p>3.gt-ui 改为gt-widget</p></li>
+    <li><p>4.在官网的在线示例里封装iframe的用法http://time-go.github.io/grootJs/Demo/</p></li>
+    <h3>iframe弹窗函数groot.page(title,url,callback),四个辅助函数</h3>
+    <li><p>groot.msg.render();重新计算弹窗的大小</p></li>
+    <li><p>groot.msg.show()</p></li>
+    <li><p>groot.msg.close()关闭窗体</p></li>
+    <li><p>groot.msg.send(); 向父窗口发送消息，groot.page的回调函数里接受到发来的消息</p></li>
+    
+    <h3>groot.page特点</h3>
+    <li><p>可以和子窗口互动</p></li>
+    <li><p>弹窗里面嵌套弹窗不会有子弹窗卡在父弹窗出不来的问题</p></li>
     <h3>代码示例</h3>
 
     <div class="row">
