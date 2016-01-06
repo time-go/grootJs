@@ -1,0 +1,80 @@
+<!DOCTYPE html>
+<html lang="zh-cn">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="renderer" content="webkit">
+    <title>前端模版</title>
+    <link href="css/comtop.css" type="text/css" rel="stylesheet">
+    <script src="js/jquery.js"></script>
+    <script src="js/groot.js"></script>
+</head>
+<body>
+<div id="head" class="layout bg-sub bg-inverse fixed-top" style="z-index:9;min-width:1000px">
+
+</div>
+<div class="head-top"></div>
+<div class="container">
+    <ul class="bread">
+        <li>
+            <a href="#" class="icon-home"> 首页</a>
+        </li>
+        <li>
+            <a href="#">新闻中心</a>
+        </li>
+        <li>
+            <a href="#">公司新闻</a>
+        </li>
+        <li>正文</li>
+    </ul>
+    <ul class="nav nav-menu nav-inline nav-tabs">
+        <li>
+            <a href="#">首页</a>
+        </li>
+        <li>
+            <a href="#">CSS</a>
+        </li>
+        <li class="active">
+            <a href="#">元件</a>
+        </li>
+    </ul>
+    <div class="line">
+
+    </div>
+</div>
+<div class="container">
+    <div class="panel margin-big-top">
+        <div class="panel-head">
+            文件说明
+        </div>
+        <div class="panel-body">
+            <ul class="list-text">
+                <li>模块化开发 里面包含了最新groot.UIComponent的用法;UIComponenternt文件夹里放置了模块实现代码</li>
+                <li>扁平模版  里面包含了groot.imcrop的运用，一个图片才裁剪的demo</li>
+                <li>列表模版 里面主要是弹窗 groot.page的运用有三个参数,这里把sample.html作为了一个弹窗</li>
+            </ul>
+        </div>
+    </div>
+    <div class="panel margin-big-top">
+        <div class="panel-head">
+            四个向父窗口传递消息的函数
+        </div>
+        <div class="panel-body">
+            <ul class="list-text">
+                <li>groot.msg.render();重新计算弹窗的大小</li>
+                <li>groot.msg.show()</li>
+                <li>groot.msg.send()</li>
+                <li>groot.msg.send(); 向父窗口发送消息，groot.page的回调函数里接受到发来的消息</li>
+            </ul>
+        </div>
+    </div>
+</div>
+<div id="foot" class="container">
+</div>
+</body>
+</html>
+<script>
+    $("#head").html(require("templete/head.html!text"));
+    $("#foot").html(require("templete/foot.html!text"));
+</script>

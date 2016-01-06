@@ -1,0 +1,235 @@
+<!DOCTYPE html>
+<html lang="zh-cn">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="renderer" content="webkit">
+    <title>前端模版</title>
+    <style>
+        .parent {
+            width: 255px;
+            height: 151px;
+            position: relative;
+        }
+
+        input[type="file"] {
+            box-sizing: border-box;
+            opacity: 0;
+            width: 255px;
+            height: 151px;
+            position: absolute;
+            top: 0;
+            left: 0;
+            z-index: 1;
+        }
+    </style>
+    <link href="css/pintu.css" type="text/css" rel="stylesheet">
+    <link href="css/ui.css" type="text/css" rel="stylesheet">
+    <script src="js/jquery.js"></script>
+    <script src="js/groot.js"></script>
+    <script src="js/ui.js"></script>
+</head>
+<body>
+<div id="head" class="layout bg-sub bg-inverse fixed-top element-remove" style="z-index:9;min-width:1000px">
+
+</div>
+<div class="head-top"></div>
+<div gt-view="sample" class="container">
+    <ul class="bread element-remove">
+        <li>
+            <a href="#" class="icon-home"> 首页</a>
+        </li>
+        <li>扁平性.加列表型</li>
+    </ul>
+    <div class="form">
+        <div class="form-x">
+            <div class="form-group">
+                <div class="label">
+                    <label>上传封面</label>
+                </div>
+                <div class="field">
+                    <div class="parent">
+                        <input id="file" type="file">
+                        <img src="images/cover.png">
+                    </div>
+                </div>
+            </div>
+            <div class="form-group">
+                <div class="label">
+                    <label>自适应字段</label>
+                </div>
+                <div class="field">
+                    <input type="text" class="input input-auto" size="30" placeholder="手机/邮箱/账号"/>
+                </div>
+            </div>
+            <div class="form-group">
+                <div class="label">
+                    <label>size大小适应字段</label>
+                </div>
+                <div class="field ">
+                    <input type="password" class="input input-auto" size="30" placeholder="请输入密码"/>
+                </div>
+            </div>
+            <div class="form-group">
+                <div class="label">
+                    <label>多只</label>
+                </div>
+                <div class="field">
+                    <input type="text" class="input input-auto" size="30" placeholder="太阳"/>
+                    <span class="button icon-cloud" id="sun">按钮</span>
+                </div>
+            </div>
+            <div class="form-group">
+                <div class="label">
+                    <label>日期</label>
+                </div>
+                <div class="field">
+                    <div class="calendar" gt-widget="start:calendar" gt-widget-data="{timer:false,title:'开始时间'}"></div>
+                    <span>至</span>
+
+                    <div class="calendar" gt-widget="end:calendar" gt-widget-data="{timer:false,title:'结束时间'}"></div>
+                </div>
+            </div>
+
+            <div class="form-group">
+                <div class="label">
+                    <label>单选(设计下)</label>
+                </div>
+                <div class="field">
+                    <div class="button-group button-group-radio">
+                        <label class="button icon-circle-o">
+                            记住吧
+                        </label>
+                        <label class="button icon-dot-circle-o">
+                            不想记住
+                        </label>
+                    </div>
+                </div>
+            </div>
+            <div class="form-group">
+                <div class="label">
+                    <label>多选(设计下)</label>
+                </div>
+                <div class="field">
+                    <div class="button-group button-group-check">
+                        <label class="button icon-square-o">
+                            CSS
+                        </label>
+                        <label class="button icon-square-o">
+                            元件
+                        </label>
+                        <label class="button icon-check-square-o">
+                            动画
+                        </label>
+                        <label class="button icon-square-o">
+                            js组件
+                        </label>
+                        <label class="button icon-square-o">
+                            模块
+                        </label>
+
+                    </div>
+                </div>
+            </div>
+
+            <div class="form-group">
+                <div class="label">
+                    <label>保留时间</label>
+                </div>
+                <div class="field">
+                    <select class="input input-auto">
+                        <option>保留一周</option>
+                        <option>保留一月</option>
+                        <option>永久保留</option>
+                    </select>
+                </div>
+            </div>
+            <div class="form-group">
+                <div class="label">
+                    <label>大文本</label>
+                </div>
+                <div class="field">
+                    <textarea class="input input-auto"
+                              style="width: 445px;height: 216px">现有组件图片裁剪，缺少富文本，文件上传,分页，人员选择，分页</textarea>
+                </div>
+            </div>
+            <div class="form-group">
+                <div class="label">
+                    <label>数组类型</label>
+                </div>
+                <div class="field">
+                    <div class="border button-group-table">
+                        <div class="button">张三<span class="icon-times-circle" title="删除"></span></div>
+                        <div class="button">张三<span class="icon-times-circle" title="删除"></span></div>
+                        <div class="button">张三<span class="icon-times-circle" title="删除"></span></div>
+                        <div class="button">张三<span class="icon-times-circle" title="删除"></span></div>
+                        <div class="button">张三<span class="icon-times-circle" title="删除"></span></div>
+                        <div class="button">张三<span class="icon-times-circle" title="删除"></span></div>
+                        <div class="button">张三<span class="icon-times-circle" title="删除"></span></div>
+                        <div class="button">张三<span class="icon-times-circle" title="删除"></span></div>
+                        <div class="button">张三<span class="icon-times-circle" title="删除"></span></div>
+                        <div class="button">张三<span class="icon-times-circle" title="删除"></span></div>
+                        <div class="button">张三<span class="icon-times-circle" title="删除"></span></div>
+                        <div class="button">张三<span class="icon-times-circle" title="删除"></span></div>
+                    </div>
+                    <div class="button-group" style="vertical-align: bottom">
+                        <button type="button" class="button dropdown-toggle">
+                            选择 <span class="downward"></span>
+                        </button>
+                        <ul class="drop-menu">
+                            <li>
+                                <a href="#">动画</a>
+                            </li>
+                            <li>
+                                <a href="#">模块</a>
+                            </li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+            <div class="form-button">
+                <button gt-click="save" class="button bg-sub" type="submit">保存</button>
+                <button gt-click="cancel" class="button" type="submit">取消</button>
+            </div>
+        </div>
+    </div>
+</div>
+<div id="foot" class="container element-remove" style="min-width: 1000px">
+
+</div>
+</body>
+</html>
+<script>
+    $("#head").html(require("templete/head.html!text"));
+    $("#foot").html(require("templete/foot.html!text"));
+    $("#sun").click(function () {
+        groot.confrim("消息提示:", "关闭嘛")
+    });
+    $("#file").on("change", function (e) {
+        var selectedFile = e.target.files[0];
+        /****imcrop 参数注释
+         *file 文件
+         * url 提交的地址
+         *  titlte 标题
+         * cropw 裁剪的宽度
+         * croph 裁剪的高度
+         * callback 上传成功回调
+         ******/
+        groot.imcrop(selectedFile, "", "上传封面", 500, 300, function (json) {
+            //json //json格式回调 里面一般含有 上传成功的 url
+        })
+    });
+    groot.view("sample", function (vm, ve) {
+        vm.start = "2015-10-12";
+        vm.end = "";
+        ve.save = function () {
+            groot.msg.send("我是传过来的");
+        }
+        ve.cancel = function () {
+            groot.msg.close();
+        }
+    })
+    groot.msg.render();
+    groot.msg.show()
+</script>

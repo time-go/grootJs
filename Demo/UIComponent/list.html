@@ -1,0 +1,44 @@
+<table class="table table-hover table-bordered table-vertical-middle">
+    <thead>
+    <tr>
+        <th width="68px">头像</th>
+        <th width="200px">性别</th>
+        <th>简介</th>
+        <th width="130px">操作</th>
+    </tr>
+    </thead>
+    <tbody gt-each="list">
+    <tr>
+        <td><img height="50px" width="50px" gt-attr="src:{img}"></td>
+        <td>
+            <span gt-visible="!{sexState}" gt-text="{sex}=='0'?'男':'女'"></span>
+            <select gt-watch="wh" gt-visible="{sexState}" gt-select="sex" class="input input-auto">
+                <option value="0">男</option>
+                <option value="1">女</option>
+            </select>
+            <span gt-visible="!{sexState}" class="button" gt-click="upSex">修改</span>
+            <span gt-visible="{sexState}" class="button bg-sub" gt-click="submitSex">确定</span>
+            <span gt-visible="{sexState}" class="button" gt-click="submitSex">取消</span>
+        </td>
+        <td>
+            <span gt-visible="!{infoState}" gt-text={info}></span>
+            <span gt-visible="!{infoState}" class="button" gt-click="upInfo">修改</span>
+            <input gt-visible="{infoState}" gt-value-change="info" style="width: 70%" class="input input-auto"
+                   type="text">
+            <span gt-visible="{infoState}" class="button bg-sub" gt-click="submitInfo">确定</span>
+            <span gt-visible="{infoState}" class="button" gt-click="submitInfo">取消</span>
+        </td>
+        <td>
+                        <span class="button-group button-group-little-l">
+                        <button type="button" class="button">修改</button>
+                        <button type="button" class="button bg-sub">详情</button>
+                        <button type="button" class="button bg-red" gt-click="remove">删除</button>
+                    </span>
+        </td>
+    </tr>
+    </tbody>
+</table>
+<div id="page" class="padding-bottom padding-top">
+
+</div>
+
