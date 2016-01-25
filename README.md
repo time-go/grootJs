@@ -17,7 +17,7 @@ GrootJs 前端mvvm框架
 + 作者联系方式:qq289880020
 + 官方技术支持QQ群330603020
 + 官网地址http://time-go.github.io/grootJs
-+ 升级版QChttp://time-go.github.io/qc
++ 升级版QC http://time-go.github.io/qc
 
 ### 发布历史
 + 2015-08-04  grootjs 第一个稳定版本1.0发布
